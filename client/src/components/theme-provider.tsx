@@ -112,7 +112,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!settings) return;
     const root = document.documentElement;
-    const isDark = !!settings.darkMode || !!settings.darkModeEnabled;
+    const isDark = !!settings.darkMode;
 
     // ===== LIGHT-MODE PALETTE =====
     setVar(root, "--app-primary", settings.primaryColor);
