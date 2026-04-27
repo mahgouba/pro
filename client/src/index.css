@@ -192,36 +192,36 @@ svg {
   user-select: none !important;
 }
 
-/* Override Default Backgrounds to Dark */
+/* Override Default Backgrounds — driven by appearance settings */
 .bg-white,
 .bg-slate-50,
 .bg-gray-50,
 .bg-background {
-  background: var(--dark-bg-primary);
+  background: var(--dynamic-card-bg, var(--dark-bg-primary));
 }
 
 .bg-slate-100,
 .bg-gray-100,
 .bg-secondary {
-  background: var(--dark-bg-secondary);
+  background: var(--dynamic-card-hover, var(--dark-bg-secondary));
 }
 
 .bg-slate-200,
 .bg-gray-200 {
-  background: var(--dark-bg-accent);
+  background: var(--dynamic-border, var(--dark-bg-accent));
 }
 
-/* Text Color Overrides for Dark Theme */
+/* Text Color Overrides — driven by appearance settings */
 .text-slate-900,
 .text-gray-900,
 .text-black,
 .text-foreground {
-  color: var(--text-primary);
+  color: var(--dynamic-text-primary, var(--text-primary));
 }
 
 .text-slate-700,
 .text-gray-700 {
-  color: var(--text-secondary);
+  color: var(--dynamic-text-secondary, var(--text-secondary));
 }
 
 .text-slate-500,
@@ -655,10 +655,9 @@ input:focus, textarea:focus, select:focus, .glass-input:focus {
   --text-muted: rgba(255, 255, 255, 0.5);
 }
 
-/* Global Dark Theme */
+/* Global body color (background handled at top of file via --app-page-bg) */
 body {
-  background: var(--dark-bg-primary);
-  color: var(--text-primary);
+  color: var(--dynamic-text-primary, var(--text-primary));
   transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -667,21 +666,21 @@ body {
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Override all default backgrounds to dark */
+/* Override all default backgrounds — driven by appearance settings */
 .bg-white,
 .bg-slate-50,
 .bg-gray-50 {
-  background-color: var(--dark-bg-primary) !important;
+  background-color: var(--dynamic-card-bg, var(--dark-bg-primary)) !important;
 }
 
 .bg-slate-100,
 .bg-gray-100 {
-  background-color: var(--dark-bg-secondary) !important;
+  background-color: var(--dynamic-card-hover, var(--dark-bg-secondary)) !important;
 }
 
 .bg-slate-200,
 .bg-gray-200 {
-  background-color: var(--dark-bg-accent) !important;
+  background-color: var(--dynamic-border, var(--dark-bg-accent)) !important;
 }
 
 /* Global checkbox and radio button styling */
