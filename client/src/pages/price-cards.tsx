@@ -924,8 +924,8 @@ export default function PriceCardsPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">جميع الصناع</SelectItem>
-                {manufacturers.slice(1).map((manufacturer) => (
-                  <SelectItem key={manufacturer} value={manufacturer || "empty"}>
+                {Array.from(new Set(manufacturers.slice(1))).map((manufacturer, idx) => (
+                  <SelectItem key={`${manufacturer || "empty"}-${idx}`} value={manufacturer || "empty"}>
                     {manufacturer || "غير محدد"}
                   </SelectItem>
                 ))}
@@ -1020,11 +1020,11 @@ export default function PriceCardsPage() {
       {/* Price Cards Grouped by Manufacturer */}
       {Object.entries(groupedByManufacturer)
         .sort(([,a], [,b]) => b.length - a.length) // Sort by count (highest first)
-        .map(([manufacturer, cards]) => {
+        .map(([manufacturer, cards], mfgIdx) => {
           const isManufacturerExpanded = expandedManufacturers.has(manufacturer);
           
           return (
-            <Card key={manufacturer} className="mb-6 border-l-4 border-l-blue-500">
+            <Card key={`${manufacturer}-${mfgIdx}`} className="mb-6 border-l-4 border-l-blue-500">
               {/* Manufacturer Header */}
               <CardHeader 
                 className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"

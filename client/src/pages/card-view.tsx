@@ -1384,11 +1384,11 @@ export default function CardViewPage({ userRole, username, onLogout }: CardViewP
                 : allGroupedData[b.items[0]?.manufacturer]?.items.filter(item => item.status !== "مباع").length || 0;
               return bCount - aCount; // Descending order (highest first)
             })
-            .map(([manufacturer, data]) => {
+            .map(([manufacturer, data], mfgIdx) => {
             const logo = getManufacturerLogo(manufacturer);
             
             return (
-              <div key={manufacturer} className="space-y-4 relative z-10">
+              <div key={`${manufacturer}-${mfgIdx}`} className="space-y-4 relative z-10">
                 {/* Manufacturer Header - Clickable */}
                 <div 
                   className="glass-card dark:glass-card-dark rounded-lg p-6 cursor-pointer border-0 transition-all duration-200"

@@ -796,8 +796,8 @@ export default function InventoryPage({ userRole, username, onLogout }: Inventor
                                             <div className="text-sm text-white font-medium pb-2 border-b border-white/20">
                                               اختر الصانع
                                             </div>
-                                            {manufacturers.map((manufacturer) => (
-                                              <div key={manufacturer} className="flex items-center space-x-2 space-x-reverse">
+                                            {manufacturers.map((manufacturer, idx) => (
+                                              <div key={`${manufacturer}-${idx}`} className="flex items-center space-x-2 space-x-reverse">
                                                 <Checkbox
                                                   id={`manufacturer-${manufacturer}`}
                                                   checked={manufacturerFilter.includes(manufacturer)}
