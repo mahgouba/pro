@@ -60,6 +60,7 @@ import CompanyPDFTemplates from "@/components/company-pdf-templates";
 
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
+import { captureElementToCanvas, canvasToA4Pdf } from "@/utils/pdf-capture";
 import EnhancedPDFExport from "@/components/enhanced-pdf-export";
 
 interface QuotationCreationPageProps {
@@ -1170,39 +1171,10 @@ export default function QuotationCreationPage({ vehicleData }: QuotationCreation
         return;
       }
 
-      // Create canvas from HTML element
-      const canvas = await html2canvas(element as HTMLElement, {
-        scale: 2,
-        logging: false,
-        allowTaint: true,
-        useCORS: true,
-        backgroundColor: '#ffffff',
-      });
+      // Create canvas + PDF using shared high-quality Arabic-safe capture
+      const canvas = await captureElementToCanvas(element as HTMLElement);
+      const pdf = canvasToA4Pdf(canvas, element as HTMLElement);
 
-      // Create PDF
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4',
-      });
-
-      // Calculate dimensions
-      const imgWidth = 210; // A4 width in mm
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      
-      // Add image to PDF
-      pdf.addImage(
-        canvas.toDataURL('image/png'),
-        'PNG',
-        0,
-        0,
-        imgWidth,
-        imgHeight,
-        '',
-        'FAST'
-      );
-
-      // Save PDF
       const filename = `عرض_سعر_${quoteNumber}_${new Date().toISOString().split('T')[0]}.pdf`;
       pdf.save(filename);
 
@@ -1383,41 +1355,10 @@ export default function QuotationCreationPage({ vehicleData }: QuotationCreation
         return;
       }
 
-      // Import html2canvas and jspdf dynamically
-      const html2canvas = (await import('html2canvas')).default;
-      const jsPDF = (await import('jspdf')).default;
+      // Generate canvas + PDF using shared high-quality Arabic-safe capture
+      const canvas = await captureElementToCanvas(quotationElement);
+      const pdf = canvasToA4Pdf(canvas, quotationElement);
 
-      // Generate canvas from the quotation
-      const canvas = await html2canvas(quotationElement, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#ffffff',
-        width: quotationElement.scrollWidth,
-        height: quotationElement.scrollHeight,
-      });
-
-      // Create PDF
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const imgData = canvas.toDataURL('image/png');
-      
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
-      const canvasAspectRatio = canvas.height / canvas.width;
-      
-      let finalWidth = pdfWidth;
-      let finalHeight = pdfWidth * canvasAspectRatio;
-      
-      if (finalHeight > pdfHeight) {
-        finalHeight = pdfHeight;
-        finalWidth = pdfHeight / canvasAspectRatio;
-      }
-      
-      const xOffset = (pdfWidth - finalWidth) / 2;
-      const yOffset = (pdfHeight - finalHeight) / 2;
-
-      pdf.addImage(imgData, 'PNG', xOffset, yOffset, finalWidth, finalHeight);
-      
       // Convert PDF to blob
       const pdfBlob = pdf.output('blob');
       
@@ -1671,16 +1612,11 @@ export default function QuotationCreationPage({ vehicleData }: QuotationCreation
         return;
       }
 
-      // Wait for all images and fonts to load
-      await new Promise((resolve) => {
-        setTimeout(resolve, 1000);
-      });
-
       // Hide all interactive elements before PDF generation
       const interactiveElements = element.querySelectorAll('button, .print\\:hidden, .no-print, [data-html2canvas-ignore]');
       const originalDisplayValues: string[] = [];
       const originalVisibilityValues: string[] = [];
-      
+
       interactiveElements.forEach((el, index) => {
         const htmlEl = el as HTMLElement;
         originalDisplayValues[index] = htmlEl.style.display;
@@ -1694,35 +1630,21 @@ export default function QuotationCreationPage({ vehicleData }: QuotationCreation
       const originalVisibility = (element as HTMLElement).style.visibility;
       (element as HTMLElement).style.display = 'block';
       (element as HTMLElement).style.visibility = 'visible';
-      
-      // Create canvas with improved settings
-      const canvas = await html2canvas(element as HTMLElement, {
-        scale: 2, // Balanced quality and performance
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#ffffff',
-        logging: true, // Enable logging for debugging
-        imageTimeout: 15000, // Longer timeout for images
-        foreignObjectRendering: false, // Disable for better compatibility
-        removeContainer: false,
-        height: element.scrollHeight,
-        width: element.scrollWidth,
-        scrollX: 0,
-        scrollY: 0,
-        windowWidth: element.scrollWidth,
-        windowHeight: element.scrollHeight,
-        ignoreElements: (element) => {
-          return element.classList?.contains('no-print') || 
-                 element.classList?.contains('print:hidden') ||
-                 element.hasAttribute('data-html2canvas-ignore') ||
-                 element.tagName === 'BUTTON';
-        }
+
+      // Create canvas with shared high-quality Arabic-safe capture
+      const canvas = await captureElementToCanvas(element as HTMLElement, {
+        ignoreElements: (el: Element) => {
+          return el.classList?.contains('no-print') ||
+                 el.classList?.contains('print:hidden') ||
+                 el.hasAttribute('data-html2canvas-ignore') ||
+                 el.tagName === 'BUTTON';
+        },
       });
 
       // Restore original display properties
       (element as HTMLElement).style.display = originalDisplay;
       (element as HTMLElement).style.visibility = originalVisibility;
-      
+
       // Restore interactive elements display properties
       interactiveElements.forEach((el, index) => {
         const htmlEl = el as HTMLElement;
@@ -1739,45 +1661,9 @@ export default function QuotationCreationPage({ vehicleData }: QuotationCreation
         });
         return;
       }
-      
-      // Create PDF with exact A4 dimensions
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4',
-        compress: true
-      });
-      
-      // Calculate proper scaling for A4
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
-      const canvasAspectRatio = canvas.height / canvas.width;
-      
-      let finalWidth = pdfWidth;
-      let finalHeight = pdfWidth * canvasAspectRatio;
-      
-      // If height exceeds page, scale down
-      if (finalHeight > pdfHeight) {
-        finalHeight = pdfHeight;
-        finalWidth = pdfHeight / canvasAspectRatio;
-      }
-      
-      // Center the content
-      const xOffset = (pdfWidth - finalWidth) / 2;
-      const yOffset = (pdfHeight - finalHeight) / 2;
-      
-      // Convert canvas to high-quality image
-      const imgData = canvas.toDataURL('image/png', 1.0);
-      
-      // Add image to PDF with proper scaling
-      pdf.addImage(
-        imgData,
-        'PNG',
-        xOffset,
-        yOffset,
-        finalWidth,
-        finalHeight
-      );
+
+      // Create PDF using shared helper (high-quality JPEG, A4 fitted)
+      const pdf = canvasToA4Pdf(canvas, element as HTMLElement);
       
       // Generate filename with Arabic support
       const vehicleInfo = selectedVehicle || editableVehicle;

@@ -22,6 +22,45 @@ export default function EnhancedPDFExport({
 }: EnhancedPDFExportProps) {
   const { toast } = useToast();
 
+  // Wait for all fonts and images inside element to be ready
+  const waitForAssets = async (element: HTMLElement) => {
+    try {
+      if ((document as any).fonts && (document as any).fonts.ready) {
+        await (document as any).fonts.ready;
+      }
+    } catch {}
+
+    const images = Array.from(element.querySelectorAll('img')) as HTMLImageElement[];
+    await Promise.all(
+      images.map(img => {
+        if (img.complete && img.naturalWidth > 0) return Promise.resolve();
+        return new Promise<void>(resolve => {
+          img.onload = () => resolve();
+          img.onerror = () => resolve();
+          setTimeout(() => resolve(), 3000);
+        });
+      })
+    );
+
+    await new Promise(resolve => setTimeout(resolve, 250));
+  };
+
+  // Normalize Arabic text rendering on a cloned document so html2canvas
+  // doesn't break Arabic ligatures because of letter-spacing utilities.
+  const normalizeArabicForCapture = (clonedDoc: Document) => {
+    try {
+      const all = clonedDoc.querySelectorAll<HTMLElement>('*');
+      all.forEach(el => {
+        el.style.letterSpacing = 'normal';
+        (el.style as any).fontKerning = 'normal';
+        (el.style as any).fontFeatureSettings = '"liga" 1, "calt" 1';
+        el.style.textRendering = 'geometricPrecision';
+      });
+    } catch (e) {
+      console.warn('normalizeArabicForCapture failed', e);
+    }
+  };
+
   // Export as high-quality JPG image
   const exportAsJPG = async () => {
     try {
@@ -35,26 +74,31 @@ export default function EnhancedPDFExport({
         return;
       }
 
-      // Wait for images and fonts to load
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await waitForAssets(element);
+
+      const dpr = Math.max(window.devicePixelRatio || 1, 2);
+      const captureScale = Math.min(Math.max(dpr * 1.5, 3), 4);
 
       // Create high-quality canvas
       const canvas = await html2canvas(element, {
-        scale: 3, // Higher scale for better quality
+        scale: captureScale,
         logging: false,
         allowTaint: true,
         useCORS: true,
         backgroundColor: '#ffffff',
         width: element.scrollWidth,
         height: element.scrollHeight,
-        imageTimeout: 0,
+        windowWidth: element.scrollWidth,
+        windowHeight: element.scrollHeight,
+        imageTimeout: 15000,
         removeContainer: true,
-        foreignObjectRendering: false
+        foreignObjectRendering: false,
+        onclone: (clonedDoc) => normalizeArabicForCapture(clonedDoc),
       });
 
       // Convert to high-quality JPG
-      const imageDataURL = canvas.toDataURL('image/jpeg', 0.95); // High quality JPG
-      
+      const imageDataURL = canvas.toDataURL('image/jpeg', 0.98);
+
       // Create download link
       const link = document.createElement('a');
       link.href = imageDataURL;
@@ -90,21 +134,26 @@ export default function EnhancedPDFExport({
         return;
       }
 
-      // Wait for images and fonts to load
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await waitForAssets(element);
+
+      const dpr = Math.max(window.devicePixelRatio || 1, 2);
+      const captureScale = Math.min(Math.max(dpr * 1.5, 3), 4);
 
       // Create high-quality canvas with proper dimensions
       const canvas = await html2canvas(element, {
-        scale: 2, // Good balance of quality and file size
+        scale: captureScale,
         logging: false,
         allowTaint: true,
         useCORS: true,
         backgroundColor: '#ffffff',
         width: element.scrollWidth,
         height: element.scrollHeight,
-        imageTimeout: 0,
+        windowWidth: element.scrollWidth,
+        windowHeight: element.scrollHeight,
+        imageTimeout: 15000,
         removeContainer: true,
-        foreignObjectRendering: false
+        foreignObjectRendering: false,
+        onclone: (clonedDoc) => normalizeArabicForCapture(clonedDoc),
       });
 
       // Create PDF with proper A4 dimensions
@@ -112,39 +161,32 @@ export default function EnhancedPDFExport({
         orientation: 'portrait',
         unit: 'mm',
         format: 'a4',
-        compress: true
+        compress: true,
       });
 
-      // Calculate dimensions to fit A4
-      const pdfWidth = 210; // A4 width in mm
-      const pdfHeight = 297; // A4 height in mm
-      const canvasWidth = canvas.width;
-      const canvasHeight = canvas.height;
-      
-      // Calculate scaling to fit A4 while maintaining aspect ratio
-      const scale = 2; // We know the scale we used
-      const widthRatio = pdfWidth / (canvasWidth / scale);
-      const heightRatio = pdfHeight / (canvasHeight / scale);
+      // A4 dimensions
+      const pdfWidth = 210;
+      const pdfHeight = 297;
+
+      // Fit canvas (which is element.scrollWidth/Height * scale) into A4 page
+      // by scaling the source element dimensions, NOT the canvas pixel size.
+      const elementWidth = element.scrollWidth;
+      const elementHeight = element.scrollHeight;
+      const widthRatio = pdfWidth / elementWidth;
+      const heightRatio = pdfHeight / elementHeight;
       const ratio = Math.min(widthRatio, heightRatio);
-      
-      const imgWidth = (canvasWidth / scale) * ratio;
-      const imgHeight = (canvasHeight / scale) * ratio;
-      
-      // Center the image on the page
+
+      const imgWidth = elementWidth * ratio;
+      const imgHeight = elementHeight * ratio;
+
+      // Center on page
       const x = (pdfWidth - imgWidth) / 2;
       const y = (pdfHeight - imgHeight) / 2;
 
-      // Add image to PDF with optimized quality
-      pdf.addImage(
-        canvas.toDataURL('image/png', 1.0),
-        'PNG',
-        x,
-        y,
-        imgWidth,
-        imgHeight,
-        '',
-        'FAST'
-      );
+      // Use high-quality JPEG (much smaller file with negligible visual loss
+      // for documents and far better than FAST compressed PNG).
+      const imgData = canvas.toDataURL('image/jpeg', 0.98);
+      pdf.addImage(imgData, 'JPEG', x, y, imgWidth, imgHeight, undefined, 'SLOW');
 
       // Save PDF
       pdf.save(`${filename}_${new Date().toISOString().split('T')[0]}.pdf`);

@@ -582,7 +582,7 @@ export default function QuotationA4Preview({
                             </div>
                             <div className="flex items-center gap-3">
                               <span className="font-black text-xl print:text-black" style={{ color: secondaryColor }}>السيارة :</span>
-                              <span className="text-2xl font-black print:text-black tracking-tight" style={{ color: primaryColor }}>
+                              <span className="text-2xl font-black print:text-black" style={{ color: primaryColor, letterSpacing: 'normal', fontFeatureSettings: '"liga" 1, "calt" 1' }}>
                                 {selectedVehicle.manufacturer} {selectedVehicle.category} {selectedVehicle.trimLevel} {selectedVehicle.engineCapacity}
                               </span>
                             </div>
@@ -724,7 +724,8 @@ export default function QuotationA4Preview({
                         style={{ 
                           color: primaryColor, 
                           lineHeight: '1.6',
-                          letterSpacing: '0.01em',
+                          letterSpacing: 'normal',
+                          fontFeatureSettings: '"liga" 1, "calt" 1',
                           textAlign: 'right'
                         }}
                         title="اضغط مرتين للتعديل"
