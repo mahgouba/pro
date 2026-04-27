@@ -533,26 +533,31 @@ export default function CardViewPage({ userRole, username, onLogout }: CardViewP
   });
 
   // Group ALL items by manufacturer first (including sold cars for count calculation)
+  // Trim manufacturer names so visually-identical entries (e.g. "نيسان" vs "نيسان ") merge
   const allGroupedData = inventoryData.reduce((acc, item) => {
-    if (!acc[item.manufacturer]) {
-      acc[item.manufacturer] = {
+    const key = (item.manufacturer || "").trim();
+    if (!key) return acc;
+    if (!acc[key]) {
+      acc[key] = {
         items: [],
         logo: null,
       };
     }
-    acc[item.manufacturer].items.push(item);
+    acc[key].items.push(item);
     return acc;
   }, {} as Record<string, { items: InventoryItem[], logo: string | null }>);
 
   // Then filter for display (only available items)
   const groupedData = filteredItems.reduce((acc, item) => {
-    if (!acc[item.manufacturer]) {
-      acc[item.manufacturer] = {
+    const key = (item.manufacturer || "").trim();
+    if (!key) return acc;
+    if (!acc[key]) {
+      acc[key] = {
         items: [],
         logo: null,
       };
     }
-    acc[item.manufacturer].items.push(item);
+    acc[key].items.push(item);
     return acc;
   }, {} as Record<string, { items: InventoryItem[], logo: string | null }>);
 

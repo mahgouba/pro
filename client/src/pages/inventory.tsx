@@ -261,10 +261,13 @@ export default function InventoryPage({ userRole, username, onLogout }: Inventor
   };
 
   // Get unique values for each filter based on cascading filters
+  // Trim values so visually-identical entries with stray whitespace dedupe correctly
   const getAvailableValues = (field: keyof InventoryItem): string[] => {
     const filteredData = getFilteredDataForField(field);
     const values = filteredData
       .map(item => field === "year" ? String(item[field]) : item[field])
+      .filter((value): value is string => Boolean(value))
+      .map(value => (typeof value === "string" ? value.trim() : value))
       .filter((value): value is string => Boolean(value))
       .filter((value, index, self) => self.indexOf(value) === index)
       .sort();
