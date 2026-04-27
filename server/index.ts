@@ -77,7 +77,7 @@ async function initializeServer() {
 if (process.env.NODE_ENV !== "production" || !process.env.FUNCTION_SIGNATURE_TYPE) {
   (async () => {
     const server = await initializeServer();
-    const port = process.env.PORT || 5001;
+    const port = process.env.PORT || 5000;
     server.listen({
       port: Number(port),
       host: "0.0.0.0",
