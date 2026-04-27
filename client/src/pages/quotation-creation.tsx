@@ -630,52 +630,106 @@ export default function QuotationCreationPage({ vehicleData }: QuotationCreation
 
   // ===== Customizable layout for the main content area =====
   type LayoutSectionId = "customer" | "vehicle" | "preview";
-  const LAYOUT_STORAGE_KEY = "quotation-creation-layout-v1";
+  type LayoutPreset = {
+    name: string;
+    order: LayoutSectionId[];
+    hidden: LayoutSectionId[];
+  };
+  const LAYOUT_STORAGE_KEY_V1 = "quotation-creation-layout-v1";
+  const LAYOUT_STORAGE_KEY = "quotation-creation-layout-v2";
   const DEFAULT_LAYOUT_ORDER: LayoutSectionId[] = ["customer", "vehicle", "preview"];
+  const DEFAULT_PRESET_NAME = "افتراضي";
   const SECTION_LABELS: Record<LayoutSectionId, string> = {
     customer: "بيانات العميل",
     vehicle: "بيانات السيارة والتسعير",
     preview: "معاينة A4",
   };
 
-  const [layoutOrder, setLayoutOrder] = useState<LayoutSectionId[]>(() => {
+  const sanitizeOrder = (raw: unknown): LayoutSectionId[] => {
+    if (!Array.isArray(raw)) return DEFAULT_LAYOUT_ORDER;
+    const known = raw.filter((id): id is LayoutSectionId =>
+      DEFAULT_LAYOUT_ORDER.includes(id as LayoutSectionId)
+    );
+    const missing = DEFAULT_LAYOUT_ORDER.filter((id) => !known.includes(id));
+    return [...known, ...missing];
+  };
+  const sanitizeHidden = (raw: unknown): LayoutSectionId[] => {
+    if (!Array.isArray(raw)) return [];
+    return raw.filter((id): id is LayoutSectionId =>
+      DEFAULT_LAYOUT_ORDER.includes(id as LayoutSectionId)
+    );
+  };
+
+  const loadInitialLayout = (): { presets: LayoutPreset[]; activeName: string } => {
+    const fallback = {
+      presets: [{ name: DEFAULT_PRESET_NAME, order: DEFAULT_LAYOUT_ORDER, hidden: [] as LayoutSectionId[] }],
+      activeName: DEFAULT_PRESET_NAME,
+    };
     try {
-      const raw = localStorage.getItem(LAYOUT_STORAGE_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed.order)) {
-          // Keep only known ids and append any missing ones to preserve compatibility
-          const known = parsed.order.filter((id: string): id is LayoutSectionId =>
-            DEFAULT_LAYOUT_ORDER.includes(id as LayoutSectionId)
-          );
-          const missing = DEFAULT_LAYOUT_ORDER.filter((id) => !known.includes(id));
-          return [...known, ...missing];
+      const rawV2 = localStorage.getItem(LAYOUT_STORAGE_KEY);
+      if (rawV2) {
+        const parsed = JSON.parse(rawV2);
+        if (Array.isArray(parsed.presets) && parsed.presets.length > 0) {
+          const presets: LayoutPreset[] = parsed.presets.map((p: any) => ({
+            name: typeof p?.name === "string" && p.name.trim() ? p.name : DEFAULT_PRESET_NAME,
+            order: sanitizeOrder(p?.order),
+            hidden: sanitizeHidden(p?.hidden),
+          }));
+          const activeName =
+            typeof parsed.activeName === "string" && presets.some((p) => p.name === parsed.activeName)
+              ? parsed.activeName
+              : presets[0].name;
+          return { presets, activeName };
         }
       }
-    } catch {}
-    return DEFAULT_LAYOUT_ORDER;
-  });
-  const [hiddenSections, setHiddenSections] = useState<LayoutSectionId[]>(() => {
-    try {
-      const raw = localStorage.getItem(LAYOUT_STORAGE_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed.hidden)) {
-          return parsed.hidden.filter((id: string): id is LayoutSectionId =>
-            DEFAULT_LAYOUT_ORDER.includes(id as LayoutSectionId)
-          );
-        }
+      // Migrate from v1
+      const rawV1 = localStorage.getItem(LAYOUT_STORAGE_KEY_V1);
+      if (rawV1) {
+        const parsed = JSON.parse(rawV1);
+        return {
+          presets: [
+            {
+              name: DEFAULT_PRESET_NAME,
+              order: sanitizeOrder(parsed?.order),
+              hidden: sanitizeHidden(parsed?.hidden),
+            },
+          ],
+          activeName: DEFAULT_PRESET_NAME,
+        };
       }
     } catch {}
-    return [];
-  });
+    return fallback;
+  };
+
+  const initialLayoutState = loadInitialLayout();
+  const [layoutPresets, setLayoutPresets] = useState<LayoutPreset[]>(initialLayoutState.presets);
+  const [activePresetName, setActivePresetName] = useState<string>(initialLayoutState.activeName);
+
+  const activePreset =
+    layoutPresets.find((p) => p.name === activePresetName) ?? layoutPresets[0];
+  const layoutOrder = activePreset?.order ?? DEFAULT_LAYOUT_ORDER;
+  const hiddenSections = activePreset?.hidden ?? [];
+
+  const persistPresets = (presets: LayoutPreset[], activeName: string) => {
+    try {
+      localStorage.setItem(
+        LAYOUT_STORAGE_KEY,
+        JSON.stringify({ presets, activeName })
+      );
+    } catch {}
+  };
+
   const [showLayoutDialog, setShowLayoutDialog] = useState(false);
   const [draftOrder, setDraftOrder] = useState<LayoutSectionId[]>(layoutOrder);
   const [draftHidden, setDraftHidden] = useState<LayoutSectionId[]>(hiddenSections);
+  const [draftActiveName, setDraftActiveName] = useState<string>(activePresetName);
+  const [newPresetName, setNewPresetName] = useState<string>("");
 
   const openLayoutDialog = () => {
     setDraftOrder(layoutOrder);
     setDraftHidden(hiddenSections);
+    setDraftActiveName(activePresetName);
+    setNewPresetName("");
     setShowLayoutDialog(true);
   };
 
@@ -695,17 +749,62 @@ export default function QuotationCreationPage({ vehicleData }: QuotationCreation
     );
   };
 
+  const switchDraftPreset = (name: string) => {
+    const target = layoutPresets.find((p) => p.name === name);
+    if (!target) return;
+    setDraftActiveName(name);
+    setDraftOrder(target.order);
+    setDraftHidden(target.hidden);
+  };
+
   const saveLayout = () => {
-    setLayoutOrder(draftOrder);
-    setHiddenSections(draftHidden);
-    try {
-      localStorage.setItem(
-        LAYOUT_STORAGE_KEY,
-        JSON.stringify({ order: draftOrder, hidden: draftHidden })
-      );
-    } catch {}
+    const updated = layoutPresets.map((p) =>
+      p.name === draftActiveName
+        ? { ...p, order: draftOrder, hidden: draftHidden }
+        : p
+    );
+    setLayoutPresets(updated);
+    setActivePresetName(draftActiveName);
+    persistPresets(updated, draftActiveName);
     setShowLayoutDialog(false);
-    toast({ title: "تم الحفظ", description: "تم حفظ التخطيط الجديد بنجاح" });
+    toast({ title: "تم الحفظ", description: `تم حفظ تخطيط "${draftActiveName}" بنجاح` });
+  };
+
+  const saveAsNewPreset = () => {
+    const name = newPresetName.trim();
+    if (!name) {
+      toast({ title: "اسم مطلوب", description: "يرجى إدخال اسم للتخطيط الجديد", variant: "destructive" });
+      return;
+    }
+    if (layoutPresets.some((p) => p.name === name)) {
+      toast({ title: "اسم مكرر", description: "يوجد تخطيط بهذا الاسم بالفعل", variant: "destructive" });
+      return;
+    }
+    const newPreset: LayoutPreset = { name, order: draftOrder, hidden: draftHidden };
+    const updated = [...layoutPresets, newPreset];
+    setLayoutPresets(updated);
+    setActivePresetName(name);
+    setDraftActiveName(name);
+    persistPresets(updated, name);
+    setNewPresetName("");
+    toast({ title: "تم إنشاء التخطيط", description: `تم حفظ "${name}" كتخطيط جديد` });
+  };
+
+  const deletePreset = (name: string) => {
+    if (layoutPresets.length <= 1) {
+      toast({ title: "لا يمكن الحذف", description: "يجب الإبقاء على تخطيط واحد على الأقل", variant: "destructive" });
+      return;
+    }
+    if (!window.confirm(`حذف التخطيط "${name}"؟`)) return;
+    const updated = layoutPresets.filter((p) => p.name !== name);
+    const newActive = updated[0].name;
+    setLayoutPresets(updated);
+    setActivePresetName(newActive);
+    setDraftActiveName(newActive);
+    setDraftOrder(updated[0].order);
+    setDraftHidden(updated[0].hidden);
+    persistPresets(updated, newActive);
+    toast({ title: "تم الحذف", description: `تم حذف التخطيط "${name}"` });
   };
 
   const resetLayout = () => {
@@ -4445,9 +4544,73 @@ export default function QuotationCreationPage({ vehicleData }: QuotationCreation
               تخصيص تخطيط الصفحة
             </DialogTitle>
             <DialogDescription>
-              رتّب الأقسام أو أخفِها حسب احتياجك ثم احفظ التخطيط.
+              رتّب الأقسام أو أخفِها، واحفظ تخطيطات متعددة بأسماء مختلفة للتبديل بينها بسرعة.
             </DialogDescription>
           </DialogHeader>
+
+          {/* Preset selector */}
+          <div className="space-y-3 pt-2 pb-1 border-b">
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                التخطيط النشط
+              </label>
+              <div className="flex items-center gap-2">
+                <Select value={draftActiveName} onValueChange={switchDraftPreset}>
+                  <SelectTrigger className="flex-1" data-testid="select-active-preset">
+                    <SelectValue placeholder="اختر تخطيط" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {layoutPresets.map((p) => (
+                      <SelectItem key={p.name} value={p.name} data-testid={`option-preset-${p.name}`}>
+                        {p.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => deletePreset(draftActiveName)}
+                  disabled={layoutPresets.length <= 1}
+                  data-testid="button-delete-preset"
+                  title="حذف التخطيط الحالي"
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
+                >
+                  <Trash2 size={16} />
+                </Button>
+              </div>
+            </div>
+
+            {/* Save as new preset */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                حفظ التغييرات الحالية كتخطيط جديد
+              </label>
+              <div className="flex items-center gap-2">
+                <Input
+                  type="text"
+                  placeholder="اسم التخطيط الجديد..."
+                  value={newPresetName}
+                  onChange={(e) => setNewPresetName(e.target.value)}
+                  className="flex-1"
+                  data-testid="input-new-preset-name"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={saveAsNewPreset}
+                  disabled={!newPresetName.trim()}
+                  data-testid="button-save-as-new-preset"
+                >
+                  <Save size={14} className="ml-1" />
+                  إنشاء
+                </Button>
+              </div>
+            </div>
+          </div>
+
           <div className="space-y-3 py-2">
             {draftOrder.map((id, index) => {
               const isHidden = draftHidden.includes(id);
