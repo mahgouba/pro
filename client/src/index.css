@@ -937,9 +937,9 @@ button[data-state="checked"][role="radio"] span {
     0 8px 24px 0 rgba(255, 255, 255, 0.2);
 }
 
-/* Unified Glass Background System */
+/* Unified Glass Background System — driven by appearance settings */
 .glass-background {
-  background: linear-gradient(135deg, #00627F 0%, #004861 50%, #00627F 100%);
+  background: var(--app-page-bg, linear-gradient(135deg, #00627F 0%, #004861 50%, #00627F 100%));
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -2624,19 +2624,19 @@ span.badge,
 /* Global checkbox and radio styling with blue theme */
 input[type="checkbox"],
 input[type="radio"] {
-  accent-color: #00627F;
+  accent-color: var(--dynamic-primary, #00627F);
 }
 
-/* Shadcn UI Checkbox styling */
+/* Shadcn UI Checkbox styling — driven by appearance settings */
 [data-state="checked"] {
-  background-color: #00627F !important;
-  border-color: #00627F !important;
+  background-color: var(--dynamic-primary, #00627F) !important;
+  border-color: var(--dynamic-primary, #00627F) !important;
 }
 
-/* RadioGroup styling */
+/* RadioGroup styling — driven by appearance settings */
 button[role="radio"][data-state="checked"] {
-  background-color: #00627F !important;
-  border-color: #00627F !important;
+  background-color: var(--dynamic-primary, #00627F) !important;
+  border-color: var(--dynamic-primary, #00627F) !important;
 }
 
 /* Add checkbox animation keyframes */
