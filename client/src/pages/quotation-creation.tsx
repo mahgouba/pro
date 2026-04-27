@@ -2181,10 +2181,11 @@ export default function QuotationCreationPage({ vehicleData }: QuotationCreation
         localStorage.setItem('lastSavedQuotationId', response.id.toString());
       }
     },
-    onError: (error) => {
+    onError: (error: any) => {
+      console.error("Quotation save error:", error);
       toast({
         title: "خطأ في حفظ عرض السعر",
-        description: "حدث خطأ أثناء حفظ عرض السعر. يرجى المحاولة مرة أخرى.",
+        description: error?.message || "حدث خطأ أثناء حفظ عرض السعر. يرجى المحاولة مرة أخرى.",
         variant: "destructive",
       });
     }
@@ -2210,10 +2211,11 @@ export default function QuotationCreationPage({ vehicleData }: QuotationCreation
         localStorage.setItem('lastSavedInvoiceId', response.id.toString());
       }
     },
-    onError: (error) => {
+    onError: (error: any) => {
+      console.error("Invoice save error:", error);
       toast({
         title: "خطأ في حفظ الفاتورة",
-        description: "حدث خطأ أثناء حفظ الفاتورة. يرجى المحاولة مرة أخرى.",
+        description: error?.message || "حدث خطأ أثناء حفظ الفاتورة. يرجى المحاولة مرة أخرى.",
         variant: "destructive",
       });
     }
