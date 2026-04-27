@@ -327,24 +327,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
   hierarchyRouter.delete("/categories/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      
+      const force = req.query.force === "true";
+
       // Get category name to check for associated vehicles
       const [categoryData] = await db.select().from(vehicleCategories).where(eq(vehicleCategories.id, id)).limit(1);
       if (!categoryData) return res.status(404).json({ message: "الفئة غير موجودة" });
 
-      const hasTrimLevels = await db.select().from(vehicleTrimLevels).where(eq(vehicleTrimLevels.categoryId, id)).limit(1);
-      
-      // Check for vehicles using the category name
-      const hasVehicles = await db.select().from(inventoryItems)
-        .where(eq(inventoryItems.category, categoryData.nameAr))
-        .limit(1);
+      const linkedTrimLevels = await db.select({ id: vehicleTrimLevels.id }).from(vehicleTrimLevels)
+        .where(eq(vehicleTrimLevels.categoryId, id));
 
-      if (hasTrimLevels.length > 0 || hasVehicles.length > 0) {
-        return res.status(400).json({ message: "لا يمكن حذف الفئة لأنها مرتبطة بدرجات تجهيز أو مركبات موجودة. يرجى حذف العناصر المرتبطة أولاً." });
+      // Check for vehicles using the category name
+      const linkedVehicles = await db.select({ id: inventoryItems.id }).from(inventoryItems)
+        .where(eq(inventoryItems.category, categoryData.nameAr));
+
+      // Real inventory vehicles always block deletion
+      if (linkedVehicles.length > 0) {
+        return res.status(400).json({
+          message: `لا يمكن حذف الفئة "${categoryData.nameAr}" لأنها مرتبطة بـ ${linkedVehicles.length} مركبة في المخزون. يرجى حذف أو نقل هذه المركبات أولاً.`,
+          linkedTrimLevels: linkedTrimLevels.length,
+          linkedVehicles: linkedVehicles.length,
+          canForce: false,
+        });
+      }
+
+      // If trim levels exist and not forcing, ask the client to confirm cascade
+      if (!force && linkedTrimLevels.length > 0) {
+        return res.status(409).json({
+          message: `الفئة "${categoryData.nameAr}" مرتبطة بـ ${linkedTrimLevels.length} درجة تجهيز. هل تريد حذفها جميعاً؟`,
+          linkedTrimLevels: linkedTrimLevels.length,
+          linkedVehicles: 0,
+          canForce: true,
+        });
+      }
+
+      // Cascade delete trim levels then the category
+      if (linkedTrimLevels.length > 0) {
+        await db.delete(vehicleTrimLevels).where(eq(vehicleTrimLevels.categoryId, id));
       }
 
       const [deleted] = await db.delete(vehicleCategories).where(eq(vehicleCategories.id, id)).returning();
-      res.json({ message: "تم حذف الفئة بنجاح" });
+      if (!deleted) return res.status(404).json({ message: "الفئة غير موجودة" });
+      res.json({ message: "تم حذف الفئة بنجاح", deletedTrimLevels: linkedTrimLevels.length });
     } catch (error) {
       console.error("Error deleting category:", error);
       res.status(500).json({ message: "فشل في حذف الفئة" });

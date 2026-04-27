@@ -348,21 +348,31 @@ export default function DropdownOptionsManagement() {
 
   // Delete category mutation
   const deleteCategoryMutation = useMutation({
-    mutationFn: async (id: number) => {
-      return apiRequest('DELETE', `/api/categories/${id}`);
+    mutationFn: async ({ id, force }: { id: number; force?: boolean }) => {
+      const url = force ? `/api/categories/${id}?force=true` : `/api/categories/${id}`;
+      return apiRequest('DELETE', url);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/categories'] });
       queryClient.invalidateQueries({ queryKey: ['/api/hierarchy/full'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/trim-levels'] });
       toast({
         title: "تم الحذف",
         description: "تم حذف الفئة بنجاح",
       });
     },
-    onError: (error: any) => {
+    onError: (error: any, variables) => {
+      const body = getErrorBody(error);
+      if (body?.canForce && !variables.force) {
+        const confirmMsg = `${body.message}\n\nسيتم حذف ${body.linkedTrimLevels} درجة تجهيز نهائياً. هل تريد المتابعة؟`;
+        if (window.confirm(confirmMsg)) {
+          deleteCategoryMutation.mutate({ id: variables.id, force: true });
+        }
+        return;
+      }
       toast({
         title: "خطأ",
-        description: getErrorMessage(error) || "فشل في حذف الفئة",
+        description: body?.message || getErrorMessage(error) || "فشل في حذف الفئة",
         variant: "destructive",
       });
     }
@@ -410,9 +420,10 @@ export default function DropdownOptionsManagement() {
       });
     },
     onError: (error: any) => {
+      const body = getErrorBody(error);
       toast({
         title: "خطأ",
-        description: getErrorMessage(error) || "فشل في حذف درجة التجهيز",
+        description: body?.message || getErrorMessage(error) || "فشل في حذف درجة التجهيز",
         variant: "destructive",
       });
     }
@@ -1946,7 +1957,7 @@ export default function DropdownOptionsManagement() {
                                           onClick={(e) => {
                                             e.stopPropagation();
                                             if (window.confirm(`هل أنت متأكد من حذف الفئة "${category.nameAr}"؟`)) {
-                                              deleteCategoryMutation.mutate(category.id);
+                                              deleteCategoryMutation.mutate({ id: category.id });
                                             }
                                           }}
                                           data-testid={`delete-category-${category.id}`}
