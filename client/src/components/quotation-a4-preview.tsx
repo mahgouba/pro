@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Phone, Mail, Globe, Building, Trash2, List, Eraser, PlusCircle, Type } from "lucide-react";
+import { Phone, Mail, Globe, Building, Trash2, List, Eraser, PlusCircle, Type, Edit3, Check } from "lucide-react";
 import { numberToArabic } from "@/utils/number-to-arabic";
 import type { Company, InventoryItem, Specification, AppearanceSettings } from "@shared/schema";
 import { getManufacturerLogo } from "@shared/manufacturer-logos";
@@ -116,6 +116,7 @@ export default function QuotationA4Preview({
 
   const [isEditingSpecs, setIsEditingSpecs] = useState(false);
   const [editableSpecs, setEditableSpecs] = useState<string>("");
+  const [isTextEditMode, setIsTextEditMode] = useState(false);
   const previewRef = useRef<HTMLDivElement>(null);
 
   const { data: appearance } = useQuery<AppearanceSettings>({
@@ -304,6 +305,28 @@ export default function QuotationA4Preview({
           </Select>
         </div>
 
+        <Button
+          onClick={() => setIsTextEditMode((v) => !v)}
+          className={`px-6 py-2 text-sm font-medium shadow-lg gap-2 ${
+            isTextEditMode
+              ? "bg-emerald-600 hover:bg-emerald-700 text-white"
+              : "bg-amber-500 hover:bg-amber-600 text-white"
+          }`}
+          data-testid="button-toggle-text-edit"
+        >
+          {isTextEditMode ? (
+            <>
+              <Check size={16} />
+              إنهاء التحرير
+            </>
+          ) : (
+            <>
+              <Edit3 size={16} />
+              تحرير النصوص
+            </>
+          )}
+        </Button>
+
         <Button 
           onClick={handlePrint}
           className="text-white px-6 py-2 text-sm font-medium shadow-lg"
@@ -314,12 +337,26 @@ export default function QuotationA4Preview({
 
       </div>
 
+      {isTextEditMode && (
+        <div
+          className="mb-3 mx-auto max-w-2xl text-center text-[12px] font-bold text-amber-800 bg-amber-50 border border-amber-300 rounded-md py-2 px-3 print:hidden no-print"
+          data-html2canvas-ignore="true"
+          data-testid="text-edit-mode-banner"
+        >
+          وضع التحرير مفعّل — انقر على أي نص في عرض السعر للتعديل عليه مباشرة. التغييرات للعرض والطباعة فقط.
+        </div>
+      )}
+
       {/* Main Preview Container */}
       <div 
         ref={previewRef}
         id="quotation"
-        className="print-content shadow-2xl mx-auto"
+        className={`print-content shadow-2xl mx-auto ${isTextEditMode ? "ring-2 ring-amber-400 ring-offset-2 quotation-edit-mode" : ""}`}
         data-pdf-export="quotation"
+        contentEditable={isTextEditMode}
+        suppressContentEditableWarning={true}
+        spellCheck={false}
+        data-testid="quotation-preview-container"
         style={{
           width: '210mm',
           height: '297mm',
@@ -330,7 +367,9 @@ export default function QuotationA4Preview({
           position: 'relative',
           overflow: 'hidden',
           direction: 'rtl',
-          fontFamily: fontFamily
+          fontFamily: fontFamily,
+          outline: isTextEditMode ? 'none' : undefined,
+          cursor: isTextEditMode ? 'text' : undefined,
         }}
       >
         {bgType === "dynamic" && (
