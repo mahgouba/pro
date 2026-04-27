@@ -1,19 +1,18 @@
 import * as React from "react"
-import { Check, ChevronDown, ChevronUp, Search, X } from "lucide-react"
+import { Check, ChevronDown, Search, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import * as PopoverPrimitive from "@radix-ui/react-popover"
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command"
+
+interface ComboboxOption {
+  label: string
+  value: string
+  logo?: string
+  secondaryLabel?: string
+}
 
 interface ComboboxProps {
-  options: { label: string; value: string; logo?: string; secondaryLabel?: string }[]
+  options: ComboboxOption[]
   value?: string | string[]
   onValueChange: (value: any) => void
   placeholder?: string
@@ -34,17 +33,35 @@ export function Combobox({
   emptyText = "لا توجد نتائج",
   className,
   disabled = false,
-  showSearch = false, // Default to false for Listbox style
+  showSearch = false,
   multi = false,
 }: ComboboxProps) {
   const [open, setOpen] = React.useState(false)
+  const [query, setQuery] = React.useState("")
+
+  React.useEffect(() => {
+    if (!open) setQuery("")
+  }, [open])
 
   const values = React.useMemo(() => {
-    if (!value) return []
+    if (value === undefined || value === null || value === "") return []
     return Array.isArray(value) ? value : [value]
   }, [value])
 
-  const selectedOptions = options.filter((opt) => values.includes(opt.value))
+  const selectedOptions = React.useMemo(
+    () => options.filter((opt) => values.includes(opt.value)),
+    [options, values]
+  )
+
+  const filteredOptions = React.useMemo(() => {
+    const q = query.trim().toLowerCase()
+    if (!q) return options
+    return options.filter(
+      (opt) =>
+        opt.label.toLowerCase().includes(q) ||
+        (opt.secondaryLabel?.toLowerCase().includes(q) ?? false)
+    )
+  }, [options, query])
 
   const handleSelect = (optionValue: string) => {
     if (multi) {
@@ -58,101 +75,148 @@ export function Combobox({
     }
   }
 
-  const handleRemove = (e: React.MouseEvent, optionValue: string) => {
+  const handleClear = (e: React.MouseEvent) => {
     e.stopPropagation()
-    if (multi) {
-      onValueChange(values.filter((v) => v !== optionValue))
-    } else {
-      onValueChange("")
-    }
+    e.preventDefault()
+    onValueChange(multi ? [] : "")
   }
+
+  const triggerLabel = (() => {
+    if (selectedOptions.length === 0) return null
+    if (multi && selectedOptions.length > 1) {
+      return `${selectedOptions[0].label} (+${selectedOptions.length - 1})`
+    }
+    return selectedOptions[0].label
+  })()
 
   return (
     <PopoverPrimitive.Root open={open} onOpenChange={setOpen}>
       <PopoverPrimitive.Trigger asChild>
         <Button
+          type="button"
           variant="outline"
           role="combobox"
           aria-expanded={open}
           className={cn(
-            "h-8 w-full justify-between bg-white border-slate-200 text-slate-900 hover:bg-slate-50 hover:text-slate-900 text-xs px-2 shadow-sm transition-all font-arabic rounded-md",
+            "h-9 w-full justify-between bg-white border-slate-200 text-slate-900 hover:bg-slate-50 hover:text-slate-900 text-sm px-3 shadow-sm font-arabic rounded-md",
             open && "border-purple-500 ring-1 ring-purple-500",
             className
           )}
           disabled={disabled}
+          data-testid="button-combobox-trigger"
         >
-          <div className="flex items-center gap-1.5 truncate w-full text-right" dir="rtl">
+          <div
+            className="flex items-center gap-2 truncate w-full text-right"
+            dir="rtl"
+          >
             {selectedOptions.length > 0 ? (
-              <div className="flex items-center gap-1.5 truncate">
+              <>
                 {selectedOptions[0].logo && (
-                  <img src={selectedOptions[0].logo} alt="" className="w-3.5 h-3.5 object-contain" />
+                  <img
+                    src={selectedOptions[0].logo}
+                    alt=""
+                    className="w-4 h-4 object-contain flex-shrink-0"
+                  />
                 )}
-                <span className="truncate">
-                  {multi 
-                    ? `${selectedOptions[0].label}${selectedOptions.length > 1 ? ` (+${selectedOptions.length - 1})` : ''}`
-                    : selectedOptions[0].label
-                  }
-                </span>
-              </div>
+                <span className="truncate">{triggerLabel}</span>
+              </>
             ) : (
-              <span className="text-slate-400">{placeholder}</span>
+              <span className="text-slate-400 truncate">{placeholder}</span>
             )}
           </div>
-          <ChevronDown className="h-3 w-3 text-slate-400 opacity-50 shrink-0" />
+          <div className="flex items-center gap-1 flex-shrink-0">
+            {selectedOptions.length > 0 && !disabled && (
+              <span
+                role="button"
+                tabIndex={-1}
+                onClick={handleClear}
+                onPointerDown={(e) => e.stopPropagation()}
+                className="text-slate-400 hover:text-slate-700 p-0.5 rounded cursor-pointer"
+                data-testid="button-combobox-clear"
+              >
+                <X className="h-3.5 w-3.5" />
+              </span>
+            )}
+            <ChevronDown className="h-4 w-4 text-slate-400 opacity-60" />
+          </div>
         </Button>
       </PopoverPrimitive.Trigger>
-      
-      <PopoverPrimitive.Content 
-          className="p-1 z-[100] bg-white border border-slate-200 shadow-lg rounded-md animate-in fade-in-0 zoom-in-95 font-arabic w-full min-w-[200px]" 
+
+      <PopoverPrimitive.Portal>
+        <PopoverPrimitive.Content
+          className="z-[100] bg-white border border-slate-200 shadow-lg rounded-md font-arabic overflow-hidden"
           align="start"
-          side="top"
-          sideOffset={-40} // Overlaps the trigger (trigger height is approx 40px)
+          side="bottom"
+          sideOffset={4}
           dir="rtl"
-          style={{ width: 'var(--radix-popover-trigger-width)' }}
+          style={{ width: "var(--radix-popover-trigger-width)" }}
+          onOpenAutoFocus={(e) => {
+            if (!showSearch) e.preventDefault()
+          }}
         >
-        <Command className="bg-transparent text-slate-900 w-full border-none" dir="rtl">
           {showSearch && (
-            <div className="flex items-center border-b border-slate-100 px-2" dir="rtl">
-              <Search className="h-3.5 w-3.5 shrink-0 text-slate-400 ml-2" />
-              <CommandInput 
-                placeholder={searchPlaceholder} 
-                className="h-8 w-full bg-transparent border-none focus:ring-0 text-xs text-slate-900 placeholder:text-slate-400" 
+            <div
+              className="flex items-center border-b border-slate-100 px-2"
+              dir="rtl"
+            >
+              <Search className="h-4 w-4 text-slate-400 ml-2 flex-shrink-0" />
+              <input
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder={searchPlaceholder}
+                className="h-9 w-full bg-transparent border-none focus:outline-none text-sm text-slate-900 placeholder:text-slate-400"
+                data-testid="input-combobox-search"
               />
             </div>
           )}
-          <CommandList className="max-h-[300px] w-full scrollbar-hide border-none">
-            <CommandEmpty className="py-4 text-xs text-slate-500 text-center">{emptyText}</CommandEmpty>
-            <CommandGroup className="p-1">
-              {options.map((option) => {
+
+          <div className="max-h-[260px] overflow-y-auto p-1">
+            {filteredOptions.length === 0 ? (
+              <div className="py-6 text-sm text-slate-500 text-center">
+                {emptyText}
+              </div>
+            ) : (
+              filteredOptions.map((option) => {
                 const isSelected = values.includes(option.value)
                 return (
-                  <CommandItem
+                  <button
+                    type="button"
                     key={option.value}
-                    value={option.label}
-                    onSelect={() => handleSelect(option.value)}
+                    onClick={() => handleSelect(option.value)}
                     className={cn(
-                      "text-xs py-1.5 px-2 mb-0.5 rounded-sm cursor-pointer transition-all flex items-center justify-between",
-                      isSelected 
-                        ? "bg-slate-100 text-slate-900" 
-                        : "text-slate-700 hover:bg-slate-50 hover:text-slate-900"
+                      "w-full text-sm py-2 px-2 mb-0.5 rounded-sm cursor-pointer flex items-center justify-between gap-2 text-right",
+                      isSelected
+                        ? "bg-purple-50 text-purple-900"
+                        : "text-slate-700 hover:bg-slate-100"
                     )}
+                    data-testid={`option-combobox-${option.value}`}
                   >
-                    <div className="flex items-center gap-2 truncate">
+                    <div className="flex items-center gap-2 truncate min-w-0">
                       {option.logo && (
-                        <img src={option.logo} alt="" className="w-3.5 h-3.5 object-contain flex-shrink-0" />
+                        <img
+                          src={option.logo}
+                          alt=""
+                          className="w-4 h-4 object-contain flex-shrink-0"
+                        />
                       )}
                       <span className="truncate">{option.label}</span>
+                      {option.secondaryLabel && (
+                        <span className="text-xs text-slate-400 truncate">
+                          {option.secondaryLabel}
+                        </span>
+                      )}
                     </div>
                     {isSelected && (
-                      <Check className="h-3.5 w-3.5 flex-shrink-0 text-purple-600 ml-2" />
+                      <Check className="h-4 w-4 flex-shrink-0 text-purple-600" />
                     )}
-                  </CommandItem>
+                  </button>
                 )
-              })}
-            </CommandGroup>
-          </CommandList>
-        </Command>
-      </PopoverPrimitive.Content>
+              })
+            )}
+          </div>
+        </PopoverPrimitive.Content>
+      </PopoverPrimitive.Portal>
     </PopoverPrimitive.Root>
   )
 }
