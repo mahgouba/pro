@@ -1049,6 +1049,17 @@ export default function QuotationCreationPage({ vehicleData }: QuotationCreation
   // WhatsApp sharing enhanced options
   const [selectedEmployee, setSelectedEmployee] = useState<string>("");
   const [sendToWorkNumber, setSendToWorkNumber] = useState(false);
+  // New: target type for WhatsApp dialog ("customer" | "employee" | "bank")
+  const [whatsappTarget, setWhatsappTarget] = useState<'customer' | 'employee' | 'bank'>('customer');
+  const [selectedBankId, setSelectedBankId] = useState<string>("");
+  const [selectedBankRepId, setSelectedBankRepId] = useState<string>("");
+  const [savePhoneToQuotation, setSavePhoneToQuotation] = useState(true);
+  const [customerPhoneInput, setCustomerPhoneInput] = useState<string>("");
+
+  // Banks list (for WhatsApp dialog bank-rep mode)
+  const { data: banksList = [] } = useQuery<any[]>({
+    queryKey: ['/api/banks'],
+  });
   
   // Terms management states
   const [selectedTerms, setSelectedTerms] = useState<number[]>([]);
@@ -1317,30 +1328,67 @@ export default function QuotationCreationPage({ vehicleData }: QuotationCreation
 
   // Share via WhatsApp with PDF generation
   const shareViaWhatsApp = async () => {
-    // Determine target phone number
+    // Determine target phone number based on selected target type
     let targetNumber = "";
-    
-    if (selectedEmployee && sendToWorkNumber) {
-      // Use employee's work number
-      const selectedRep = users.find((user: any) => user.id.toString() === selectedEmployee);
-      if (selectedRep && selectedRep.phoneNumber) {
-        // Ensure number starts with +966 and remove leading 0
-        const cleanPhone = selectedRep.phoneNumber.replace(/\D/g, '').replace(/^0/, '').replace(/^966/, '');
-        targetNumber = `+966${cleanPhone}`;
-      }
+    let errorMessage = "يرجى إدخال رقم الواتساب";
+
+    const cleanAndPrefix = (raw: string | undefined | null) => {
+      if (!raw) return "";
+      const cleaned = raw.replace(/\D/g, '').replace(/^0/, '').replace(/^966/, '');
+      return cleaned ? `+966${cleaned}` : "";
+    };
+
+    if (whatsappTarget === 'employee') {
+      const emp = (users as any[]).find((u: any) => u.id.toString() === selectedEmployee);
+      targetNumber = cleanAndPrefix(emp?.phoneNumber);
+      errorMessage = "رقم جوال الموظف غير متوفر";
+    } else if (whatsappTarget === 'bank') {
+      const rep = (users as any[]).find((u: any) => u.id.toString() === selectedBankRepId);
+      targetNumber = cleanAndPrefix(rep?.phoneNumber);
+      errorMessage = "رقم جوال مندوب البنك غير متوفر";
     } else {
-      // Use custom entered number
-      const cleanPhone = whatsappNumber.replace(/\D/g, '').replace(/^0/, '').replace(/^966/, '');
-      targetNumber = `+966${cleanPhone}`;
+      // customer mode
+      targetNumber = cleanAndPrefix(customerPhoneInput || whatsappNumber);
+      errorMessage = "يرجى إدخال رقم العميل";
     }
 
     if (!targetNumber || targetNumber === "+966") {
       toast({
         title: "خطأ",
-        description: selectedEmployee && sendToWorkNumber ? "رقم عمل الموظف غير متوفر" : "يرجى إدخال رقم الواتساب",
+        description: errorMessage,
         variant: "destructive",
       });
       return;
+    }
+
+    // If customer mode and the quotation didn't have a phone, save it back
+    if (
+      whatsappTarget === 'customer' &&
+      savePhoneToQuotation &&
+      customerPhoneInput &&
+      customerPhoneInput.trim() &&
+      !(customerPhone && customerPhone.trim()) &&
+      editingQuotation?.id
+    ) {
+      try {
+        const newPhone = `+966${customerPhoneInput.replace(/\D/g, '').replace(/^0/, '').replace(/^966/, '')}`;
+        await fetch(`/api/quotations/${editingQuotation.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ...editingQuotation,
+            customerPhone: newPhone,
+          }),
+        });
+        setCustomerPhone(newPhone);
+        queryClient.invalidateQueries({ queryKey: ['/api/quotations'] });
+        toast({
+          title: "تم حفظ رقم العميل",
+          description: "تم تحديث رقم العميل في عرض السعر",
+        });
+      } catch (e) {
+        console.error('Failed to save customer phone to quotation:', e);
+      }
     }
 
     try {
@@ -2337,9 +2385,19 @@ export default function QuotationCreationPage({ vehicleData }: QuotationCreation
                 variant="outline"
                 size="sm"
                 onClick={() => {
+                  // Initialize dialog state
+                  setWhatsappTarget('customer');
+                  setSelectedEmployee("");
+                  setSelectedBankId("");
+                  setSelectedBankRepId("");
+                  setSavePhoneToQuotation(true);
                   if (customerPhone && customerPhone.trim()) {
                     const cleanPhone = customerPhone.replace(/\D/g, '').replace(/^0/, '').replace(/^966/, '');
                     setWhatsappNumber('+966' + cleanPhone);
+                    setCustomerPhoneInput(cleanPhone);
+                  } else {
+                    setWhatsappNumber('+966');
+                    setCustomerPhoneInput('');
                   }
                   setShowWhatsappDialog(true);
                 }}
@@ -3845,72 +3903,206 @@ export default function QuotationCreationPage({ vehicleData }: QuotationCreation
       </div>
       
 
-      {/* WhatsApp Dialog */}
+      {/* WhatsApp Dialog - Redesigned with 3 target modes */}
       <Dialog open={showWhatsappDialog} onOpenChange={setShowWhatsappDialog}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md" dir="rtl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <MessageCircle className="h-5 w-5 text-emerald-600" />
               مشاركة عبر الواتساب
             </DialogTitle>
           </DialogHeader>
+
           <div className="space-y-4">
-            {/* Employee Selection */}
+            {/* Target type selector */}
             <div>
-              <Label htmlFor="employee-select">اختيار الموظف</Label>
-              <Select value={selectedEmployee} onValueChange={setSelectedEmployee}>
-                <SelectTrigger>
-                  <SelectValue placeholder="اختر موظف لإرسال الرسالة إليه" />
-                </SelectTrigger>
-                <SelectContent>
-                  {users.map((user: any) => (
-                    <SelectItem key={user.id} value={user.id.toString()}>
-                      {user.name} - {user.jobTitle}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label>إرسال إلى</Label>
+              <div className="grid grid-cols-3 gap-2 mt-2">
+                <Button
+                  type="button"
+                  variant={whatsappTarget === 'customer' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setWhatsappTarget('customer')}
+                  data-testid="button-target-customer"
+                  className={whatsappTarget === 'customer' ? 'bg-emerald-600 hover:bg-emerald-700' : ''}
+                >
+                  العميل
+                </Button>
+                <Button
+                  type="button"
+                  variant={whatsappTarget === 'employee' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setWhatsappTarget('employee')}
+                  data-testid="button-target-employee"
+                  className={whatsappTarget === 'employee' ? 'bg-emerald-600 hover:bg-emerald-700' : ''}
+                >
+                  موظف المعرض
+                </Button>
+                <Button
+                  type="button"
+                  variant={whatsappTarget === 'bank' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setWhatsappTarget('bank')}
+                  data-testid="button-target-bank"
+                  className={whatsappTarget === 'bank' ? 'bg-emerald-600 hover:bg-emerald-700' : ''}
+                >
+                  مندوب البنك
+                </Button>
+              </div>
             </div>
 
-            {/* Work Number Checkbox */}
-            {selectedEmployee && (
-              <div className="flex items-center space-x-2 space-x-reverse">
-                <Checkbox 
-                  id="send-to-work" 
-                  checked={sendToWorkNumber}
-                  onCheckedChange={setSendToWorkNumber}
-                />
-                <Label htmlFor="send-to-work" className="text-sm">
-                  إرسال على رقم العمل: {users.find((user: any) => user.id.toString() === selectedEmployee)?.phoneNumber}
-                </Label>
-              </div>
-            )}
-
-            {/* Phone Number Input - Only show if custom number or no work number selected */}
-            {(!sendToWorkNumber || !selectedEmployee) && (
-              <div>
-                <Label htmlFor="whatsapp-number">رقم الواتساب</Label>
-                <div className="flex items-center">
-                  <div className="bg-gray-100 border border-r-0 rounded-r-md px-3 py-2 text-sm font-medium text-gray-700">
-                    🇸🇦 +966
+            {/* CUSTOMER MODE */}
+            {whatsappTarget === 'customer' && (
+              <div className="space-y-3">
+                <div>
+                  <Label htmlFor="customer-phone-input">رقم العميل</Label>
+                  <div className="flex items-center mt-1">
+                    <div className="bg-gray-100 border border-l-0 rounded-l-md px-3 py-2 text-sm font-medium text-gray-700">
+                      🇸🇦 +966
+                    </div>
+                    <Input
+                      id="customer-phone-input"
+                      data-testid="input-customer-phone"
+                      placeholder="501234567"
+                      value={customerPhoneInput}
+                      onChange={(e) => {
+                        const v = e.target.value.replace(/\D/g, '').replace(/^0/, '').replace(/^966/, '');
+                        setCustomerPhoneInput(v);
+                        setWhatsappNumber('+966' + v);
+                      }}
+                      className="text-left rounded-l-none border-l-0"
+                    />
                   </div>
-                  <Input
-                    id="whatsapp-number"
-                    placeholder="501234567"
-                    value={whatsappNumber.replace('+966', '')}
-                    onChange={(e) => setWhatsappNumber('+966' + e.target.value.replace(/^\+966/, ''))}
-                    className="text-left rounded-r-none border-r-0"
-                  />
+                  {customerPhone && customerPhone.trim() ? (
+                    <p className="text-xs text-gray-500 mt-1">رقم العميل المحفوظ مسبقاً: {customerPhone}</p>
+                  ) : (
+                    <p className="text-xs text-amber-600 mt-1">لا يوجد رقم محفوظ في عرض السعر</p>
+                  )}
                 </div>
+
+                {/* Save back to quotation - only when no original phone exists */}
+                {!(customerPhone && customerPhone.trim()) && customerPhoneInput.trim() !== '' && editingQuotation?.id && (
+                  <div className="flex items-center space-x-2 space-x-reverse">
+                    <Checkbox
+                      id="save-phone"
+                      data-testid="checkbox-save-phone"
+                      checked={savePhoneToQuotation}
+                      onCheckedChange={(v) => setSavePhoneToQuotation(Boolean(v))}
+                    />
+                    <Label htmlFor="save-phone" className="text-sm">
+                      حفظ هذا الرقم في بيانات عرض السعر
+                    </Label>
+                  </div>
+                )}
               </div>
             )}
 
-            <div className="flex gap-3">
-              <Button onClick={shareViaWhatsApp} className="bg-emerald-600 hover:bg-emerald-700">
+            {/* EMPLOYEE MODE */}
+            {whatsappTarget === 'employee' && (
+              <div>
+                <Label htmlFor="employee-select">اختيار موظف المعرض</Label>
+                <Select value={selectedEmployee} onValueChange={setSelectedEmployee}>
+                  <SelectTrigger data-testid="select-showroom-employee">
+                    <SelectValue placeholder="اختر موظف لإرسال الرسالة إليه" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {(users as any[])
+                      .filter((u: any) =>
+                        u.role === 'salesperson' ||
+                        u.role === 'sales_director' ||
+                        u.role === 'inventory_manager' ||
+                        u.role === 'admin' ||
+                        u.role === 'seller'
+                      )
+                      .map((user: any) => (
+                        <SelectItem key={user.id} value={user.id.toString()}>
+                          {user.name} - {user.jobTitle}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+                {selectedEmployee && (
+                  <p className="text-xs text-gray-500 mt-2">
+                    سيتم الإرسال على: {(users as any[]).find((u: any) => u.id.toString() === selectedEmployee)?.phoneNumber || '—'}
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* BANK REP MODE */}
+            {whatsappTarget === 'bank' && (
+              <div className="space-y-3">
+                <div>
+                  <Label htmlFor="bank-select">اختيار البنك</Label>
+                  <Select
+                    value={selectedBankId}
+                    onValueChange={(v) => {
+                      setSelectedBankId(v);
+                      setSelectedBankRepId("");
+                    }}
+                  >
+                    <SelectTrigger data-testid="select-bank-whatsapp">
+                      <SelectValue placeholder="اختر البنك" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {(banksList as any[]).map((b: any) => (
+                        <SelectItem key={b.id} value={b.id.toString()}>
+                          {b.bankName}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {selectedBankId && (() => {
+                  const bankReps = (users as any[]).filter(
+                    (u: any) => u.bankId && u.bankId.toString() === selectedBankId
+                  );
+                  return (
+                    <div>
+                      <Label htmlFor="bank-rep-select">اختيار مندوب البنك</Label>
+                      <Select value={selectedBankRepId} onValueChange={setSelectedBankRepId}>
+                        <SelectTrigger data-testid="select-bank-rep">
+                          <SelectValue placeholder={bankReps.length ? "اختر المندوب" : "لا يوجد مناديب لهذا البنك"} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {bankReps.map((u: any) => (
+                            <SelectItem key={u.id} value={u.id.toString()}>
+                              {u.name} - {u.jobTitle}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {bankReps.length === 0 && (
+                        <p className="text-xs text-amber-600 mt-1">
+                          لا يوجد مناديب مرتبطين بهذا البنك. يمكن ربطهم من إدارة المستخدمين.
+                        </p>
+                      )}
+                      {selectedBankRepId && (
+                        <p className="text-xs text-gray-500 mt-2">
+                          سيتم الإرسال على: {(users as any[]).find((u: any) => u.id.toString() === selectedBankRepId)?.phoneNumber || '—'}
+                        </p>
+                      )}
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
+
+            <div className="flex gap-3 pt-2">
+              <Button
+                onClick={shareViaWhatsApp}
+                data-testid="button-send-whatsapp"
+                className="bg-emerald-600 hover:bg-emerald-700"
+              >
                 <MessageCircle size={16} className="ml-2" />
                 إرسال PDF
               </Button>
-              <Button variant="outline" onClick={() => setShowWhatsappDialog(false)}>
+              <Button
+                variant="outline"
+                onClick={() => setShowWhatsappDialog(false)}
+                data-testid="button-cancel-whatsapp"
+              >
                 إلغاء
               </Button>
             </div>

@@ -31,7 +31,13 @@ interface User {
   phoneNumber: string;
   username: string;
   role: string;
+  bankId?: number | null;
   createdAt?: string;
+}
+
+interface BankOption {
+  id: number;
+  bankName: string;
 }
 
 export default function UserManagement() {
@@ -48,7 +54,8 @@ export default function UserManagement() {
     phoneNumber: "",
     username: "",
     password: "",
-    role: "seller"
+    role: "seller",
+    bankId: "" as string,
   });
 
   // Fetch users
@@ -57,9 +64,15 @@ export default function UserManagement() {
     retry: false,
   });
 
+  // Fetch banks (for bank-rep linkage)
+  const { data: banksList = [] } = useQuery<BankOption[]>({
+    queryKey: ["/api/banks"],
+    retry: false,
+  });
+
   // Create user mutation
   const createUserMutation = useMutation({
-    mutationFn: async (userData: { name: string; jobTitle: string; phoneNumber: string; username: string; password: string; role: string }) => {
+    mutationFn: async (userData: { name: string; jobTitle: string; phoneNumber: string; username: string; password: string; role: string; bankId?: number | null }) => {
       const response = await fetch("/api/users", {
         method: "POST",
         body: JSON.stringify(userData),
@@ -155,6 +168,9 @@ export default function UserManagement() {
     },
   });
 
+  const isBankRole = (role: string) =>
+    role === "bank_accountant" || role === "accountant";
+
   const handleCreateUser = () => {
     if (!formData.name || !formData.jobTitle || !formData.phoneNumber || !formData.username || !formData.password) {
       toast({
@@ -164,7 +180,11 @@ export default function UserManagement() {
       });
       return;
     }
-    createUserMutation.mutate(formData);
+    const payload = {
+      ...formData,
+      bankId: isBankRole(formData.role) && formData.bankId ? Number(formData.bankId) : null,
+    };
+    createUserMutation.mutate(payload);
   };
 
   const handleEditUser = (user: User) => {
@@ -175,7 +195,8 @@ export default function UserManagement() {
       phoneNumber: user.phoneNumber,
       username: user.username,
       password: "",
-      role: user.role
+      role: user.role,
+      bankId: user.bankId ? String(user.bankId) : "",
     });
     setEditUserOpen(true);
   };
@@ -196,7 +217,8 @@ export default function UserManagement() {
       jobTitle: formData.jobTitle,
       phoneNumber: formData.phoneNumber,
       username: formData.username,
-      role: formData.role
+      role: formData.role,
+      bankId: isBankRole(formData.role) && formData.bankId ? Number(formData.bankId) : null,
     };
 
     if (formData.password) {
@@ -352,9 +374,9 @@ export default function UserManagement() {
                     <Label htmlFor="role">الصلاحيات</Label>
                     <Select
                       value={formData.role}
-                      onValueChange={(value) => setFormData(prev => ({ ...prev, role: value }))}
+                      onValueChange={(value) => setFormData(prev => ({ ...prev, role: value, bankId: isBankRole(value) ? prev.bankId : "" }))}
                     >
-                      <SelectTrigger>
+                      <SelectTrigger data-testid="select-role">
                         <SelectValue placeholder="اختر نوع الصلاحيات" />
                       </SelectTrigger>
                       <SelectContent>
@@ -369,6 +391,24 @@ export default function UserManagement() {
                       </SelectContent>
                     </Select>
                   </div>
+                  {isBankRole(formData.role) && (
+                    <div>
+                      <Label htmlFor="bankId">البنك (لمناديب البنوك)</Label>
+                      <Select
+                        value={formData.bankId}
+                        onValueChange={(value) => setFormData(prev => ({ ...prev, bankId: value }))}
+                      >
+                        <SelectTrigger data-testid="select-bank">
+                          <SelectValue placeholder="اختر البنك" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {banksList.map((b) => (
+                            <SelectItem key={b.id} value={String(b.id)}>{b.bankName}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
                   <div className="flex space-x-2 space-x-reverse pt-4">
                     <Button
                       onClick={handleCreateUser}
@@ -514,9 +554,9 @@ export default function UserManagement() {
                 <Label htmlFor="edit-role">الصلاحيات</Label>
                 <Select
                   value={formData.role}
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, role: value }))}
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, role: value, bankId: isBankRole(value) ? prev.bankId : "" }))}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger data-testid="select-edit-role">
                     <SelectValue placeholder="اختر نوع الصلاحيات" />
                   </SelectTrigger>
                   <SelectContent>
@@ -531,6 +571,24 @@ export default function UserManagement() {
                   </SelectContent>
                 </Select>
               </div>
+              {isBankRole(formData.role) && (
+                <div>
+                  <Label htmlFor="edit-bankId">البنك (لمناديب البنوك)</Label>
+                  <Select
+                    value={formData.bankId}
+                    onValueChange={(value) => setFormData(prev => ({ ...prev, bankId: value }))}
+                  >
+                    <SelectTrigger data-testid="select-edit-bank">
+                      <SelectValue placeholder="اختر البنك" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {banksList.map((b) => (
+                        <SelectItem key={b.id} value={String(b.id)}>{b.bankName}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
               <div className="flex space-x-2 space-x-reverse pt-4">
                 <Button
                   onClick={handleUpdateUser}

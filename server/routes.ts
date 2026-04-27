@@ -1678,6 +1678,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         phoneNumber: user.phoneNumber,
         username: user.username,
         role: user.role,
+        bankId: user.bankId,
         createdAt: user.createdAt
       }));
       
@@ -1881,7 +1882,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create new user
   app.post("/api/users", async (req, res) => {
     try {
-      const { name, username, password, role, jobTitle, phoneNumber } = req.body;
+      const { name, username, password, role, jobTitle, phoneNumber, bankId } = req.body;
       
       if (!name || !username || !password || !role) {
         return res.status(400).json({ message: "Missing required fields: name, username, password, role" });
@@ -1906,6 +1907,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         role,
         jobTitle: jobTitle || '',
         phoneNumber: phoneNumber || '',
+        bankId: bankId ? Number(bankId) : null,
         createdAt: new Date()
       }).returning();
 
@@ -1922,7 +1924,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/users/:id", async (req, res) => {
     try {
       const userId = parseInt(req.params.id);
-      const { name, username, password, role, jobTitle, phoneNumber } = req.body;
+      const { name, username, password, role, jobTitle, phoneNumber, bankId } = req.body;
 
       if (!userId) {
         return res.status(400).json({ message: "Invalid user ID" });
@@ -1951,6 +1953,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (role) updateData.role = role;
       if (jobTitle !== undefined) updateData.jobTitle = jobTitle;
       if (phoneNumber !== undefined) updateData.phoneNumber = phoneNumber;
+      if (bankId !== undefined) updateData.bankId = bankId ? Number(bankId) : null;
 
       // Hash new password if provided
       if (password && password.trim() !== '') {

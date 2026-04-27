@@ -11,6 +11,7 @@ export const users = pgTable("users", {
   username: text("username").notNull().unique(), // اسم المستخدم
   password: text("password").notNull(), // كلمة المرور
   role: text("role").notNull().default("seller"), // الصلاحيات: 'admin', 'accountant', 'salesperson', 'inventory_manager', 'bank_accountant', 'sales_director'
+  bankId: integer("bank_id"), // معرف البنك (لمناديب البنوك فقط)
   createdAt: timestamp("created_at").defaultNow().notNull(), // تاريخ الإنشاء
 });
 
