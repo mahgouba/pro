@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <defs>
+    <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFD700;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#FFA500;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FF8C00;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Center nucleus -->
+  <circle cx="50" cy="50" r="4" fill="url(#goldGradient)" />
+  
+  <!-- First orbital ring -->
+  <ellipse cx="50" cy="50" rx="35" ry="12" 
+           fill="none" 
+           stroke="url(#goldGradient)" 
+           stroke-width="3" 
+           transform="rotate(30 50 50)" />
+  
+  <!-- Second orbital ring -->
+  <ellipse cx="50" cy="50" rx="35" ry="12" 
+           fill="none" 
+           stroke="url(#goldGradient)" 
+           stroke-width="3" 
+           transform="rotate(-30 50 50)" />
+  
+  <!-- Third orbital ring -->
+  <ellipse cx="50" cy="50" rx="35" ry="12" 
+           fill="none" 
+           stroke="url(#goldGradient)" 
+           stroke-width="3" 
+           transform="rotate(90 50 50)" />
+</svg>

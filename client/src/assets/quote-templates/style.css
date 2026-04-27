@@ -1,0 +1,225 @@
+.a-4-1,
+.a-4-1 * {
+  box-sizing: border-box;
+}
+.a-4-1 {
+  background: #ffffff;
+  height: 842px;
+  position: relative;
+  overflow: hidden;
+}
+.footer-element {
+  background: #00627f;
+  width: 595px;
+  height: 40px;
+  position: absolute;
+  left: 0px;
+  top: 802px;
+}
+.footer-element-2 {
+  background: #c49632;
+  width: 88px;
+  height: 68px;
+  position: absolute;
+  left: 26px;
+  top: 774px;
+}
+.right-side-element-2 {
+  background: #00627f;
+  width: 22px;
+  height: 839px;
+  position: absolute;
+  left: 573px;
+  top: 0px;
+}
+.div {
+  color: #000000;
+  text-align: right;
+  font-family: "Cairo-Bold", sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  position: absolute;
+  left: 147px;
+  top: 23px;
+  width: 275px;
+  height: 62px;
+}
+.div2 {
+  color: #000000;
+  text-align: right;
+  font-family: "Cairo-Regular", sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  position: absolute;
+  left: 510px;
+  top: 62px;
+}
+.div3 {
+  color: #000000;
+  text-align: right;
+  font-family: "Cairo-Regular", sans-serif;
+  font-size: 8px;
+  font-weight: 400;
+  position: absolute;
+  left: 371px;
+  top: 84px;
+}
+.div4 {
+  color: #000000;
+  text-align: right;
+  font-family: "Cairo-Regular", sans-serif;
+  font-size: 8px;
+  font-weight: 400;
+  position: absolute;
+  left: 544px;
+  top: 83px;
+}
+.div5 {
+  color: #000000;
+  text-align: right;
+  font-family: "Cairo-Regular", sans-serif;
+  font-size: 8px;
+  font-weight: 400;
+  position: absolute;
+  left: 541px;
+  top: 102px;
+}
+.div6 {
+  color: #000000;
+  text-align: right;
+  font-family: "Cairo-Regular", sans-serif;
+  font-size: 8px;
+  font-weight: 400;
+  position: absolute;
+  left: 395px;
+  top: 102px;
+}
+.div7 {
+  color: #000000;
+  text-align: right;
+  font-family: "Cairo-Regular", sans-serif;
+  font-size: 8px;
+  font-weight: 400;
+  position: absolute;
+  left: 254px;
+  top: 102px;
+}
+.div8 {
+  color: #000000;
+  text-align: right;
+  font-family: "Cairo-Regular", sans-serif;
+  font-size: 8px;
+  font-weight: 400;
+  position: absolute;
+  left: 244px;
+  top: 84px;
+}
+.thanks-word {
+  color: #000000;
+  text-align: right;
+  font-family: "Dubai-Regular", sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  position: absolute;
+  left: 4px;
+  top: 661px;
+  width: 124px;
+}
+.albarimi-com {
+  text-align: right;
+  font-family: "Dubai-Regular", sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  position: absolute;
+  left: 393px;
+  top: 814px;
+  width: 124px;
+}
+.albarimi-com-span {
+  color: #ffffff;
+}
+.albarimi-com-span2 {
+  color: #c49632;
+}
+.albarimi-cars-920033340 {
+  color: #ffffff;
+  text-align: right;
+  font-family: "Dubai-Regular", sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  position: absolute;
+  left: 161px;
+  top: 816px;
+  width: 158px;
+  height: 20px;
+}
+.demo-qr-code {
+  width: 61px;
+  height: 61px;
+  position: absolute;
+  left: 510px;
+  top: 8px;
+  object-fit: cover;
+  aspect-ratio: 1;
+}
+.water-maker {
+  width: 15.82%;
+  height: 96.11%;
+  position: absolute;
+  right: 80.05%;
+  left: 4.13%;
+  bottom: 1.22%;
+  top: 2.67%;
+  overflow: visible;
+}
+.footer-logo {
+  width: 13.43%;
+  height: 1.31%;
+  position: absolute;
+  right: 81.53%;
+  left: 5.04%;
+  bottom: 3.09%;
+  top: 95.61%;
+  overflow: visible;
+}
+.right-side-element {
+  width: 4.2%;
+  height: 100.52%;
+  position: absolute;
+  right: -0.5%;
+  left: 96.3%;
+  bottom: -0.52%;
+  top: 0%;
+  overflow: visible;
+}
+.copmany-logo {
+  width: 13.99%;
+  height: 8.86%;
+  position: absolute;
+  right: 81.64%;
+  left: 4.37%;
+  bottom: 88.17%;
+  top: 2.97%;
+  overflow: visible;
+}
+.shape {
+  width: 80px;
+  height: 11px;
+  position: absolute;
+  left: 30px;
+  top: 805px;
+  overflow: visible;
+}
+.line-1 {
+  margin-top: -1px;
+  border-style: solid;
+  border-color: #cf9b47;
+  border-width: 1px 0 0 0;
+  width: 453px;
+  height: 0px;
+  position: absolute;
+  left: 572px;
+  top: 127px;
+  transform-origin: 0 0;
+  transform: rotate(180deg) scale(1, 1);
+}

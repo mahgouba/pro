@@ -1,0 +1,333 @@
+return (
+    <div className="w-full max-w-4xl mx-auto p-6">
+      {/* Controls - Background Toggle and Print Button */}
+      <div className="mb-4 flex justify-center items-center gap-4 print:hidden no-print" data-html2canvas-ignore="true">
+        <div className="flex items-center gap-3 border border-yellow-600 rounded-lg px-4 py-3 bg-white">
+          <span className="bg-[#cf9b46] text-[#fcfcfc] text-[15px] px-2 py-1 rounded">البريمي</span>
+          <div className="relative">
+            <div 
+              className={`w-11 h-6 rounded-full cursor-pointer transition-all duration-300 ${
+                useAlbarimi2Background ? 'bg-yellow-600' : 'bg-yellow-200'
+              }`}
+              onClick={() => setUseAlbarimi2Background(!useAlbarimi2Background)}
+            >
+              <div 
+                className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-lg transition-all duration-300 ease-in-out ${
+                  useAlbarimi2Background ? 'right-1' : 'right-6'
+                }`}
+              />
+            </div>
+          </div>
+          <span className="text-sm text-yellow-700 font-medium">خلفية 2</span>
+        </div>
+        
+
+      </div>
+
+      <div 
+        ref={previewRef}
+        data-pdf-export="quotation"
+        className="mx-auto text-black shadow-2xl print:shadow-none border border-slate-200 overflow-hidden relative print:border-none"
+        style={{
+          width: '210mm',
+          height: '297mm',
+          minWidth: '210mm',
+          minHeight: '297mm',
+          maxWidth: '210mm',
+          maxHeight: '297mm',
+          fontFamily: '"Noto Sans Arabic", Arial, sans-serif',
+          direction: 'rtl',
+          backgroundImage: `url(${useAlbarimi2Background ? backgroundImages.albarimi2 : backgroundImages.albarimi1})`,
+          backgroundRepeat: 'no-repeat',
+          backgroundPosition: 'center',
+          backgroundSize: 'cover',
+          boxSizing: 'border-box',
+          position: 'relative',
+          transform: 'none',
+          zoom: 1,
+          WebkitPrintColorAdjust: 'exact',
+          printColorAdjust: 'exact',
+          colorAdjust: 'exact'
+        }}
+      >
+        {/* Content overlay on A4 background */}
+        <div className="absolute inset-0 p-8">
+          
+          {/* Header section with company logo and QR code */}
+          <div className="relative mb-8">
+            {/* Company Logo */}
+            {selectedCompany?.logo && (
+              <div className="absolute top-4 left-8 w-20 h-20">
+                <img 
+                  src={selectedCompany.logo} 
+                  alt={selectedCompany.name}
+                  className="w-full h-full object-contain"
+                />
+              </div>
+            )}
+
+            {/* QR Code */}
+            {qrCodeDataURL && (
+              <div className="absolute top-4 right-8">
+                <img src={qrCodeDataURL} alt="QR Code" className="w-16 h-16" />
+              </div>
+            )}
+
+            {/* Document Type with Number and Date in same row */}
+            <div className="absolute top-20 right-8">
+              <div className="flex items-center gap-8">
+                <h2 className="text-base font-bold text-[#2B4C8C] print:text-black mt-[4px] mb-[4px]" style={{fontFamily: 'Cairo, sans-serif'}}>
+                  {isInvoiceMode ? 'فاتورة' : 'عرض سعر'}
+                </h2>
+                <div className="text-xs text-[#1A365D] print:text-black">
+                  <span className="font-semibold">رقم: </span>
+                  <span className="font-bold text-[#C49632]">{isInvoiceMode ? invoiceNumber : quoteNumber}</span>
+                </div>
+                <div className="text-xs text-[#1A365D] print:text-black">
+                  <span className="font-semibold">الإصدار: </span>
+                  <span className="font-bold text-[#C49632]">{new Date().toLocaleDateString('en-GB')}</span>
+                </div>
+                {!isInvoiceMode && (
+                  <div className="text-xs text-[#1A365D] print:text-black">
+                    <span className="font-semibold">صالح حتى: </span>
+                    <span className="font-bold text-[#C49632]">{validUntil.toLocaleDateString('en-GB')}</span>
+                  </div>
+                )}
+              </div>
+              
+              {/* Customer Information Details below header */}
+              <div className="customer-info mt-4 bg-white/95 print:bg-white p-3 pt-[1px] pb-[1px] text-[13px] text-right print:border-none">
+                <div className="space-y-2 text-xs">
+                  <div className="text-right text-[16px] font-semibold text-[#2B4C8C] print:text-black">
+                    {isInvoiceMode ? (
+                      <span>بناءً على تعميدكم رقم: <span className="text-[#C49632]">{quoteNumber}</span></span>
+                    ) : (
+                      <span>{customerTitle} / <span className="text-[#C49632] ml-[14px] mr-[14px]">{customerName || "غير محدد"}</span> &nbsp;&nbsp;&nbsp; الموقرين</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+
+          {/* Vehicle Information Section */}
+          <div className="mb-[11px] ml-[25px] mr-[25px]" style={{marginTop: '38px'}}>
+            
+
+            {/* Vehicle Information */}
+            {selectedVehicle && (
+              <div className="vehicle-info relative p-4 w-full mt-[166px] mb-[16px] overflow-hidden print:bg-transparent border border-[#E2E8F0] rounded-lg shadow-lg print:border-none pl-[18px] pr-[18px] ml-[-22px] mr-[-22px]">
+                {/* Systematic Manufacturer Logo Watermark Pattern */}
+                {selectedVehicle && manufacturerLogo && (
+                  <div className="absolute inset-0 pointer-events-none">
+                    {/* Organized grid pattern with systematic layout */}
+                    <div className="grid grid-cols-4 grid-rows-3 gap-6 h-full w-full p-4">
+                      {Array.from({ length: 12 }).map((_, index) => (
+                        <div key={index} className="flex items-center justify-center">
+                          <img 
+                            src={manufacturerLogo} 
+                            alt={`${selectedVehicle.manufacturer} logo`}
+                            className="w-16 h-16 object-contain opacity-20"
+                            style={{
+                              filter: 'sepia(1) saturate(2) hue-rotate(25deg) brightness(1.2)',
+                              color: '#C79C45'
+                            }}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                    
+                    {/* Central focal logo with golden color */}
+                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                      <div 
+                        className="w-24 h-24 rounded-full flex items-center justify-center"
+                        style={{ backgroundColor: 'rgba(199, 156, 69, 0.1)' }}
+                      >
+                        <img 
+                          src={manufacturerLogo} 
+                          alt={`${selectedVehicle.manufacturer} logo`}
+                          className="w-20 h-20 object-contain opacity-30"
+                          style={{
+                            filter: 'sepia(1) saturate(2) hue-rotate(25deg) brightness(1.2)',
+                            color: '#C79C45'
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
+                <div className="relative z-10 text-xs">
+                  {/* Vehicle Information Grid - Two Rows Layout */}
+                  <div className="space-y-4 text-[13px]">
+                    {/* First Row: Manufacturer, Category, Trim Level */}
+                    <div className="grid grid-cols-3 gap-x-6">
+                      <div className="flex justify-between">
+                        <span className="font-semibold text-[#2B4C8C] print:text-black">الصانع:</span>
+                        <span className="text-right text-[#1A365D] font-medium print:text-black">{selectedVehicle.manufacturer}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-semibold text-[#2B4C8C] print:text-black">الفئة:</span>
+                        <span className="text-right text-[#1A365D] font-medium print:text-black">{selectedVehicle.category}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-semibold text-[#2B4C8C] print:text-black">درجة التجهيز:</span>
+                        <span className="text-right text-[#1A365D] font-medium print:text-black">{selectedVehicle.trimLevel || "غير محدد"}</span>
+                      </div>
+                    </div>
+                    
+                    {/* Second Row: Year, Exterior Color, Interior Color */}
+                    <div className="grid grid-cols-3 gap-x-6">
+                      <div className="flex justify-between">
+                        <span className="font-semibold text-[#2B4C8C] print:text-black">السنة:</span>
+                        <span className="text-right text-[#C49632] font-bold print:text-black">{selectedVehicle.year}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-semibold text-[#2B4C8C] print:text-black">اللون الخارجي:</span>
+                        <span className="text-right text-[#1A365D] font-medium print:text-black">{selectedVehicle.exteriorColor}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-semibold text-[#2B4C8C] print:text-black">اللون الداخلي:</span>
+                        <span className="text-right text-[#1A365D] font-medium print:text-black">{selectedVehicle.interiorColor}</span>
+                      </div>
+                    </div>
+                    
+                    {/* Third Row: Chassis Number - Full Width */}
+                    <div className="flex justify-between w-full">
+                      <span className="font-semibold text-[#2B4C8C] print:text-black">رقم الهيكل:</span>
+                      <span className="text-right text-[#C49632] font-bold print:text-black">{selectedVehicle.chassisNumber}</span>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Detailed Specifications - Full Width Editable */}
+<div className="mt-3 pt-3">
+                  <div className="flex items-center justify-between mt-[-10px] mb-[-10px] pt-[0px] pb-[0px]">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setIsEditingSpecs(!isEditingSpecs)}
+                      className="text-xs px-2 py-1 print:hidden no-print border-[#C49632] text-[#C49632] hover:bg-[#C49632] hover:text-white"
+                      style={{ display: 'none' }}
+                      data-html2canvas-ignore="true"
+                    >
+                      {isEditingSpecs ? "حفظ" : "تحرير"}
+                    </Button>
+                  </div>
+                  {isEditingSpecs ? (
+                    <textarea
+                      value={editableSpecs}
+                      onChange={(e) => setEditableSpecs(e.target.value)}
+                      className="w-full h-20 p-2 text-xs text-[#1A365D] border border-[#E2E8F0] rounded resize-none focus:outline-none focus:ring-2 focus:ring-[#C49632] focus:border-[#C49632]"
+                      placeholder="اكتب المواصفات التفصيلية هنا..."
+                      style={{ direction: 'rtl' }}
+                    />
+                  ) : (
+                    <div className="text-xs text-[#1A365D] whitespace-pre-wrap max-h-20 overflow-y-auto bg-[#F8FAFC] border border-[#E2E8F0] p-2 rounded print:bg-white print:text-black print:border-none">
+                      {editableSpecs || "لا توجد مواصفات تفصيلية"}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Price Breakdown Table */}
+          <div className="print:bg-transparent border border-[#E2E8F0] rounded-lg mb-4 shadow-lg overflow-hidden p-4 bg-[#c49633a1]"></div>
+            
+            {/* Table Header */}
+            <div className="grid grid-cols-5 print:bg-transparent border-b border-white print:border-white text-xs font-bold">
+              <div className="p-2 border-l border-white print:border-white text-[#2B4C8C] print:text-black text-center flex items-center justify-center">الكمية</div>
+              <div className="p-2 border-l border-white print:border-white text-[#2B4C8C] print:text-black text-center flex items-center justify-center">السعر الفردي</div>
+              <div className="p-2 border-l border-white print:border-white text-[#2B4C8C] print:text-black text-center flex items-center justify-center">الضريبة ({taxRate}%)</div>
+              <div className="p-2 border-l border-white print:border-white text-[#2B4C8C] print:text-black text-center flex items-center justify-center">اللوحات</div>
+              <div className="p-2 text-[#2B4C8C] print:text-black text-center flex items-center justify-center">الإجمالي</div>
+            </div>
+            
+            {/* Table Data Row */}
+            <div className="grid grid-cols-5 print:bg-transparent text-xs">
+              <div className="p-2 border-l border-white print:border-white text-[#1A365D] print:text-black text-center flex items-center justify-center">1</div>
+              <div className="p-2 border-l border-white print:border-white font-semibold text-[#1A365D] print:text-black text-center flex items-center justify-center">{basePrice.toLocaleString()}</div>
+              <div className="p-2 border-l border-white print:border-white font-semibold text-[#1A365D] print:text-black text-center flex items-center justify-center">{taxAmount.toLocaleString()}</div>
+              <div className="p-2 border-l border-white print:border-white font-semibold text-[#1A365D] print:text-black text-center flex items-center justify-center">
+                {includeLicensePlate ? licensePlatePrice.toLocaleString() : "0"}
+              </div>
+              <div className="p-2 font-bold text-[#2B4C8C] print:text-black text-center flex items-center justify-center">
+                {(grandTotal + (includeLicensePlate ? licensePlatePrice : 0)).toLocaleString()}
+              </div>
+            </div>
+          </div>
+
+          {/* Separate Total Section */}
+          <div className="print:bg-transparent border border-[#E2E8F0] rounded-lg shadow-lg overflow-hidden p-4 pt-[1px] pb-[1px] mt-[12px] mb-[12px]">
+            <div className="grid grid-cols-10 print:bg-transparent text-xs">
+              <div className="p-4 col-span-3 flex items-center justify-center">
+                <div className="font-bold text-[#2B4C8C] print:text-black text-[13px] text-center">
+                  المجموع: <span className="text-[#2B4C8C] print:text-black">{(grandTotal + (includeLicensePlate ? licensePlatePrice : 0)).toLocaleString()}</span> ريال
+                </div>
+              </div>
+              <div className="p-4 col-span-7 flex items-center justify-center">
+                <div className="text-center text-xs font-bold text-[#2B4C8C] print:text-black">
+                  {numberToArabic(grandTotal + (includeLicensePlate ? licensePlatePrice : 0))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Representative Information and Terms & Conditions Section */}
+          <div className="flex gap-6 mb-6">
+            {/* Terms & Conditions Section - Hidden in invoice mode */}
+            {!isInvoiceMode && (
+              <div className="terms-section bg-white/95 print:bg-white border border-[#E2E8F0] print:border-none p-4 rounded-lg flex-1 shadow-sm" style={{backgroundColor: '#c49633a1'}}>
+                
+                <div className="text-xs space-y-2">
+                  {termsConditions.length > 0 ? (
+                    termsConditions.map((term, index) => (
+                      <div key={term.id} className="flex items-start gap-2">
+                        <span className="text-[#C49632] print:text-black font-bold min-w-[1rem]">{index + 1}.</span>
+                        <span className="leading-relaxed text-[#1A365D] print:text-black">{term.term_text}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-[#64748B] print:text-black italic">لم يتم إضافة شروط وأحكام بعد</p>
+                  )}
+                </div>
+              </div>
+            )}
+            
+            {/* Representative Information - Small box on the right - Hidden if no representative selected */}
+            {representativeName && (
+              <div className="representative-section bg-white/95 print:bg-white border border-[#E2E8F0] print:border-none p-3 rounded-lg shadow-sm w-64">
+                <div className="text-center mb-2 pb-1 border-b border-[#E2E8F0] print:border-gray-300">
+                  <span className="font-bold text-[#2B4C8C] print:text-black text-sm">المندوب</span>
+                </div>
+                <div className="space-y-1 text-xs">
+                  <div className="flex justify-between">
+                    <span className="font-semibold text-[#2B4C8C] print:text-black">الاسم:</span>
+                    <span className="text-[#1A365D] font-medium print:text-black">{representativeName}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="font-semibold text-[#2B4C8C] print:text-black">الجوال:</span>
+                    <span className="text-[#C49632] font-bold print:text-black">{representativePhone || "غير محدد"}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Company Stamp Section */}
+          {companyStamp && (
+            <div className="flex justify-end mb-6">
+              <img 
+                src={companyStamp} 
+                alt="ختم الشركة" 
+                className="w-52 h-36 object-contain max-w-[216px] max-h-[144px] print:w-[216px] print:h-[144px]"
+              />
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
