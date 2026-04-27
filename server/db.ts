@@ -1,30 +1,29 @@
-import pg from 'pg';
-import { drizzle } from 'drizzle-orm/node-postgres';
+import { neon } from '@neondatabase/serverless';
+import { drizzle } from 'drizzle-orm/neon-http';
 import * as schema from "@shared/schema";
 
-const { Pool } = pg;
+const CONNECTION_URL = process.env.NEON_DATABASE_URL || process.env.DATABASE_URL;
 
-if (!process.env.DATABASE_URL) {
+if (!CONNECTION_URL) {
   throw new Error(
     "DATABASE_URL must be set. Did you forget to provision a database?",
   );
 }
 
-let DATABASE_URL = process.env.DATABASE_URL;
+let DATABASE_URL = CONNECTION_URL;
 if (DATABASE_URL.startsWith("psql '")) {
   DATABASE_URL = DATABASE_URL.replace(/^psql '/, '').replace(/'$/, '');
 }
 
-export const pool = new Pool({
-  connectionString: DATABASE_URL,
-  ssl: DATABASE_URL.includes('sslmode=disable') ? false : { rejectUnauthorized: false },
-});
+export const sql = neon(DATABASE_URL);
+export const db = drizzle(sql, { schema });
 
-export const db = drizzle(pool, { schema });
-
-export const sql = async (queryText: string, params?: any[]) => {
-  const result = await pool.query(queryText, params);
-  return result.rows;
+export const pool = {
+  query: async (queryText: string, params?: any[]) => {
+    return { rows: await sql(queryText, params) };
+  },
+  end: async () => {},
+  on: () => {},
 };
 
 export function getDatabase() {

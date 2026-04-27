@@ -47,3 +47,8 @@ build = ["npm", "run", "build"]
 [agent]
 expertMode = true
 stack = "FULLSTACK_JS"
+
+[userenv]
+
+[userenv.shared]
+NEON_DATABASE_URL = "postgresql://neondb_owner:npg_QsVlu48oOAih@ep-tiny-silence-amv285wr-pooler.c-5.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
