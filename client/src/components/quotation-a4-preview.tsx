@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Phone, Mail, Globe, Building, Trash2, List, Eraser, PlusCircle, Type, Edit3, Check } from "lucide-react";
+import { Phone, Mail, Globe, Building, Trash2, List, Eraser, PlusCircle, Type, Edit3, Check, Save, FileText, X } from "lucide-react";
 import { numberToArabic } from "@/utils/number-to-arabic";
 import type { Company, InventoryItem, Specification, AppearanceSettings } from "@shared/schema";
 import { getManufacturerLogo } from "@shared/manufacturer-logos";
@@ -118,6 +118,67 @@ export default function QuotationA4Preview({
   const [editableSpecs, setEditableSpecs] = useState<string>("");
   const [isTextEditMode, setIsTextEditMode] = useState(false);
   const previewRef = useRef<HTMLDivElement>(null);
+
+  // Saved templates (custom edited quote snapshots stored in localStorage)
+  type QuoteTemplate = { id: string; name: string; html: string; savedAt: number };
+  const TEMPLATES_STORAGE_KEY = "quotationCustomTemplates";
+  const [templates, setTemplates] = useState<QuoteTemplate[]>(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      const raw = window.localStorage.getItem(TEMPLATES_STORAGE_KEY);
+      if (!raw) return [];
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  });
+  const [activeTemplateId, setActiveTemplateId] = useState<string | null>(null);
+  const activeTemplate = templates.find((t) => t.id === activeTemplateId) || null;
+
+  const persistTemplates = (next: QuoteTemplate[]) => {
+    setTemplates(next);
+    try {
+      window.localStorage.setItem(TEMPLATES_STORAGE_KEY, JSON.stringify(next));
+    } catch (e) {
+      console.error("Failed to save templates", e);
+    }
+  };
+
+  const handleSaveTemplate = () => {
+    if (!previewRef.current) return;
+    const defaultName = `قالب ${new Date().toLocaleString("ar-EG", { dateStyle: "short", timeStyle: "short" })}`;
+    const name = window.prompt("اسم القالب:", defaultName);
+    if (!name || !name.trim()) return;
+    const html = previewRef.current.innerHTML;
+    const newTemplate: QuoteTemplate = {
+      id: `tpl_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+      name: name.trim(),
+      html,
+      savedAt: Date.now(),
+    };
+    persistTemplates([newTemplate, ...templates]);
+    setActiveTemplateId(newTemplate.id);
+    setIsTextEditMode(false);
+  };
+
+  const handleApplyTemplate = (id: string) => {
+    if (id === "__none__") {
+      setActiveTemplateId(null);
+      return;
+    }
+    setIsTextEditMode(false);
+    setActiveTemplateId(id);
+  };
+
+  const handleDeleteTemplate = (id: string) => {
+    const tpl = templates.find((t) => t.id === id);
+    if (!tpl) return;
+    if (!window.confirm(`حذف القالب "${tpl.name}"؟`)) return;
+    const next = templates.filter((t) => t.id !== id);
+    persistTemplates(next);
+    if (activeTemplateId === id) setActiveTemplateId(null);
+  };
 
   const { data: appearance } = useQuery<AppearanceSettings>({
     queryKey: ["/api/appearance"],
@@ -327,6 +388,53 @@ export default function QuotationA4Preview({
           )}
         </Button>
 
+        {isTextEditMode && (
+          <Button
+            onClick={handleSaveTemplate}
+            className="px-4 py-2 text-sm font-medium shadow-lg gap-2 bg-blue-600 hover:bg-blue-700 text-white"
+            data-testid="button-save-template"
+          >
+            <Save size={16} />
+            حفظ كقالب
+          </Button>
+        )}
+
+        <div className="flex items-center gap-2 border border-purple-500 rounded-lg px-3 py-1.5 bg-white shadow-sm">
+          <FileText size={16} className="text-purple-600" />
+          <span className="text-xs font-bold text-purple-700">القوالب:</span>
+          <Select
+            value={activeTemplateId || "__none__"}
+            onValueChange={handleApplyTemplate}
+          >
+            <SelectTrigger
+              className="w-[170px] h-8 text-xs border-purple-200"
+              data-testid="select-template"
+            >
+              <SelectValue placeholder="اختر قالباً" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__none__">— بدون قالب —</SelectItem>
+              {templates.map((t) => (
+                <SelectItem key={t.id} value={t.id}>
+                  {t.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {activeTemplateId && (
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-7 w-7 p-0 text-red-600 hover:text-red-800 hover:bg-red-50"
+              onClick={() => handleDeleteTemplate(activeTemplateId)}
+              title="حذف القالب الحالي"
+              data-testid="button-delete-template"
+            >
+              <Trash2 size={14} />
+            </Button>
+          )}
+        </div>
+
         <Button 
           onClick={handlePrint}
           className="text-white px-6 py-2 text-sm font-medium shadow-lg"
@@ -336,6 +444,26 @@ export default function QuotationA4Preview({
         </Button>
 
       </div>
+
+      {activeTemplate && (
+        <div
+          className="mb-3 mx-auto max-w-2xl flex items-center justify-center gap-3 text-[12px] font-bold text-purple-800 bg-purple-50 border border-purple-300 rounded-md py-2 px-3 print:hidden no-print"
+          data-html2canvas-ignore="true"
+          data-testid="active-template-banner"
+        >
+          <FileText size={14} />
+          <span>القالب المفعّل: {activeTemplate.name}</span>
+          <button
+            type="button"
+            onClick={() => setActiveTemplateId(null)}
+            className="ml-2 inline-flex items-center gap-1 px-2 py-0.5 rounded bg-white border border-purple-300 hover:bg-purple-100"
+            data-testid="button-clear-template"
+          >
+            <X size={12} />
+            إلغاء القالب
+          </button>
+        </div>
+      )}
 
       {isTextEditMode && (
         <div
@@ -348,6 +476,31 @@ export default function QuotationA4Preview({
       )}
 
       {/* Main Preview Container */}
+      {activeTemplate ? (
+        <div
+          key={activeTemplate.id}
+          id="quotation"
+          className={`print-content shadow-2xl mx-auto ${isTextEditMode ? "ring-2 ring-amber-400 ring-offset-2 quotation-edit-mode" : ""}`}
+          data-pdf-export="quotation"
+          contentEditable={isTextEditMode}
+          suppressContentEditableWarning={true}
+          spellCheck={false}
+          data-testid="quotation-preview-container"
+          ref={previewRef}
+          style={{
+            width: '210mm',
+            height: '297mm',
+            backgroundColor: 'white',
+            position: 'relative',
+            overflow: 'hidden',
+            direction: 'rtl',
+            fontFamily: fontFamily,
+            outline: isTextEditMode ? 'none' : undefined,
+            cursor: isTextEditMode ? 'text' : undefined,
+          }}
+          dangerouslySetInnerHTML={{ __html: activeTemplate.html }}
+        />
+      ) : (
       <div 
         ref={previewRef}
         id="quotation"
@@ -974,6 +1127,7 @@ export default function QuotationA4Preview({
         </div>
         )}
       </div>
+      )}
     </div>
   );
 }
