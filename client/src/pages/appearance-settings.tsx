@@ -19,12 +19,14 @@ import {
   Plus,
   Trash2,
   Info,
-  FileText
+  FileText,
+  Eye
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { convertArabicToEnglishNumerals } from "@/utils/numeral-converter";
+import { applyThemeSettings } from "@/components/theme-provider";
 
 export default function AppearanceSettings() {
   const { toast } = useToast();
@@ -59,12 +61,31 @@ export default function AppearanceSettings() {
   });
 
   const [formData, setFormData] = useState<any>({});
+  const [livePreview, setLivePreview] = useState<boolean>(false);
 
   useEffect(() => {
     if (settings) {
       setFormData(settings);
     }
   }, [settings]);
+
+  // Live preview: apply formData immediately while toggle is on.
+  // When the user disables it (or unmounts), restore the saved settings.
+  useEffect(() => {
+    if (livePreview) {
+      applyThemeSettings(formData);
+    } else if (settings) {
+      applyThemeSettings(settings);
+    }
+  }, [livePreview, formData, settings]);
+
+  useEffect(() => {
+    return () => {
+      // On unmount, ensure saved settings are re-applied
+      if (settings) applyThemeSettings(settings);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleChange = (field: string, value: any) => {
     setFormData((prev: any) => ({ ...prev, [field]: value }));
@@ -126,12 +147,44 @@ export default function AppearanceSettings() {
           </h1>
           <p className="text-slate-500 mt-1">تحكم في الهوية البصرية، الألوان، الخطوط وتنسيق المطبوعات</p>
         </div>
-        <div className="flex gap-3">
-          <Button variant="outline" onClick={() => setFormData(settings)} className="gap-2">
+        <div className="flex gap-3 items-center">
+          <div
+            className={`flex items-center gap-2 px-3 py-2 rounded-lg border transition-colors ${
+              livePreview
+                ? "bg-primary/10 border-primary/40 text-primary"
+                : "bg-slate-50 border-slate-200 text-slate-600"
+            }`}
+            data-testid="container-live-preview"
+          >
+            <Eye className="h-4 w-4" />
+            <Label htmlFor="live-preview-switch" className="text-sm font-bold cursor-pointer select-none">
+              معاينة مباشرة
+            </Label>
+            <Switch
+              id="live-preview-switch"
+              checked={livePreview}
+              onCheckedChange={setLivePreview}
+              data-testid="switch-live-preview"
+            />
+          </div>
+          <Button
+            variant="outline"
+            onClick={() => {
+              setFormData(settings);
+              setLivePreview(false);
+            }}
+            className="gap-2"
+            data-testid="button-cancel-changes"
+          >
             <RotateCcw className="h-4 w-4" />
             إلغاء التغييرات
           </Button>
-          <Button onClick={handleSave} disabled={updateMutation.isPending} className="gap-2 bg-primary hover:bg-primary/90">
+          <Button
+            onClick={handleSave}
+            disabled={updateMutation.isPending}
+            className="gap-2 bg-primary hover:bg-primary/90"
+            data-testid="button-save-settings"
+          >
             <Save className="h-4 w-4" />
             حفظ الإعدادات
           </Button>
