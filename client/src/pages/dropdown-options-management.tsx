@@ -273,22 +273,46 @@ export default function DropdownOptionsManagement() {
     return null;
   };
 
+  // Helper that returns parsed JSON body of an error if it's "status: {json}"
+  const getErrorBody = (error: any): any | null => {
+    if (!error?.message) return null;
+    const match = error.message.match(/^\d+: (\{.*\})$/);
+    if (!match) return null;
+    try {
+      return JSON.parse(match[1]);
+    } catch {
+      return null;
+    }
+  };
+
   const deleteManufacturerMutation = useMutation({
-    mutationFn: async (id: number) => {
-      return apiRequest('DELETE', `/api/manufacturers/${id}`);
+    mutationFn: async ({ id, force }: { id: number; force?: boolean }) => {
+      const url = force ? `/api/manufacturers/${id}?force=true` : `/api/manufacturers/${id}`;
+      return apiRequest('DELETE', url);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/manufacturers'] });
       queryClient.invalidateQueries({ queryKey: ['/api/hierarchy/full'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/categories'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/trim-levels'] });
       toast({
         title: "تم الحذف",
         description: "تم حذف الشركة المصنعة بنجاح",
       });
     },
-    onError: (error: any) => {
+    onError: (error: any, variables) => {
+      const body = getErrorBody(error);
+      // Backend asks for cascade confirmation (409 with canForce=true)
+      if (body?.canForce && !variables.force) {
+        const confirmMsg = `${body.message}\n\nسيتم حذف ${body.linkedCategories} فئة و ${body.linkedTrimLevels} درجة تجهيز نهائياً. هل تريد المتابعة؟`;
+        if (window.confirm(confirmMsg)) {
+          deleteManufacturerMutation.mutate({ id: variables.id, force: true });
+        }
+        return;
+      }
       toast({
         title: "خطأ",
-        description: getErrorMessage(error) || "فشل في حذف الشركة المصنعة",
+        description: body?.message || getErrorMessage(error) || "فشل في حذف الشركة المصنعة",
         variant: "destructive",
       });
     }

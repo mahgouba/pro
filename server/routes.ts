@@ -54,7 +54,7 @@ import {
   type VehicleColor
 } from "@shared/schema";
 import { Pool } from 'pg';
-import { eq, desc, asc, or, like, count, sql, ne, isNull, isNotNull, and, not } from "drizzle-orm";
+import { eq, desc, asc, or, like, count, sql, ne, isNull, isNotNull, and, not, inArray } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 
 // Helper function to get vehicle specifications from database
@@ -192,24 +192,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
   hierarchyRouter.delete("/manufacturers/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      
+      const force = req.query.force === "true";
+
       // Get manufacturer name to check for associated vehicles
       const [manufacturerData] = await db.select().from(manufacturers).where(eq(manufacturers.id, id)).limit(1);
       if (!manufacturerData) return res.status(404).json({ message: "الشركة المصنعة غير موجودة" });
 
-      const hasCategories = await db.select().from(vehicleCategories).where(eq(vehicleCategories.manufacturerId, id)).limit(1);
-      
-      // Check for vehicles using the manufacturer name (since inventoryItems stores names)
-      const hasVehicles = await db.select().from(inventoryItems)
-        .where(eq(inventoryItems.manufacturer, manufacturerData.nameAr))
-        .limit(1);
+      const linkedCategories = await db.select().from(vehicleCategories).where(eq(vehicleCategories.manufacturerId, id));
+      const categoryIds = linkedCategories.map((c) => c.id);
 
-      if (hasCategories.length > 0 || hasVehicles.length > 0) {
-        return res.status(400).json({ message: "لا يمكن حذف الشركة لأنها مرتبطة بفئات أو مركبات موجودة. يرجى حذف العناصر المرتبطة أولاً." });
+      let linkedTrimLevels: { id: number }[] = [];
+      if (categoryIds.length > 0) {
+        linkedTrimLevels = await db.select({ id: vehicleTrimLevels.id }).from(vehicleTrimLevels)
+          .where(inArray(vehicleTrimLevels.categoryId, categoryIds));
       }
 
+      // Check for vehicles using the manufacturer name (since inventoryItems stores names)
+      const linkedVehicles = await db.select({ id: inventoryItems.id }).from(inventoryItems)
+        .where(eq(inventoryItems.manufacturer, manufacturerData.nameAr));
+
+      // Real inventory vehicles always block deletion (business data)
+      if (linkedVehicles.length > 0) {
+        return res.status(400).json({
+          message: `لا يمكن حذف الشركة "${manufacturerData.nameAr}" لأنها مرتبطة بـ ${linkedVehicles.length} مركبة في المخزون. يرجى حذف أو نقل هذه المركبات أولاً.`,
+          linkedCategories: linkedCategories.length,
+          linkedTrimLevels: linkedTrimLevels.length,
+          linkedVehicles: linkedVehicles.length,
+          canForce: false,
+        });
+      }
+
+      // If categories/trim levels exist and not forcing, ask the client to confirm cascade
+      if (!force && (linkedCategories.length > 0 || linkedTrimLevels.length > 0)) {
+        return res.status(409).json({
+          message: `الشركة "${manufacturerData.nameAr}" مرتبطة بـ ${linkedCategories.length} فئة و ${linkedTrimLevels.length} درجة تجهيز. هل تريد حذفها جميعاً؟`,
+          linkedCategories: linkedCategories.length,
+          linkedTrimLevels: linkedTrimLevels.length,
+          linkedVehicles: 0,
+          canForce: true,
+        });
+      }
+
+      // Cascade delete: trim levels -> categories -> color associations -> manufacturer
+      if (categoryIds.length > 0) {
+        await db.delete(vehicleTrimLevels).where(inArray(vehicleTrimLevels.categoryId, categoryIds));
+        await db.delete(vehicleCategories).where(eq(vehicleCategories.manufacturerId, id));
+      }
+      await db.delete(colorAssociations).where(eq(colorAssociations.manufacturer, manufacturerData.nameAr));
+
       const [deleted] = await db.delete(manufacturers).where(eq(manufacturers.id, id)).returning();
-      res.json({ message: "تم حذف الشركة بنجاح" });
+      if (!deleted) return res.status(404).json({ message: "الشركة المصنعة غير موجودة" });
+      res.json({ message: "تم حذف الشركة بنجاح", deletedCategories: linkedCategories.length, deletedTrimLevels: linkedTrimLevels.length });
     } catch (error) {
       console.error("Error deleting manufacturer:", error);
       res.status(500).json({ message: "فشل في حذف الشركة المصنعة" });
