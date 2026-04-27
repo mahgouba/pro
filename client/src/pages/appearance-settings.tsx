@@ -403,71 +403,225 @@ export default function AppearanceSettings() {
           <Card className="border-slate-200 shadow-sm">
             <CardHeader className="bg-slate-50/50 border-b">
               <CardTitle className="text-lg">سمات الألوان والواجهة</CardTitle>
-              <CardDescription>خصص ألوان النظام بما يتناسب مع الهوية التجارية للشركة</CardDescription>
+              <CardDescription>خصص جميع ألوان النظام. التغييرات تُطبَّق فوراً على كامل الواجهة بعد الحفظ.</CardDescription>
             </CardHeader>
             <CardContent className="p-6 space-y-8">
-              <div className="grid md:grid-cols-3 gap-6">
-                <div className="space-y-3">
-                  <Label className="flex justify-between">
-                    <span>اللون الأساسي (Primary)</span>
-                    <span className="text-[10px] text-slate-400 font-mono uppercase">{formData.primaryColor || "#03627f"}</span>
-                  </Label>
-                  <div className="flex gap-2">
-                    <Input 
-                      type="color" 
-                      value={formData.primaryColor || "#03627f"} 
-                      onChange={(e) => handleChange("primaryColor", e.target.value)}
-                      className="w-12 h-10 p-1 rounded-lg cursor-pointer"
-                    />
-                    <Input 
-                      value={formData.primaryColor || "#03627f"} 
-                      onChange={(e) => handleChange("primaryColor", e.target.value)}
-                      className="flex-1 font-mono"
-                    />
+              {/* ===== LIVE PREVIEW ===== */}
+              <div
+                className="rounded-2xl p-6 border-2"
+                style={{
+                  background: `linear-gradient(135deg, ${formData.gradientStart || formData.primaryColor || "#0f766e"} 0%, ${formData.gradientEnd || formData.secondaryColor || "#0891b2"} 100%)`,
+                  borderColor: formData.borderColor || "#e2e8f0",
+                }}
+                data-testid="preview-theme"
+              >
+                <div className="grid md:grid-cols-3 gap-4">
+                  <div
+                    className="rounded-xl p-4 shadow-lg"
+                    style={{
+                      background: formData.cardBackgroundColor || "#ffffff",
+                      color: formData.textPrimaryColor || "#1e293b",
+                      border: `1px solid ${formData.borderColor || "#e2e8f0"}`,
+                    }}
+                  >
+                    <div className="text-sm font-bold mb-1">بطاقة معاينة</div>
+                    <div className="text-xs" style={{ color: formData.textSecondaryColor || "#64748b" }}>
+                      نص ثانوي للقراءة السريعة
+                    </div>
+                    <button
+                      type="button"
+                      className="mt-3 px-4 py-2 rounded-lg text-white text-xs font-bold w-full"
+                      style={{ background: formData.primaryColor || "#0f766e" }}
+                    >
+                      زر أساسي
+                    </button>
                   </div>
-                </div>
-
-                <div className="space-y-3">
-                  <Label className="flex justify-between">
-                    <span>اللون الثانوي (Secondary)</span>
-                    <span className="text-[10px] text-slate-400 font-mono uppercase">{formData.secondaryColor || "#C79C45"}</span>
-                  </Label>
-                  <div className="flex gap-2">
-                    <Input 
-                      type="color" 
-                      value={formData.secondaryColor || "#C79C45"} 
-                      onChange={(e) => handleChange("secondaryColor", e.target.value)}
-                      className="w-12 h-10 p-1 rounded-lg cursor-pointer"
-                    />
-                    <Input 
-                      value={formData.secondaryColor || "#C79C45"} 
-                      onChange={(e) => handleChange("secondaryColor", e.target.value)}
-                      className="flex-1 font-mono"
-                    />
+                  <div
+                    className="rounded-xl p-4 shadow-lg"
+                    style={{
+                      background: formData.cardBackgroundColor || "#ffffff",
+                      color: formData.textPrimaryColor || "#1e293b",
+                      border: `1px solid ${formData.borderColor || "#e2e8f0"}`,
+                    }}
+                  >
+                    <div className="text-sm font-bold mb-1">عناصر تحكم</div>
+                    <div className="flex gap-2 mt-3">
+                      <span className="px-3 py-1 rounded-full text-[10px] text-white" style={{ background: formData.secondaryColor || "#0891b2" }}>ثانوي</span>
+                      <span className="px-3 py-1 rounded-full text-[10px] text-white" style={{ background: formData.accentColor || "#BF9231" }}>تمييز</span>
+                    </div>
                   </div>
-                </div>
-
-                <div className="space-y-3">
-                  <Label className="flex justify-between">
-                    <span>لون التمييز (Accent)</span>
-                    <span className="text-[10px] text-slate-400 font-mono uppercase">{formData.accentColor || "#1e293b"}</span>
-                  </Label>
-                  <div className="flex gap-2">
-                    <Input 
-                      type="color" 
-                      value={formData.accentColor || "#1e293b"} 
-                      onChange={(e) => handleChange("accentColor", e.target.value)}
-                      className="w-12 h-10 p-1 rounded-lg cursor-pointer"
-                    />
-                    <Input 
-                      value={formData.accentColor || "#1e293b"} 
-                      onChange={(e) => handleChange("accentColor", e.target.value)}
-                      className="flex-1 font-mono"
-                    />
+                  <div
+                    className="rounded-xl p-4 shadow-lg"
+                    style={{
+                      background: formData.darkCardBackgroundColor || "#141414",
+                      color: formData.darkTextPrimaryColor || "#f1f5f9",
+                      border: `1px solid ${formData.darkBorderColor || "#374151"}`,
+                    }}
+                  >
+                    <div className="text-sm font-bold mb-1">معاينة وضع ليلي</div>
+                    <div className="text-xs" style={{ color: formData.darkTextSecondaryColor || "#94a3b8" }}>
+                      ألوان الوضع الداكن
+                    </div>
+                    <button
+                      type="button"
+                      className="mt-3 px-4 py-2 rounded-lg text-white text-xs font-bold w-full"
+                      style={{ background: formData.darkPrimaryColor || "#14b8a6" }}
+                    >
+                      زر ليلي
+                    </button>
                   </div>
                 </div>
               </div>
 
+              {/* ===== LIGHT MODE COLORS ===== */}
+              <div>
+                <h3 className="font-bold text-slate-700 mb-4 flex items-center gap-2">
+                  <Palette className="h-5 w-5" />
+                  ألوان الوضع النهاري (Light Mode)
+                </h3>
+                <div className="grid md:grid-cols-3 gap-4">
+                  {[
+                    { key: "primaryColor", label: "اللون الأساسي", def: "#0f766e" },
+                    { key: "primaryHoverColor", label: "الأساسي عند التمرير", def: "#134e4a" },
+                    { key: "secondaryColor", label: "اللون الثانوي", def: "#0891b2" },
+                    { key: "secondaryHoverColor", label: "الثانوي عند التمرير", def: "#0c4a6e" },
+                    { key: "accentColor", label: "لون التمييز (ذهبي)", def: "#BF9231" },
+                    { key: "accentHoverColor", label: "التمييز عند التمرير", def: "#a67c27" },
+                    { key: "gradientStart", label: "بداية التدرج (الخلفية)", def: "#0f766e" },
+                    { key: "gradientEnd", label: "نهاية التدرج (الخلفية)", def: "#0891b2" },
+                    { key: "backgroundColor", label: "خلفية المحتوى", def: "#f8fafc" },
+                    { key: "cardBackgroundColor", label: "خلفية البطاقات", def: "#ffffff" },
+                    { key: "cardHoverColor", label: "البطاقات عند التمرير", def: "#f8fafc" },
+                    { key: "headerBackgroundColor", label: "خلفية الترويسة", def: "#ffffff" },
+                    { key: "borderColor", label: "لون الحدود", def: "#e2e8f0" },
+                    { key: "borderHoverColor", label: "الحدود عند التمرير", def: "#0f766e" },
+                    { key: "textPrimaryColor", label: "النص الرئيسي", def: "#1e293b" },
+                    { key: "textSecondaryColor", label: "النص الثانوي", def: "#64748b" },
+                  ].map((c) => (
+                    <div className="space-y-2" key={c.key}>
+                      <Label className="flex justify-between items-center">
+                        <span className="text-xs">{c.label}</span>
+                        <span className="text-[10px] text-slate-400 font-mono uppercase">
+                          {formData[c.key] || c.def}
+                        </span>
+                      </Label>
+                      <div className="flex gap-2">
+                        <Input
+                          type="color"
+                          value={formData[c.key] || c.def}
+                          onChange={(e) => handleChange(c.key, e.target.value)}
+                          className="w-12 h-10 p-1 rounded-lg cursor-pointer"
+                          data-testid={`color-${c.key}`}
+                        />
+                        <Input
+                          value={formData[c.key] || c.def}
+                          onChange={(e) => handleChange(c.key, e.target.value)}
+                          className="flex-1 font-mono text-xs"
+                          data-testid={`input-${c.key}`}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* ===== DARK MODE COLORS ===== */}
+              <div className="border-t pt-8">
+                <h3 className="font-bold text-slate-700 mb-4 flex items-center gap-2">
+                  <Palette className="h-5 w-5" />
+                  ألوان الوضع الليلي (Dark Mode)
+                </h3>
+                <div className="grid md:grid-cols-3 gap-4">
+                  {[
+                    { key: "darkPrimaryColor", label: "الأساسي (ليلي)", def: "#14b8a6" },
+                    { key: "darkPrimaryHoverColor", label: "الأساسي عند التمرير", def: "#0d9488" },
+                    { key: "darkSecondaryColor", label: "الثانوي (ليلي)", def: "#0ea5e9" },
+                    { key: "darkSecondaryHoverColor", label: "الثانوي عند التمرير", def: "#0284c7" },
+                    { key: "darkAccentColor", label: "التمييز (ليلي)", def: "#f59e0b" },
+                    { key: "darkAccentHoverColor", label: "التمييز عند التمرير", def: "#d97706" },
+                    { key: "darkBackgroundColor", label: "خلفية المحتوى (ليلي)", def: "#000000" },
+                    { key: "darkCardBackgroundColor", label: "خلفية البطاقات (ليلي)", def: "#141414" },
+                    { key: "darkCardHoverColor", label: "البطاقات عند التمرير", def: "#282828" },
+                    { key: "darkHeaderBackgroundColor", label: "خلفية الترويسة (ليلي)", def: "#141414" },
+                    { key: "darkBorderColor", label: "لون الحدود (ليلي)", def: "#374151" },
+                    { key: "darkBorderHoverColor", label: "الحدود عند التمرير", def: "#14b8a6" },
+                    { key: "darkTextPrimaryColor", label: "النص الرئيسي (ليلي)", def: "#f1f5f9" },
+                    { key: "darkTextSecondaryColor", label: "النص الثانوي (ليلي)", def: "#94a3b8" },
+                  ].map((c) => (
+                    <div className="space-y-2" key={c.key}>
+                      <Label className="flex justify-between items-center">
+                        <span className="text-xs">{c.label}</span>
+                        <span className="text-[10px] text-slate-400 font-mono uppercase">
+                          {formData[c.key] || c.def}
+                        </span>
+                      </Label>
+                      <div className="flex gap-2">
+                        <Input
+                          type="color"
+                          value={formData[c.key] || c.def}
+                          onChange={(e) => handleChange(c.key, e.target.value)}
+                          className="w-12 h-10 p-1 rounded-lg cursor-pointer"
+                          data-testid={`color-${c.key}`}
+                        />
+                        <Input
+                          value={formData[c.key] || c.def}
+                          onChange={(e) => handleChange(c.key, e.target.value)}
+                          className="flex-1 font-mono text-xs"
+                          data-testid={`input-${c.key}`}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* ===== PRESET PALETTES ===== */}
+              <div className="border-t pt-8">
+                <h3 className="font-bold text-slate-700 mb-4 flex items-center gap-2">
+                  <Palette className="h-5 w-5" />
+                  لوحات ألوان جاهزة
+                </h3>
+                <div className="grid md:grid-cols-4 gap-3">
+                  {[
+                    { name: "البريمي الافتراضي", primary: "#00627F", secondary: "#00A3CC", accent: "#C49632", gradStart: "#00627F", gradEnd: "#004861" },
+                    { name: "أخضر تجاري", primary: "#0f766e", secondary: "#0891b2", accent: "#BF9231", gradStart: "#0f766e", gradEnd: "#0891b2" },
+                    { name: "أزرق ملكي", primary: "#1e40af", secondary: "#3b82f6", accent: "#fbbf24", gradStart: "#1e3a8a", gradEnd: "#3b82f6" },
+                    { name: "أحمر فاخر", primary: "#991b1b", secondary: "#dc2626", accent: "#f59e0b", gradStart: "#7f1d1d", gradEnd: "#dc2626" },
+                    { name: "بنفسجي حديث", primary: "#6d28d9", secondary: "#8b5cf6", accent: "#f472b6", gradStart: "#5b21b6", gradEnd: "#8b5cf6" },
+                    { name: "رمادي راقٍ", primary: "#1f2937", secondary: "#475569", accent: "#d4af37", gradStart: "#111827", gradEnd: "#374151" },
+                    { name: "أخضر زمردي", primary: "#065f46", secondary: "#10b981", accent: "#facc15", gradStart: "#064e3b", gradEnd: "#10b981" },
+                    { name: "برتقالي شمسي", primary: "#c2410c", secondary: "#f97316", accent: "#fbbf24", gradStart: "#9a3412", gradEnd: "#f97316" },
+                  ].map((p) => (
+                    <button
+                      key={p.name}
+                      type="button"
+                      onClick={() => {
+                        setFormData((prev: any) => ({
+                          ...prev,
+                          primaryColor: p.primary,
+                          secondaryColor: p.secondary,
+                          accentColor: p.accent,
+                          gradientStart: p.gradStart,
+                          gradientEnd: p.gradEnd,
+                          borderHoverColor: p.primary,
+                        }));
+                      }}
+                      className="rounded-xl p-3 border-2 border-slate-100 hover:border-primary hover:shadow-md transition-all text-left"
+                      data-testid={`preset-${p.name}`}
+                    >
+                      <div className="h-10 rounded-lg mb-2 shadow-inner" style={{ background: `linear-gradient(135deg, ${p.gradStart} 0%, ${p.gradEnd} 100%)` }} />
+                      <div className="flex gap-1 mb-2">
+                        <div className="h-3 flex-1 rounded" style={{ background: p.primary }} />
+                        <div className="h-3 flex-1 rounded" style={{ background: p.secondary }} />
+                        <div className="h-3 flex-1 rounded" style={{ background: p.accent }} />
+                      </div>
+                      <div className="text-xs font-bold text-slate-700">{p.name}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* ===== THEME STYLE ===== */}
               <div className="border-t pt-8">
                 <h3 className="font-bold text-slate-700 mb-4 flex items-center gap-2">
                   <Layout className="h-5 w-5" />
@@ -487,6 +641,7 @@ export default function AppearanceSettings() {
                           ? "border-primary bg-primary/5 shadow-md" 
                           : "border-slate-100 hover:border-slate-200"
                       }`}
+                      data-testid={`theme-style-${style.id}`}
                     >
                       <div className="flex items-center justify-between mb-2">
                         <span className="font-bold text-slate-800">{style.name}</span>
@@ -498,15 +653,31 @@ export default function AppearanceSettings() {
                 </div>
               </div>
 
-              <div className="border-t pt-8 flex items-center justify-between">
-                <div className="space-y-1">
-                  <Label className="text-base">تفعيل الوضع الليلي تلقائياً</Label>
-                  <p className="text-xs text-slate-400">تحويل ألوان النظام للألوان الداكنة حسب إعدادات جهاز المستخدم</p>
+              {/* ===== TOGGLES ===== */}
+              <div className="border-t pt-8 grid md:grid-cols-2 gap-6">
+                <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-100">
+                  <div className="space-y-1">
+                    <Label className="text-base">تفعيل الوضع الليلي</Label>
+                    <p className="text-[10px] text-slate-400">تطبيق ألوان الوضع الداكن على كل الواجهة</p>
+                  </div>
+                  <Switch 
+                    checked={formData.darkModeEnabled || false}
+                    onCheckedChange={(checked) => handleChange("darkModeEnabled", checked)}
+                    data-testid="switch-dark-mode"
+                  />
                 </div>
-                <Switch 
-                  checked={formData.darkModeEnabled || false}
-                  onCheckedChange={(checked) => handleChange("darkModeEnabled", checked)}
-                />
+
+                <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-100">
+                  <div className="space-y-1">
+                    <Label className="text-base">اتجاه RTL (من اليمين إلى اليسار)</Label>
+                    <p className="text-[10px] text-slate-400">تخطيط الواجهة العربي</p>
+                  </div>
+                  <Switch 
+                    checked={formData.rtlLayout !== false}
+                    onCheckedChange={(checked) => handleChange("rtlLayout", checked)}
+                    data-testid="switch-rtl"
+                  />
+                </div>
               </div>
             </CardContent>
           </Card>

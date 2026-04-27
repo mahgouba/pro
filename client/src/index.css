@@ -12,33 +12,47 @@
   --text-secondary: rgba(255, 255, 255, 0.7);
   --text-muted: rgba(255, 255, 255, 0.5);
 
-  /* Theme Management Variables */
+  /* Theme Management Variables (defaults — overwritten by ThemeProvider) */
   --theme-primary: #00627F;
   --theme-secondary: #00A3CC;
   --theme-accent: #0081A3;
   --theme-background: #f8fafc;
   --theme-foreground: #1e293b;
-  --theme-gradient: linear-gradient(90deg, #00627F 0%, #00A3CC 100%);
-  
-  /* Dynamic Theme Variables */
+  --theme-gradient: linear-gradient(135deg, var(--theme-primary) 0%, var(--theme-secondary) 100%);
+
+  /* Dynamic Theme Variables (defaults — overwritten by ThemeProvider) */
   --dynamic-primary: #00627F;
+  --dynamic-primary-hover: #004f66;
   --dynamic-secondary: #00A3CC;
-  --dynamic-accent: #0081A3;
+  --dynamic-secondary-hover: #007ea3;
+  --dynamic-accent: #C49632;
+  --dynamic-accent-hover: #A67C28;
+  --dynamic-card-bg: #ffffff;
+  --dynamic-card-hover: #f8fafc;
+  --dynamic-border: #e2e8f0;
+  --dynamic-border-hover: #00627F;
+  --dynamic-bg: #f8fafc;
+  --dynamic-text-primary: #1e293b;
+  --dynamic-text-secondary: #64748b;
+  --dynamic-header-bg: #ffffff;
   --dynamic-primary-hsl: 194, 100%, 25%;
   --dynamic-secondary-hsl: 194, 100%, 40%;
-  --dynamic-accent-hsl: 194, 100%, 32%;
+  --dynamic-accent-hsl: 42, 60%, 47%;
+
+  /* Page background — gradient by default, ThemeProvider can override */
+  --app-page-bg: linear-gradient(135deg, var(--dynamic-primary) 0%, var(--dynamic-secondary) 100%);
 }
 
-/* Global Dark Background with New Theme Color */
+/* Global background driven by appearance settings */
 html, body {
-  background: linear-gradient(135deg, #00627F 0%, #004861 50%, #00627F 100%) !important;
+  background: var(--app-page-bg) !important;
   color: var(--text-primary);
   min-height: 100vh;
 }
 
-/* Root with Static Dark Background */
+/* Root with dynamic background */
 #root {
-  background: linear-gradient(135deg, #00627F 0%, #004861 50%, #00627F 100%);
+  background: var(--app-page-bg);
   min-height: 100vh;
 }
 
@@ -343,15 +357,15 @@ svg {
   }
 }
 
-/* Unified Glass Morphism Components with #00627F Theme */
+/* Unified Glass Morphism Components — driven by appearance settings */
 .glass-container,
 .dark-glass {
-  background: rgba(0, 98, 127, 0.15) !important;
+  background: rgba(var(--dynamic-primary-rgb, 0, 98, 127), 0.15) !important;
   backdrop-filter: blur(20px) !important;
   -webkit-backdrop-filter: blur(20px) !important;
   border: 1px solid rgba(255, 255, 255, 0.2) !important;
   box-shadow: 
-    0 8px 32px rgba(0, 98, 127, 0.3),
+    0 8px 32px rgba(var(--dynamic-primary-rgb, 0, 98, 127), 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.15),
     0 4px 16px rgba(0, 0, 0, 0.2) !important;
 }
@@ -673,7 +687,7 @@ body {
 /* Global checkbox and radio button styling */
 input[type="checkbox"], 
 input[type="radio"] {
-  accent-color: #C49632;
+  accent-color: var(--dynamic-accent, #C49632);
 }
 
 /* RTL Toggle Switch Styling */
@@ -692,53 +706,53 @@ input[type="radio"] {
 /* Additional styling for better visual consistency */
 input[type="checkbox"]:checked,
 input[type="radio"]:checked {
-  background-color: #C49632;
-  border-color: #C49632;
+  background-color: var(--dynamic-accent, #C49632);
+  border-color: var(--dynamic-accent, #C49632);
 }
 
 /* RadioGroup styling for shadcn components */
 button[data-state="checked"][role="radio"] {
-  background-color: #C49632 !important;
-  border-color: #C49632 !important;
+  background-color: var(--dynamic-accent, #C49632) !important;
+  border-color: var(--dynamic-accent, #C49632) !important;
 }
 
 button[data-state="checked"][role="radio"] span {
-  background-color: #C49632 !important;
+  background-color: var(--dynamic-accent, #C49632) !important;
 }
 
-/* Custom colors for the application */
+/* Custom colors for the application — driven by appearance settings */
 .bg-custom-primary {
-  background-color: #00627F !important;
+  background-color: var(--dynamic-primary, #00627F) !important;
 }
 .hover\:bg-custom-primary-dark:hover {
-  background-color: #004f66 !important;
+  background-color: var(--dynamic-primary-hover, #004f66) !important;
 }
 .text-custom-primary {
-  color: #00627F !important;
+  color: var(--dynamic-primary, #00627F) !important;
 }
 .hover\:text-custom-primary-dark:hover {
-  color: #004f66 !important;
+  color: var(--dynamic-primary-hover, #004f66) !important;
 }
 .border-custom-primary {
-  border-color: #00627F !important;
+  border-color: var(--dynamic-primary, #00627F) !important;
 }
 .hover\:border-custom-primary:hover {
-  border-color: #00627F !important;
+  border-color: var(--dynamic-primary, #00627F) !important;
 }
 .focus\:border-custom-primary:focus {
-  border-color: #00627F !important;
+  border-color: var(--dynamic-primary, #00627F) !important;
 }
 .focus\:ring-custom-primary:focus {
-  --tw-ring-color: #00627F !important;
+  --tw-ring-color: var(--dynamic-primary, #00627F) !important;
 }
 
-/* Golden theme colors for buttons */
+/* Gold/accent theme colors for buttons — driven by appearance settings */
 .bg-custom-gold {
-  background-color: #C49632 !important;
+  background-color: var(--dynamic-accent, #C49632) !important;
   color: white !important;
 }
 .hover\:bg-custom-gold-dark:hover {
-  background-color: #A67C28 !important;
+  background-color: var(--dynamic-accent-hover, #A67C28) !important;
 }
 
 /* Unified Animation System */
