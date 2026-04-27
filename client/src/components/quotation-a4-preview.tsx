@@ -9,6 +9,7 @@ import { numberToArabic } from "@/utils/number-to-arabic";
 import type { Company, InventoryItem, Specification, AppearanceSettings } from "@shared/schema";
 import { getManufacturerLogo } from "@shared/manufacturer-logos";
 import { useQuery } from "@tanstack/react-query";
+import QuotationTableLayout from "@/components/quotation-table-layout";
 
 
 // Background images
@@ -122,6 +123,21 @@ export default function QuotationA4Preview({
   });
 
   const [currentBgType, setCurrentBgType] = useState<string>("albarimi2");
+
+  // Layout style toggle: "standard" = original A4 layout, "table" = vertical 2-column table layout
+  const [layoutStyle, setLayoutStyle] = useState<"standard" | "table">(() => {
+    if (typeof window !== "undefined") {
+      const saved = window.localStorage.getItem("quotationLayoutStyle");
+      if (saved === "table" || saved === "standard") return saved;
+    }
+    return "standard";
+  });
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem("quotationLayoutStyle", layoutStyle);
+    }
+  }, [layoutStyle]);
 
   useEffect(() => {
     if (appearance?.quotationBackgroundType) {
@@ -258,7 +274,7 @@ export default function QuotationA4Preview({
         <div className="flex items-center gap-3 border border-yellow-600 rounded-lg px-4 py-2 bg-white shadow-sm">
           <span className="text-sm font-bold text-yellow-700">الخلفية:</span>
           <Select value={currentBgType} onValueChange={setCurrentBgType}>
-            <SelectTrigger className="w-[180px] h-9 text-xs border-yellow-200">
+            <SelectTrigger className="w-[180px] h-9 text-xs border-yellow-200" data-testid="select-background">
               <SelectValue placeholder="اختر نوع الخلفية" />
             </SelectTrigger>
             <SelectContent>
@@ -268,7 +284,26 @@ export default function QuotationA4Preview({
             </SelectContent>
           </Select>
         </div>
-        
+
+        <div className="flex items-center gap-3 border border-teal-600 rounded-lg px-4 py-2 bg-white shadow-sm">
+          <span className="text-sm font-bold text-teal-700">التخطيط:</span>
+          <Select
+            value={layoutStyle}
+            onValueChange={(v) => setLayoutStyle(v as "standard" | "table")}
+          >
+            <SelectTrigger
+              className="w-[180px] h-9 text-xs border-teal-200"
+              data-testid="select-layout-style"
+            >
+              <SelectValue placeholder="اختر التخطيط" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="standard">التخطيط الافتراضي</SelectItem>
+              <SelectItem value="table">جدول عمودي (تيل)</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
         <Button 
           onClick={handlePrint}
           className="text-white px-6 py-2 text-sm font-medium shadow-lg"
@@ -334,6 +369,27 @@ export default function QuotationA4Preview({
           </div>
         )}
 
+        {layoutStyle === "table" ? (
+          <QuotationTableLayout
+            selectedCompany={selectedCompany}
+            selectedVehicle={selectedVehicle}
+            appearance={appearance}
+            quoteNumber={quoteNumber}
+            customerName={customerName}
+            customerTitle={customerTitle}
+            validUntil={validUntil}
+            basePrice={baseSubtotal}
+            taxAmount={taxAmount}
+            finalPrice={totalWithLicense}
+            taxRate={taxRate}
+            notes={notes}
+            primaryColor={primaryColor}
+            secondaryColor={secondaryColor}
+            accentColor={accentColor}
+            fontFamily={fontFamily}
+            isInvoiceMode={isInvoiceMode}
+          />
+        ) : (
         <div className="p-[25px] flex flex-col h-full relative z-10">
           {/* Header info for non-dynamic backgrounds - hidden now as it's moved to the title row */}
           {bgType !== "dynamic" && (
@@ -877,6 +933,7 @@ export default function QuotationA4Preview({
             )}
           </div>
         </div>
+        )}
       </div>
     </div>
   );
