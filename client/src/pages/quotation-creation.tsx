@@ -814,9 +814,23 @@ export default function QuotationCreationPage({ vehicleData }: QuotationCreation
 
   const sectionStyle = (id: LayoutSectionId): React.CSSProperties => {
     const order = layoutOrder.indexOf(id);
+    const isHidden = hiddenSections.includes(id);
+    if (isHidden) {
+      // Keep section rendered in DOM (off-screen) so PDF/WhatsApp/print
+      // capture of the preview still works even when visually hidden.
+      return {
+        order: order === -1 ? 999 : order,
+        position: "absolute",
+        left: "-99999px",
+        top: 0,
+        width: "210mm",
+        opacity: 0,
+        pointerEvents: "none",
+        visibility: "hidden",
+      };
+    }
     return {
       order: order === -1 ? 999 : order,
-      display: hiddenSections.includes(id) ? "none" : undefined,
     };
   };
 
