@@ -1200,7 +1200,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // Using direct db import
       const itemId = parseInt(req.params.id);
-      const updateData = req.body;
+      const updateData = { ...req.body };
+
+      // Trim string fields so stray whitespace can't create duplicate-looking entries
+      const stringFields = [
+        "manufacturer", "category", "trimLevel", "engineCapacity",
+        "exteriorColor", "interiorColor", "status", "importType",
+        "ownershipType", "location", "chassisNumber",
+      ];
+      for (const f of stringFields) {
+        if (typeof updateData[f] === "string") {
+          updateData[f] = updateData[f].trim();
+        }
+      }
 
       // Check if item exists
       const [existingItem] = await db.select().from(inventoryItems).where(eq(inventoryItems.id, itemId));
@@ -1336,20 +1348,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const cleanPrice = vehicleData.price && vehicleData.price !== "" ? vehicleData.price : null;
       const cleanMileage = vehicleData.mileage && vehicleData.mileage !== "" ? parseInt(vehicleData.mileage) : null;
 
+      // Trim string fields so stray whitespace can't create duplicate-looking entries
+      const t = (v: any) => (typeof v === "string" ? v.trim() : v);
+
       // Create new inventory item
       const [newItem] = await db.insert(inventoryItems).values({
-        manufacturer: vehicleData.manufacturer,
-        category: vehicleData.category,
-        trimLevel: vehicleData.trimLevel,
-        engineCapacity: vehicleData.engineCapacity,
+        manufacturer: t(vehicleData.manufacturer),
+        category: t(vehicleData.category),
+        trimLevel: t(vehicleData.trimLevel),
+        engineCapacity: t(vehicleData.engineCapacity),
         year: vehicleData.year,
-        exteriorColor: vehicleData.exteriorColor,
-        interiorColor: vehicleData.interiorColor,
-        status: vehicleData.status || "متوفر",
-        importType: vehicleData.importType || "شخصي",
-        ownershipType: vehicleData.ownershipType || "ملك الشركة",
-        location: vehicleData.location,
-        chassisNumber: vehicleData.chassisNumber,
+        exteriorColor: t(vehicleData.exteriorColor),
+        interiorColor: t(vehicleData.interiorColor),
+        status: t(vehicleData.status) || "متوفر",
+        importType: t(vehicleData.importType) || "شخصي",
+        ownershipType: t(vehicleData.ownershipType) || "ملك الشركة",
+        location: t(vehicleData.location),
+        chassisNumber: t(vehicleData.chassisNumber),
         images: vehicleData.images || [],
         logo: vehicleData.logo,
         notes: vehicleData.notes,
