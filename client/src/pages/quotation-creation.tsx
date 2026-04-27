@@ -37,7 +37,10 @@ import {
   Car,
   ChevronUp,
   ChevronDown,
-  Package
+  Package,
+  LayoutGrid,
+  RotateCcw,
+  EyeOff
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
 
@@ -624,6 +627,99 @@ export default function QuotationCreationPage({ vehicleData }: QuotationCreation
   const [isMultiVehicleMode, setIsMultiVehicleMode] = useState(() => {
     return !!(editingQuotation?.multiItems && JSON.parse(editingQuotation.multiItems).length > 0);
   });
+
+  // ===== Customizable layout for the main content area =====
+  type LayoutSectionId = "customer" | "vehicle" | "preview";
+  const LAYOUT_STORAGE_KEY = "quotation-creation-layout-v1";
+  const DEFAULT_LAYOUT_ORDER: LayoutSectionId[] = ["customer", "vehicle", "preview"];
+  const SECTION_LABELS: Record<LayoutSectionId, string> = {
+    customer: "بيانات العميل",
+    vehicle: "بيانات السيارة والتسعير",
+    preview: "معاينة A4",
+  };
+
+  const [layoutOrder, setLayoutOrder] = useState<LayoutSectionId[]>(() => {
+    try {
+      const raw = localStorage.getItem(LAYOUT_STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed.order)) {
+          // Keep only known ids and append any missing ones to preserve compatibility
+          const known = parsed.order.filter((id: string): id is LayoutSectionId =>
+            DEFAULT_LAYOUT_ORDER.includes(id as LayoutSectionId)
+          );
+          const missing = DEFAULT_LAYOUT_ORDER.filter((id) => !known.includes(id));
+          return [...known, ...missing];
+        }
+      }
+    } catch {}
+    return DEFAULT_LAYOUT_ORDER;
+  });
+  const [hiddenSections, setHiddenSections] = useState<LayoutSectionId[]>(() => {
+    try {
+      const raw = localStorage.getItem(LAYOUT_STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed.hidden)) {
+          return parsed.hidden.filter((id: string): id is LayoutSectionId =>
+            DEFAULT_LAYOUT_ORDER.includes(id as LayoutSectionId)
+          );
+        }
+      }
+    } catch {}
+    return [];
+  });
+  const [showLayoutDialog, setShowLayoutDialog] = useState(false);
+  const [draftOrder, setDraftOrder] = useState<LayoutSectionId[]>(layoutOrder);
+  const [draftHidden, setDraftHidden] = useState<LayoutSectionId[]>(hiddenSections);
+
+  const openLayoutDialog = () => {
+    setDraftOrder(layoutOrder);
+    setDraftHidden(hiddenSections);
+    setShowLayoutDialog(true);
+  };
+
+  const moveDraftSection = (index: number, direction: -1 | 1) => {
+    setDraftOrder((prev) => {
+      const next = [...prev];
+      const target = index + direction;
+      if (target < 0 || target >= next.length) return prev;
+      [next[index], next[target]] = [next[target], next[index]];
+      return next;
+    });
+  };
+
+  const toggleDraftHidden = (id: LayoutSectionId) => {
+    setDraftHidden((prev) =>
+      prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]
+    );
+  };
+
+  const saveLayout = () => {
+    setLayoutOrder(draftOrder);
+    setHiddenSections(draftHidden);
+    try {
+      localStorage.setItem(
+        LAYOUT_STORAGE_KEY,
+        JSON.stringify({ order: draftOrder, hidden: draftHidden })
+      );
+    } catch {}
+    setShowLayoutDialog(false);
+    toast({ title: "تم الحفظ", description: "تم حفظ التخطيط الجديد بنجاح" });
+  };
+
+  const resetLayout = () => {
+    setDraftOrder(DEFAULT_LAYOUT_ORDER);
+    setDraftHidden([]);
+  };
+
+  const sectionStyle = (id: LayoutSectionId): React.CSSProperties => {
+    const order = layoutOrder.indexOf(id);
+    return {
+      order: order === -1 ? 999 : order,
+      display: hiddenSections.includes(id) ? "none" : undefined,
+    };
+  };
 
   // Column visibility state for multi-items table
   const [visibleColumns, setVisibleColumns] = useState({
@@ -2210,6 +2306,18 @@ export default function QuotationCreationPage({ vehicleData }: QuotationCreation
                 <Settings2 size={16} className="ml-2" />
                 شروط وأحكام
               </Button>
+
+              {/* Customize Layout */}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={openLayoutDialog}
+                data-testid="button-customize-layout"
+                className="glass-button border-cyan-500/50 text-cyan-300 hover:bg-cyan-500/20 bg-white/10"
+              >
+                <LayoutGrid size={16} className="ml-2" />
+                تخصيص التخطيط
+              </Button>
               
               {/* Save Button */}
               <Button
@@ -2296,8 +2404,9 @@ export default function QuotationCreationPage({ vehicleData }: QuotationCreation
       </GlassBackground>
 
       {/* Main Content Area */}
-      <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
+      <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 flex flex-col gap-6">
         {/* Customer Information Card - Now at the Top */}
+        <div data-section-id="customer" style={sectionStyle("customer")}>
         <GlassBackground variant="container" className="glass-container">
           <div className="p-6">
             <h3 className="text-lg font-semibold text-white drop-shadow-md mb-4 flex items-center">
@@ -2361,8 +2470,10 @@ export default function QuotationCreationPage({ vehicleData }: QuotationCreation
             </div>
           </div>
         </GlassBackground>
+        </div>
 
         {/* Combined Vehicle & Pricing Section */}
+        <div data-section-id="vehicle" style={sectionStyle("vehicle")}>
         <div className="grid grid-cols-1 gap-6">
           {/* Vehicle Selection */}
           <GlassBackground variant="container" className="glass-container w-full">
@@ -2783,9 +2894,10 @@ export default function QuotationCreationPage({ vehicleData }: QuotationCreation
             </GlassBackground>
           )}
         </div>
-      </div>
-        
+        </div>
+
         {/* A4 Preview Section - Bottom */}
+        <div data-section-id="preview" style={sectionStyle("preview")}>
         <QuotationA4Preview
           selectedCompany={selectedCompanyData}
           selectedVehicle={editableVehicle}
@@ -2820,6 +2932,8 @@ export default function QuotationCreationPage({ vehicleData }: QuotationCreation
           visibleColumns={visibleColumns}
           showRepresentative={showRepresentative}
         />
+        </div>
+      </div>
 
       {/* Management Dialogs */}
       
@@ -4316,6 +4430,117 @@ export default function QuotationCreationPage({ vehicleData }: QuotationCreation
               </Button>
               <Button variant="outline" onClick={() => setVehicleEditOpen(false)}>
                 إلغاء
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Customize Layout Dialog */}
+      <Dialog open={showLayoutDialog} onOpenChange={setShowLayoutDialog}>
+        <DialogContent className="max-w-md" dir="rtl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <LayoutGrid size={18} />
+              تخصيص تخطيط الصفحة
+            </DialogTitle>
+            <DialogDescription>
+              رتّب الأقسام أو أخفِها حسب احتياجك ثم احفظ التخطيط.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            {draftOrder.map((id, index) => {
+              const isHidden = draftHidden.includes(id);
+              return (
+                <div
+                  key={id}
+                  data-testid={`row-layout-section-${id}`}
+                  className={`flex items-center justify-between rounded-lg border p-3 ${
+                    isHidden
+                      ? "bg-slate-100 dark:bg-slate-800/50 border-slate-300 dark:border-slate-700 opacity-70"
+                      : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm font-mono text-slate-500 w-6 text-center">
+                      {index + 1}
+                    </span>
+                    <span className="text-sm font-medium">{SECTION_LABELS[id]}</span>
+                    {isHidden && (
+                      <span className="text-xs text-slate-500 flex items-center gap-1">
+                        <EyeOff size={12} />
+                        مخفي
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      disabled={index === 0}
+                      onClick={() => moveDraftSection(index, -1)}
+                      data-testid={`button-move-up-${id}`}
+                      title="تحريك للأعلى"
+                    >
+                      <ChevronUp size={16} />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      disabled={index === draftOrder.length - 1}
+                      onClick={() => moveDraftSection(index, 1)}
+                      data-testid={`button-move-down-${id}`}
+                      title="تحريك للأسفل"
+                    >
+                      <ChevronDown size={16} />
+                    </Button>
+                    <div className="flex items-center gap-2 ms-2 ps-2 border-s border-slate-200 dark:border-slate-700">
+                      <Switch
+                        checked={!isHidden}
+                        onCheckedChange={() => toggleDraftHidden(id)}
+                        data-testid={`switch-visible-${id}`}
+                      />
+                      <span className="text-xs text-slate-600 dark:text-slate-400">
+                        {isHidden ? "مخفي" : "ظاهر"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <div className="flex items-center justify-between gap-2 pt-2 border-t">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={resetLayout}
+              data-testid="button-reset-layout"
+            >
+              <RotateCcw size={14} className="ml-2" />
+              إعادة الافتراضي
+            </Button>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setShowLayoutDialog(false)}
+                data-testid="button-cancel-layout"
+              >
+                إلغاء
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                onClick={saveLayout}
+                data-testid="button-save-layout"
+                className="bg-cyan-600 hover:bg-cyan-700 text-white"
+              >
+                <Save size={14} className="ml-2" />
+                حفظ التخطيط
               </Button>
             </div>
           </div>
