@@ -43,16 +43,22 @@
   --app-page-bg: linear-gradient(135deg, var(--dynamic-primary) 0%, var(--dynamic-secondary) 100%);
 }
 
-/* Global background driven by appearance settings */
-html, body {
+/* Global background driven by appearance settings — applied ONCE on html only */
+html {
   background: var(--app-page-bg) !important;
   color: var(--text-primary);
   min-height: 100vh;
 }
 
-/* Root with dynamic background */
+body {
+  background: transparent !important;
+  color: var(--text-primary);
+  min-height: 100vh;
+}
+
+/* Root inherits the background from html — no extra layer */
 #root {
-  background: var(--app-page-bg);
+  background: transparent;
   min-height: 100vh;
 }
 
