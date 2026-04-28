@@ -925,6 +925,18 @@ export default function AppearanceSettings() {
                     onCheckedChange={(checked) => handleChange("showBankDetails", checked)}
                   />
                 </div>
+
+                <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-100">
+                  <div className="space-y-1">
+                    <Label>إظهار شعار الشركة في خلفية الصفحة الرئيسية</Label>
+                    <p className="text-[10px] text-slate-400">عرض شعار الشركة كعلامة مائية باهتة خلف بطاقات السيارات</p>
+                  </div>
+                  <Switch 
+                    data-testid="switch-home-watermark"
+                    checked={formData.homeWatermarkEnabled !== false}
+                    onCheckedChange={(checked) => handleChange("homeWatermarkEnabled", checked)}
+                  />
+                </div>
               </div>
             </CardContent>
           </Card>

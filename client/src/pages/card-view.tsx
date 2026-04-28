@@ -167,6 +167,11 @@ export default function CardViewPage({ userRole, username, onLogout }: CardViewP
     queryKey: ["/api/inventory"],
   });
 
+  const { data: appearanceData } = useQuery<{ homeWatermarkEnabled?: boolean }>({
+    queryKey: ["/api/appearance"],
+  });
+  const homeWatermarkEnabled = appearanceData?.homeWatermarkEnabled !== false;
+
   const { data: manufacturerStats = [] } = useQuery<Array<{
     manufacturer: string;
     total: number;
@@ -880,17 +885,19 @@ export default function CardViewPage({ userRole, username, onLogout }: CardViewP
         : ''
     }`} dir="rtl">
       {/* Company Logo Background */}
-      <div className="absolute inset-0 flex items-center justify-center opacity-5 pointer-events-none">
-        <img 
-          src={companyLogo || "/company-logo.svg"} 
-          alt="شعار الشركة" 
-          className="w-96 h-96 object-contain"
-          onError={(e) => {
-            const target = e.target as HTMLImageElement;
-            target.src = "/copmany logo.svg";
-          }}
-        />
-      </div>
+      {homeWatermarkEnabled && (
+        <div className="absolute inset-0 flex items-center justify-center opacity-5 pointer-events-none">
+          <img 
+            src={companyLogo || "/company-logo.svg"} 
+            alt="شعار الشركة" 
+            className="w-96 h-96 object-contain"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.src = "/copmany logo.svg";
+            }}
+          />
+        </div>
+      )}
       {/* Background Animation Removed */}
       <div className="relative z-10" dir="rtl">
       {/* Header */}

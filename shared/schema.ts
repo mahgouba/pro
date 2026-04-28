@@ -1113,6 +1113,7 @@ export const appearanceSettings = pgTable("appearance_settings", {
   printFooterRight: text("print_footer_right"),
   printStamp: text("print_stamp"), // Base64 encoded stamp image
   watermarkEnabled: boolean("watermark_enabled").default(false),
+  homeWatermarkEnabled: boolean("home_watermark_enabled").default(true),
   showBankDetails: boolean("show_bank_details").default(false),
   quotationBackgroundType: varchar("quotation_background_type", { length: 20 }).default("albarimi2"), // albarimi1, albarimi2, dynamic
   quotationPrimaryColor: varchar("quotation_primary_color", { length: 7 }).default("#1A365D"),
