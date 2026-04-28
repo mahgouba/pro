@@ -961,47 +961,37 @@ export default function FinancingCalculatorPage() {
     });
   };
 
+  const normalizeSaudiPhone = (raw: string | null | undefined): string =>
+    (raw ?? "").replace(/\D/g, "").replace(/^0/, "").replace(/^966/, "");
+
   const buildShareTextMessage = (): string => {
     if (!result) return "";
-    return `*عرض تمويل سيارة تقريبي* \n\n` +
-      `*العميل:* ${formData.customerName || "غير محدد"}\n` +
-      `*السيارة:* ${formData.vehicleManufacturer} ${formData.vehicleCategory} ${formData.vehicleTrimLevel}\n` +
-      `*قيمة المركبة:* ${formatCurrency(parseFloat(formData.vehiclePrice))}\n` +
-      `*البنك:* ${formData.bankName}\n` +
-      `*الدفعة الأولى:* ${formatCurrency(result.downPaymentAmount)} (${result.downPaymentPercent.toFixed(1)}%)\n` +
-      `*الدفعة الأخيرة:* ${formatCurrency(result.finalPaymentAmount)} (${result.finalPaymentPercent.toFixed(1)}%)\n` +
-      `*إجمالي الأرباح:* ${formatCurrency(result.totalInterest)}\n` +
-      `*إجمالي التأمين:* ${formatCurrency(result.totalInsurance)}\n` +
-      `*الرسوم الإدارية:* ${formatCurrency(result.adminFeesAmount)}\n` +
-      `*القسط الشهري:* ${formatCurrency(result.monthlyPayment)}\n` +
-      `*مدة التمويل:* ${formData.financingYears} سنوات ${formData.financingMonths !== "0" ? `و ${formData.financingMonths} شهر` : ""}\n\n` +
-      `_هذه الحسبة غير أكيدة وتخضع لشروط البنك_`;
+    const monthsPart = formData.financingMonths !== "0" ? ` و ${formData.financingMonths} شهر` : "";
+    return [
+      `*عرض تمويل سيارة تقريبي*`,
+      ``,
+      `*العميل:* ${formData.customerName || "غير محدد"}`,
+      `*السيارة:* ${formData.vehicleManufacturer} ${formData.vehicleCategory} ${formData.vehicleTrimLevel}`,
+      `*قيمة المركبة:* ${formatCurrency(parseFloat(formData.vehiclePrice))}`,
+      `*البنك:* ${formData.bankName}`,
+      `*الدفعة الأولى:* ${formatCurrency(result.downPaymentAmount)} (${result.downPaymentPercent.toFixed(1)}%)`,
+      `*الدفعة الأخيرة:* ${formatCurrency(result.finalPaymentAmount)} (${result.finalPaymentPercent.toFixed(1)}%)`,
+      `*إجمالي الأرباح:* ${formatCurrency(result.totalInterest)}`,
+      `*إجمالي التأمين:* ${formatCurrency(result.totalInsurance)}`,
+      `*الرسوم الإدارية:* ${formatCurrency(result.adminFeesAmount)}`,
+      `*القسط الشهري:* ${formatCurrency(result.monthlyPayment)}`,
+      `*مدة التمويل:* ${formData.financingYears} سنوات${monthsPart}`,
+      ``,
+      `_هذه الحسبة غير أكيدة وتخضع لشروط البنك_`,
+    ].join("\n");
   };
 
-  const handleWhatsAppShare = () => {
-    if (!result) return;
-    const message = buildShareTextMessage();
-    let phone = formData.customerPhone.replace(/\D/g, '');
-    if (phone.startsWith('05') && phone.length === 10) {
-      phone = '966' + phone.substring(1);
-    } else if (phone.startsWith('5') && phone.length === 9) {
-      phone = '966' + phone;
-    }
-    const encodedMessage = encodeURIComponent(message);
-    window.open(`https://wa.me/${phone}?text=${encodedMessage}`, '_blank');
-  };
-
-  // ===== Comprehensive Share Dialog (PDF or Text → Customer / Employee / Bank rep) =====
-  const { data: shareUsersList = [] } = useQuery<any[]>({
-    queryKey: ["/api/users"],
-  });
-  const { data: shareBanksList = [] } = useQuery<any[]>({
-    queryKey: ["/api/banks"],
-  });
+  const { data: shareUsersList = [] } = useQuery<any[]>({ queryKey: ["/api/users"] });
+  const { data: shareBanksList = [] } = useQuery<any[]>({ queryKey: ["/api/banks"] });
 
   const [showShareDialog, setShowShareDialog] = useState(false);
-  const [shareTarget, setShareTarget] = useState<'customer' | 'employee' | 'bank'>('customer');
-  const [shareFormat, setShareFormat] = useState<'pdf' | 'text'>('pdf');
+  const [shareTarget, setShareTarget] = useState<"customer" | "employee" | "bank">("customer");
+  const [shareFormat, setShareFormat] = useState<"pdf" | "text">("pdf");
   const [shareCustomerPhone, setShareCustomerPhone] = useState("");
   const [shareSelectedEmployee, setShareSelectedEmployee] = useState("");
   const [shareSelectedBankId, setShareSelectedBankId] = useState("");
@@ -1013,63 +1003,61 @@ export default function FinancingCalculatorPage() {
       toast({
         title: "لا توجد نتائج للمشاركة",
         description: "يرجى إجراء الحساب أولاً",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
-    // Pre-fill customer phone from form if available
-    const cp = formData.customerPhone?.replace(/\D/g, '').replace(/^0/, '').replace(/^966/, '') || "";
-    setShareCustomerPhone(cp);
+    setShareCustomerPhone(normalizeSaudiPhone(formData.customerPhone));
     setShowShareDialog(true);
+  };
+
+  const resolveShareTarget = (): { phone: string; error: string } => {
+    if (shareTarget === "employee") {
+      const emp = (shareUsersList as any[]).find((u) => u.id.toString() === shareSelectedEmployee);
+      return { phone: normalizeSaudiPhone(emp?.phoneNumber), error: "رقم جوال الموظف غير متوفر" };
+    }
+    if (shareTarget === "bank") {
+      const rep = (shareUsersList as any[]).find((u) => u.id.toString() === shareSelectedBankRepId);
+      return { phone: normalizeSaudiPhone(rep?.phoneNumber), error: "رقم جوال مندوب البنك غير متوفر" };
+    }
+    return { phone: normalizeSaudiPhone(shareCustomerPhone), error: "يرجى إدخال رقم العميل" };
+  };
+
+  const openWhatsApp = (phone: string, message: string) => {
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, "_blank");
+  };
+
+  const downloadBlob = (blob: Blob, fileName: string) => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
 
   const handleShareSubmit = async () => {
     if (!result) return;
 
-    // Resolve target phone
-    const cleanAndPrefix = (raw: string | undefined | null) => {
-      if (!raw) return "";
-      const cleaned = raw.replace(/\D/g, '').replace(/^0/, '').replace(/^966/, '');
-      return cleaned ? `+966${cleaned}` : "";
-    };
-
-    let targetNumber = "";
-    let errorMessage = "يرجى إدخال رقم الواتساب";
-    if (shareTarget === 'employee') {
-      const emp = (shareUsersList as any[]).find((u: any) => u.id.toString() === shareSelectedEmployee);
-      targetNumber = cleanAndPrefix(emp?.phoneNumber);
-      errorMessage = "رقم جوال الموظف غير متوفر";
-    } else if (shareTarget === 'bank') {
-      const rep = (shareUsersList as any[]).find((u: any) => u.id.toString() === shareSelectedBankRepId);
-      targetNumber = cleanAndPrefix(rep?.phoneNumber);
-      errorMessage = "رقم جوال مندوب البنك غير متوفر";
-    } else {
-      targetNumber = cleanAndPrefix(shareCustomerPhone);
-      errorMessage = "يرجى إدخال رقم العميل";
-    }
-
-    if (!targetNumber || targetNumber === "+966") {
-      toast({ title: "خطأ", description: errorMessage, variant: "destructive" });
+    const { phone, error } = resolveShareTarget();
+    if (!phone) {
+      toast({ title: "خطأ", description: error, variant: "destructive" });
       return;
     }
 
     setIsSharing(true);
     try {
       const textMessage = buildShareTextMessage();
-      const cleanTarget = targetNumber.replace(/\D/g, '');
 
-      if (shareFormat === 'text') {
-        const whatsappUrl = `https://wa.me/${cleanTarget}?text=${encodeURIComponent(textMessage)}`;
-        window.open(whatsappUrl, '_blank');
-        toast({
-          title: "تم بنجاح",
-          description: "تم فتح الواتساب بالرسالة النصية",
-        });
+      if (shareFormat === "text") {
+        openWhatsApp(phone, textMessage);
+        toast({ title: "تم بنجاح", description: "تم فتح الواتساب بالرسالة النصية" });
         setShowShareDialog(false);
         return;
       }
 
-      // PDF mode
       toast({ title: "جاري تجهيز ملف PDF", description: "يرجى الانتظار لحظات..." });
       const pdfBlob = await buildPdfBlob();
       if (!pdfBlob) {
@@ -1077,42 +1065,30 @@ export default function FinancingCalculatorPage() {
         return;
       }
 
-      const fileName = `financing_offer_${formData.customerName || 'customer'}.pdf`;
-      const file = new File([pdfBlob], fileName, { type: 'application/pdf' });
+      const fileName = `financing_offer_${formData.customerName || "customer"}.pdf`;
+      const file = new File([pdfBlob], fileName, { type: "application/pdf" });
+      const nav = navigator as any;
+      const canShareFile = nav.share && nav.canShare && nav.canShare({ files: [file] });
 
-      if ((navigator as any).share && (navigator as any).canShare && (navigator as any).canShare({ files: [file] })) {
-        await (navigator as any).share({
-          title: `عرض تمويل - ${formData.customerName || ''}`,
+      if (canShareFile) {
+        await nav.share({
+          title: `عرض تمويل - ${formData.customerName || ""}`,
           text: textMessage,
           files: [file],
         });
       } else {
-        // Fallback: download then open WhatsApp
-        const url = URL.createObjectURL(pdfBlob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = fileName;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-
+        downloadBlob(pdfBlob, fileName);
         toast({
           title: "تم تحميل الملف",
           description: "يرجى إرفاق ملف PDF المحمل في محادثة الواتساب التي ستفتح الآن",
         });
-
-        const whatsappUrl = `https://wa.me/${cleanTarget}?text=${encodeURIComponent(textMessage)}`;
-        setTimeout(() => window.open(whatsappUrl, '_blank'), 1000);
+        setTimeout(() => openWhatsApp(phone, textMessage), 1000);
       }
 
-      toast({
-        title: "تم بنجاح",
-        description: "تم إنشاء ومشاركة عرض التمويل",
-      });
+      toast({ title: "تم بنجاح", description: "تم إنشاء ومشاركة عرض التمويل" });
       setShowShareDialog(false);
-    } catch (error) {
-      console.error('Share error:', error);
+    } catch (err) {
+      console.error("Share error:", err);
       toast({ title: "خطأ", description: "حدث خطأ أثناء المشاركة", variant: "destructive" });
     } finally {
       setIsSharing(false);
@@ -1908,210 +1884,195 @@ export default function FinancingCalculatorPage() {
               </DialogTitle>
             </DialogHeader>
 
-            <div className="space-y-4">
-              {/* Format selector */}
-              <div>
-                <Label>صيغة المشاركة</Label>
-                <div className="grid grid-cols-2 gap-2 mt-2">
-                  <Button
-                    type="button"
-                    variant={shareFormat === 'pdf' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setShareFormat('pdf')}
-                    data-testid="button-share-format-pdf"
-                    className={shareFormat === 'pdf' ? 'bg-blue-600 hover:bg-blue-700' : ''}
-                  >
-                    <FileText className="h-4 w-4 ml-2" />
-                    ملف PDF
-                  </Button>
-                  <Button
-                    type="button"
-                    variant={shareFormat === 'text' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setShareFormat('text')}
-                    data-testid="button-share-format-text"
-                    className={shareFormat === 'text' ? 'bg-blue-600 hover:bg-blue-700' : ''}
-                  >
-                    <Type className="h-4 w-4 ml-2" />
-                    رسالة نصية
-                  </Button>
-                </div>
-              </div>
+            {(() => {
+              const SHARE_EMPLOYEE_ROLES = ["salesperson", "sales_director", "inventory_manager", "admin", "seller"];
+              const employees = (shareUsersList as any[]).filter((u) => SHARE_EMPLOYEE_ROLES.includes(u.role));
+              const bankReps = shareSelectedBankId
+                ? (shareUsersList as any[]).filter((u) => u.bankId?.toString() === shareSelectedBankId)
+                : [];
+              const findUserPhone = (id: string) =>
+                (shareUsersList as any[]).find((u) => u.id.toString() === id)?.phoneNumber || "—";
 
-              {/* Target type selector */}
-              <div>
-                <Label>إرسال إلى</Label>
-                <div className="grid grid-cols-3 gap-2 mt-2">
-                  <Button
-                    type="button"
-                    variant={shareTarget === 'customer' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setShareTarget('customer')}
-                    data-testid="button-share-target-customer"
-                    className={shareTarget === 'customer' ? 'bg-emerald-600 hover:bg-emerald-700' : ''}
-                  >
-                    العميل
-                  </Button>
-                  <Button
-                    type="button"
-                    variant={shareTarget === 'employee' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setShareTarget('employee')}
-                    data-testid="button-share-target-employee"
-                    className={shareTarget === 'employee' ? 'bg-emerald-600 hover:bg-emerald-700' : ''}
-                  >
-                    موظف المعرض
-                  </Button>
-                  <Button
-                    type="button"
-                    variant={shareTarget === 'bank' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setShareTarget('bank')}
-                    data-testid="button-share-target-bank"
-                    className={shareTarget === 'bank' ? 'bg-emerald-600 hover:bg-emerald-700' : ''}
-                  >
-                    مندوب البنك
-                  </Button>
-                </div>
-              </div>
+              const formatBtnClass = (active: boolean) => (active ? "bg-blue-600 hover:bg-blue-700" : "");
+              const targetBtnClass = (active: boolean) => (active ? "bg-emerald-600 hover:bg-emerald-700" : "");
 
-              {/* CUSTOMER MODE */}
-              {shareTarget === 'customer' && (
-                <div>
-                  <Label htmlFor="share-customer-phone">رقم العميل</Label>
-                  <div className="flex items-center mt-1">
-                    <div className="bg-gray-100 border border-l-0 rounded-l-md px-3 py-2 text-sm font-medium text-gray-700">
-                      🇸🇦 +966
-                    </div>
-                    <Input
-                      id="share-customer-phone"
-                      data-testid="input-share-customer-phone"
-                      placeholder="501234567"
-                      value={shareCustomerPhone}
-                      onChange={(e) => {
-                        const v = e.target.value.replace(/\D/g, '').replace(/^0/, '').replace(/^966/, '');
-                        setShareCustomerPhone(v);
-                      }}
-                      className="text-left rounded-l-none border-l-0"
-                    />
-                  </div>
-                  {formData.customerPhone && (
-                    <p className="text-xs text-gray-500 mt-1">رقم العميل من النموذج: {formData.customerPhone}</p>
-                  )}
-                </div>
-              )}
-
-              {/* EMPLOYEE MODE */}
-              {shareTarget === 'employee' && (
-                <div>
-                  <Label htmlFor="share-employee-select">اختيار موظف المعرض</Label>
-                  <Select value={shareSelectedEmployee} onValueChange={setShareSelectedEmployee}>
-                    <SelectTrigger data-testid="select-share-employee">
-                      <SelectValue placeholder="اختر موظف لإرسال الرسالة إليه" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {(shareUsersList as any[])
-                        .filter((u: any) =>
-                          u.role === 'salesperson' ||
-                          u.role === 'sales_director' ||
-                          u.role === 'inventory_manager' ||
-                          u.role === 'admin' ||
-                          u.role === 'seller'
-                        )
-                        .map((user: any) => (
-                          <SelectItem key={user.id} value={user.id.toString()}>
-                            {user.name} {user.jobTitle ? `- ${user.jobTitle}` : ''}
-                          </SelectItem>
-                        ))}
-                    </SelectContent>
-                  </Select>
-                  {shareSelectedEmployee && (
-                    <p className="text-xs text-gray-500 mt-2">
-                      سيتم الإرسال على: {(shareUsersList as any[]).find((u: any) => u.id.toString() === shareSelectedEmployee)?.phoneNumber || '—'}
-                    </p>
-                  )}
-                </div>
-              )}
-
-              {/* BANK REP MODE */}
-              {shareTarget === 'bank' && (
-                <div className="space-y-3">
+              return (
+                <div className="space-y-4">
                   <div>
-                    <Label htmlFor="share-bank-select">اختيار البنك</Label>
-                    <Select
-                      value={shareSelectedBankId}
-                      onValueChange={(v) => {
-                        setShareSelectedBankId(v);
-                        setShareSelectedBankRepId("");
-                      }}
-                    >
-                      <SelectTrigger data-testid="select-share-bank">
-                        <SelectValue placeholder="اختر البنك" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {(shareBanksList as any[]).map((b: any) => (
-                          <SelectItem key={b.id} value={b.id.toString()}>
-                            {b.bankName}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <Label>صيغة المشاركة</Label>
+                    <div className="grid grid-cols-2 gap-2 mt-2">
+                      <Button
+                        type="button"
+                        variant={shareFormat === "pdf" ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setShareFormat("pdf")}
+                        data-testid="button-share-format-pdf"
+                        className={formatBtnClass(shareFormat === "pdf")}
+                      >
+                        <FileText className="h-4 w-4 ml-2" />
+                        ملف PDF
+                      </Button>
+                      <Button
+                        type="button"
+                        variant={shareFormat === "text" ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setShareFormat("text")}
+                        data-testid="button-share-format-text"
+                        className={formatBtnClass(shareFormat === "text")}
+                      >
+                        <Type className="h-4 w-4 ml-2" />
+                        رسالة نصية
+                      </Button>
+                    </div>
                   </div>
 
-                  {shareSelectedBankId && (() => {
-                    const bankReps = (shareUsersList as any[]).filter(
-                      (u: any) => u.bankId && u.bankId.toString() === shareSelectedBankId
-                    );
-                    return (
+                  <div>
+                    <Label>إرسال إلى</Label>
+                    <div className="grid grid-cols-3 gap-2 mt-2">
+                      {([
+                        { key: "customer", label: "العميل" },
+                        { key: "employee", label: "موظف المعرض" },
+                        { key: "bank", label: "مندوب البنك" },
+                      ] as const).map(({ key, label }) => (
+                        <Button
+                          key={key}
+                          type="button"
+                          variant={shareTarget === key ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => setShareTarget(key)}
+                          data-testid={`button-share-target-${key}`}
+                          className={targetBtnClass(shareTarget === key)}
+                        >
+                          {label}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {shareTarget === "customer" && (
+                    <div>
+                      <Label htmlFor="share-customer-phone">رقم العميل</Label>
+                      <div className="flex items-center mt-1">
+                        <div className="bg-gray-100 border border-l-0 rounded-l-md px-3 py-2 text-sm font-medium text-gray-700">
+                          🇸🇦 +966
+                        </div>
+                        <Input
+                          id="share-customer-phone"
+                          data-testid="input-share-customer-phone"
+                          placeholder="501234567"
+                          value={shareCustomerPhone}
+                          onChange={(e) => setShareCustomerPhone(normalizeSaudiPhone(e.target.value))}
+                          className="text-left rounded-l-none border-l-0"
+                        />
+                      </div>
+                      {formData.customerPhone && (
+                        <p className="text-xs text-gray-500 mt-1">
+                          رقم العميل من النموذج: {formData.customerPhone}
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  {shareTarget === "employee" && (
+                    <div>
+                      <Label htmlFor="share-employee-select">اختيار موظف المعرض</Label>
+                      <Select value={shareSelectedEmployee} onValueChange={setShareSelectedEmployee}>
+                        <SelectTrigger data-testid="select-share-employee">
+                          <SelectValue placeholder="اختر موظف لإرسال الرسالة إليه" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {employees.map((user) => (
+                            <SelectItem key={user.id} value={user.id.toString()}>
+                              {user.name} {user.jobTitle ? `- ${user.jobTitle}` : ""}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {shareSelectedEmployee && (
+                        <p className="text-xs text-gray-500 mt-2">
+                          سيتم الإرسال على: {findUserPhone(shareSelectedEmployee)}
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  {shareTarget === "bank" && (
+                    <div className="space-y-3">
                       <div>
-                        <Label htmlFor="share-bank-rep-select">اختيار مندوب البنك</Label>
-                        <Select value={shareSelectedBankRepId} onValueChange={setShareSelectedBankRepId}>
-                          <SelectTrigger data-testid="select-share-bank-rep">
-                            <SelectValue placeholder={bankReps.length ? "اختر المندوب" : "لا يوجد مناديب لهذا البنك"} />
+                        <Label htmlFor="share-bank-select">اختيار البنك</Label>
+                        <Select
+                          value={shareSelectedBankId}
+                          onValueChange={(v) => {
+                            setShareSelectedBankId(v);
+                            setShareSelectedBankRepId("");
+                          }}
+                        >
+                          <SelectTrigger data-testid="select-share-bank">
+                            <SelectValue placeholder="اختر البنك" />
                           </SelectTrigger>
                           <SelectContent>
-                            {bankReps.map((u: any) => (
-                              <SelectItem key={u.id} value={u.id.toString()}>
-                                {u.name} {u.jobTitle ? `- ${u.jobTitle}` : ''}
+                            {(shareBanksList as any[]).map((b) => (
+                              <SelectItem key={b.id} value={b.id.toString()}>
+                                {b.bankName}
                               </SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
-                        {bankReps.length === 0 && (
-                          <p className="text-xs text-amber-600 mt-1">
-                            لا يوجد مناديب مرتبطين بهذا البنك. يمكن ربطهم من إدارة المستخدمين.
-                          </p>
-                        )}
-                        {shareSelectedBankRepId && (
-                          <p className="text-xs text-gray-500 mt-2">
-                            سيتم الإرسال على: {(shareUsersList as any[]).find((u: any) => u.id.toString() === shareSelectedBankRepId)?.phoneNumber || '—'}
-                          </p>
-                        )}
                       </div>
-                    );
-                  })()}
-                </div>
-              )}
 
-              <div className="flex gap-3 pt-2">
-                <Button
-                  onClick={handleShareSubmit}
-                  disabled={isSharing}
-                  data-testid="button-send-share"
-                  className="bg-emerald-600 hover:bg-emerald-700 flex-1"
-                >
-                  <MessageCircle size={16} className="ml-2" />
-                  {isSharing ? "جارٍ المشاركة..." : (shareFormat === 'pdf' ? "إرسال PDF" : "إرسال نص")}
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => setShowShareDialog(false)}
-                  data-testid="button-cancel-share"
-                >
-                  إلغاء
-                </Button>
-              </div>
-            </div>
+                      {shareSelectedBankId && (
+                        <div>
+                          <Label htmlFor="share-bank-rep-select">اختيار مندوب البنك</Label>
+                          <Select value={shareSelectedBankRepId} onValueChange={setShareSelectedBankRepId}>
+                            <SelectTrigger data-testid="select-share-bank-rep">
+                              <SelectValue
+                                placeholder={bankReps.length ? "اختر المندوب" : "لا يوجد مناديب لهذا البنك"}
+                              />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {bankReps.map((u) => (
+                                <SelectItem key={u.id} value={u.id.toString()}>
+                                  {u.name} {u.jobTitle ? `- ${u.jobTitle}` : ""}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          {bankReps.length === 0 && (
+                            <p className="text-xs text-amber-600 mt-1">
+                              لا يوجد مناديب مرتبطين بهذا البنك. يمكن ربطهم من إدارة المستخدمين.
+                            </p>
+                          )}
+                          {shareSelectedBankRepId && (
+                            <p className="text-xs text-gray-500 mt-2">
+                              سيتم الإرسال على: {findUserPhone(shareSelectedBankRepId)}
+                            </p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  <div className="flex gap-3 pt-2">
+                    <Button
+                      onClick={handleShareSubmit}
+                      disabled={isSharing}
+                      data-testid="button-send-share"
+                      className="bg-emerald-600 hover:bg-emerald-700 flex-1"
+                    >
+                      <MessageCircle size={16} className="ml-2" />
+                      {isSharing ? "جارٍ المشاركة..." : shareFormat === "pdf" ? "إرسال PDF" : "إرسال نص"}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => setShowShareDialog(false)}
+                      data-testid="button-cancel-share"
+                    >
+                      إلغاء
+                    </Button>
+                  </div>
+                </div>
+              );
+            })()}
           </DialogContent>
         </Dialog>
 
