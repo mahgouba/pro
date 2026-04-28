@@ -167,10 +167,56 @@ export default function CardViewPage({ userRole, username, onLogout }: CardViewP
     queryKey: ["/api/inventory"],
   });
 
-  const { data: appearanceData } = useQuery<{ homeWatermarkEnabled?: boolean }>({
+  const { data: appearanceData } = useQuery<{
+    homeWatermarkEnabled?: boolean;
+    vehicleCardUseCustomColors?: boolean;
+    vehicleCardBgColor?: string;
+    vehicleCardTextColor?: string;
+    vehicleCardPriceColor?: string;
+    vehicleCardAccentColor?: string;
+    vehicleCardBorderColor?: string;
+    vehicleCardBorderRadius?: number;
+    vehicleCardShowEngine?: boolean;
+    vehicleCardShowYear?: boolean;
+    vehicleCardShowExteriorColor?: boolean;
+    vehicleCardShowInteriorColor?: boolean;
+    vehicleCardShowImportType?: boolean;
+    vehicleCardShowOwnership?: boolean;
+    vehicleCardShowLocation?: boolean;
+    vehicleCardShowVin?: boolean;
+    vehicleCardShowPrice?: boolean;
+    vehicleCardShowMileage?: boolean;
+    vehicleCardShowShareBtn?: boolean;
+    vehicleCardShowSellBtn?: boolean;
+    vehicleCardShowQuoteBtn?: boolean;
+    vehicleCardShowPriceCardBtn?: boolean;
+    vehicleCardShowReserveBtn?: boolean;
+  }>({
     queryKey: ["/api/appearance"],
   });
   const homeWatermarkEnabled = appearanceData?.homeWatermarkEnabled !== false;
+  const cardCustom = appearanceData?.vehicleCardUseCustomColors === true;
+  const cardBgColor = appearanceData?.vehicleCardBgColor || "#7B1E1E";
+  const cardTextColor = appearanceData?.vehicleCardTextColor || "#FFFFFF";
+  const cardPriceColor = appearanceData?.vehicleCardPriceColor || "#FCD34D";
+  const cardAccentColor = appearanceData?.vehicleCardAccentColor || "#C49632";
+  const cardBorderColor = appearanceData?.vehicleCardBorderColor || "#FFFFFF";
+  const cardBorderRadius = appearanceData?.vehicleCardBorderRadius ?? 16;
+  const showEngine = appearanceData?.vehicleCardShowEngine !== false;
+  const showYear = appearanceData?.vehicleCardShowYear !== false;
+  const showExteriorColor = appearanceData?.vehicleCardShowExteriorColor !== false;
+  const showInteriorColor = appearanceData?.vehicleCardShowInteriorColor !== false;
+  const showImportType = appearanceData?.vehicleCardShowImportType !== false;
+  const showOwnership = appearanceData?.vehicleCardShowOwnership !== false;
+  const showLocation = appearanceData?.vehicleCardShowLocation !== false;
+  const showVin = appearanceData?.vehicleCardShowVin !== false;
+  const showPrice = appearanceData?.vehicleCardShowPrice !== false;
+  const showMileage = appearanceData?.vehicleCardShowMileage !== false;
+  const showShareBtn = appearanceData?.vehicleCardShowShareBtn !== false;
+  const showSellBtn = appearanceData?.vehicleCardShowSellBtn !== false;
+  const showQuoteBtn = appearanceData?.vehicleCardShowQuoteBtn !== false;
+  const showPriceCardBtn = appearanceData?.vehicleCardShowPriceCardBtn !== false;
+  const showReserveBtn = appearanceData?.vehicleCardShowReserveBtn !== false;
 
   const { data: manufacturerStats = [] } = useQuery<Array<{
     manufacturer: string;
@@ -1459,22 +1505,30 @@ export default function CardViewPage({ userRole, username, onLogout }: CardViewP
                     className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 animate-in slide-in-from-top-2 fade-in duration-300"
                   >
                   {data.items.map((item) => (
-                    <Card key={item.id} className={`rounded-2xl overflow-hidden border-0 relative ${
-                      neumorphismMode 
-                        ? 'neuro-card' 
-                        : 'glass-card dark:glass-card-dark'
-                    }`}>
+                    <Card
+                      key={item.id}
+                      className={`overflow-hidden border-0 relative ${
+                        neumorphismMode
+                          ? 'neuro-card'
+                          : (cardCustom ? '' : 'glass-card dark:glass-card-dark')
+                      }`}
+                      style={cardCustom && !neumorphismMode ? {
+                        backgroundColor: cardBgColor,
+                        color: cardTextColor,
+                        borderRadius: `${cardBorderRadius}px`,
+                      } : { borderRadius: `${cardBorderRadius}px` }}
+                    >
                       <CardHeader className="pb-3 relative z-10">
                         <div className="flex items-center justify-between">
                           {/* Category and Trim Level Row */}
                           <div className="flex items-center gap-2">
                             <div className="flex items-center gap-1">
                               <img src="/car.svg" alt="Category" className="w-9 h-9" style={{filter: 'brightness(0) saturate(100%) invert(53%) sepia(82%) saturate(423%) hue-rotate(9deg) brightness(98%) contrast(88%)'}} />
-                              <span className="font-bold text-sm drop-shadow-sm" style={{color: '#C49632'}}>{item.category}</span>
+                              <span className="font-bold text-sm drop-shadow-sm" style={{color: cardAccentColor}}>{item.category}</span>
                             </div>
                             {item.trimLevel && (
                               <div className="flex items-center gap-1">
-                                <span className="font-bold text-sm drop-shadow-sm" style={{color: '#C49632'}}>{item.trimLevel}</span>
+                                <span className="font-bold text-sm drop-shadow-sm" style={{color: cardAccentColor}}>{item.trimLevel}</span>
                               </div>
                             )}
                           </div>
@@ -1494,71 +1548,89 @@ export default function CardViewPage({ userRole, username, onLogout }: CardViewP
                       <CardContent className="pt-0 relative z-10">
                         <div className="space-y-3 text-sm">
                           {/* Row 1: Engine Capacity, Year, Exterior Color */}
-                          <div className="grid grid-cols-3 gap-2">
-                            <div className="flex items-center gap-1">
-                              <img src="/car-engine.svg" alt="Engine" className="w-6 h-6 filter drop-shadow-sm" style={{filter: 'brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%) drop-shadow(0 1px 2px rgba(0,0,0,0.3))'}} />
-                              <span className="font-semibold font-latin text-white dark:text-slate-100 text-xs drop-shadow-sm">{item.engineCapacity}</span>
+                          {(showEngine || showYear || showExteriorColor) && (
+                            <div className="grid grid-cols-3 gap-2">
+                              {showEngine ? (
+                                <div className="flex items-center gap-1">
+                                  <img src="/car-engine.svg" alt="Engine" className="w-6 h-6 filter drop-shadow-sm" style={{filter: 'brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%) drop-shadow(0 1px 2px rgba(0,0,0,0.3))'}} />
+                                  <span className="font-semibold font-latin text-xs drop-shadow-sm" style={cardCustom ? {color: cardTextColor} : undefined}>{item.engineCapacity}</span>
+                                </div>
+                              ) : <div />}
+                              {showYear ? (
+                                <div className="flex items-center gap-1">
+                                  <img src="/year.svg" alt="Year" className="w-5 h-5 filter drop-shadow-sm" style={{filter: 'brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%) drop-shadow(0 1px 2px rgba(0,0,0,0.3))'}} />
+                                  <span className="font-semibold font-latin text-xs drop-shadow-sm" style={cardCustom ? {color: cardTextColor} : undefined}>{item.year}</span>
+                                </div>
+                              ) : <div />}
+                              {showExteriorColor ? (
+                                <div className="flex items-center gap-1">
+                                  <img src="/exterior-color.svg" alt="Exterior Color" className="w-6 h-6 filter drop-shadow-sm" style={{filter: 'brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%) drop-shadow(0 1px 2px rgba(0,0,0,0.3))'}} />
+                                  <span className="font-semibold text-xs drop-shadow-sm" style={cardCustom ? {color: cardTextColor} : undefined}>{item.exteriorColor}</span>
+                                </div>
+                              ) : <div />}
                             </div>
-                            <div className="flex items-center gap-1">
-                              <img src="/year.svg" alt="Year" className="w-5 h-5 filter drop-shadow-sm" style={{filter: 'brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%) drop-shadow(0 1px 2px rgba(0,0,0,0.3))'}} />
-                              <span className="font-semibold font-latin text-white dark:text-slate-100 text-xs drop-shadow-sm">{item.year}</span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <img src="/exterior-color.svg" alt="Exterior Color" className="w-6 h-6 filter drop-shadow-sm" style={{filter: 'brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%) drop-shadow(0 1px 2px rgba(0,0,0,0.3))'}} />
-                              <span className="font-semibold text-white dark:text-slate-100 text-xs drop-shadow-sm">{item.exteriorColor}</span>
-                            </div>
-                          </div>
+                          )}
                           
                           {/* Row 2: Interior Color, Import Type, Ownership Type */}
-                          <div className="grid grid-cols-3 gap-2">
-                            <div className="flex items-center gap-1">
-                              <img src="/interior-color.svg" alt="Interior Color" className="w-6 h-6 filter drop-shadow-sm" style={{filter: 'brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%) drop-shadow(0 1px 2px rgba(0,0,0,0.3))'}} />
-                              <span className="font-semibold text-white dark:text-slate-100 text-xs drop-shadow-sm">{item.interiorColor}</span>
+                          {(showInteriorColor || showImportType || (showOwnership && item.ownershipType)) && (
+                            <div className="grid grid-cols-3 gap-2">
+                              {showInteriorColor ? (
+                                <div className="flex items-center gap-1">
+                                  <img src="/interior-color.svg" alt="Interior Color" className="w-6 h-6 filter drop-shadow-sm" style={{filter: 'brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%) drop-shadow(0 1px 2px rgba(0,0,0,0.3))'}} />
+                                  <span className="font-semibold text-xs drop-shadow-sm" style={cardCustom ? {color: cardTextColor} : undefined}>{item.interiorColor}</span>
+                                </div>
+                              ) : <div />}
+                              {showImportType ? (
+                                <div className="flex items-center gap-1">
+                                  <img src={getImportTypeIcon(item.importType)} alt="Import Type" className="w-6 h-6 filter drop-shadow-sm" style={{filter: 'brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%) drop-shadow(0 1px 2px rgba(0,0,0,0.3))'}} />
+                                  <span className="font-semibold text-xs drop-shadow-sm" style={cardCustom ? {color: cardTextColor} : undefined}>{item.importType}</span>
+                                </div>
+                              ) : <div />}
+                              {showOwnership && item.ownershipType ? (
+                                <div className="flex items-center gap-1">
+                                  <img src="/logos/ownerchip.svg" alt="Ownership Type" className="w-6 h-6 filter drop-shadow-sm" style={{filter: 'brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%) drop-shadow(0 1px 2px rgba(0,0,0,0.3))'}} />
+                                  <span className="font-semibold text-xs drop-shadow-sm" style={cardCustom ? {color: cardTextColor} : undefined}>{item.ownershipType}</span>
+                                </div>
+                              ) : <div />}
                             </div>
-                            <div className="flex items-center gap-1">
-                              <img src={getImportTypeIcon(item.importType)} alt="Import Type" className="w-6 h-6 filter drop-shadow-sm" style={{filter: 'brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%) drop-shadow(0 1px 2px rgba(0,0,0,0.3))'}} />
-                              <span className="font-semibold text-white dark:text-slate-100 text-xs drop-shadow-sm">{item.importType}</span>
-                            </div>
-                            {item.ownershipType && (
-                              <div className="flex items-center gap-1">
-                                <img src="/logos/ownerchip.svg" alt="Ownership Type" className="w-6 h-6 filter drop-shadow-sm" style={{filter: 'brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%) drop-shadow(0 1px 2px rgba(0,0,0,0.3))'}} />
-                                <span className="font-semibold text-white dark:text-slate-100 text-xs drop-shadow-sm">{item.ownershipType}</span>
-                              </div>
-                            )}
-                          </div>
+                          )}
                           
                           {/* Row 3: Location and Chassis Number */}
-                          <div className="grid grid-cols-3 gap-2">
-                            <div className="flex items-center gap-1">
-                              <img src="/location.svg" alt="Location" className="w-6 h-6 filter drop-shadow-sm" style={{filter: 'brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%) drop-shadow(0 1px 2px rgba(0,0,0,0.3))'}} />
-                              <span className="font-semibold text-white dark:text-slate-100 text-xs drop-shadow-sm">{item.location}</span>
+                          {(showLocation || (showVin && item.chassisNumber && item.chassisNumber.trim() !== '')) && (
+                            <div className="grid grid-cols-3 gap-2">
+                              {showLocation ? (
+                                <div className="flex items-center gap-1">
+                                  <img src="/location.svg" alt="Location" className="w-6 h-6 filter drop-shadow-sm" style={{filter: 'brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%) drop-shadow(0 1px 2px rgba(0,0,0,0.3))'}} />
+                                  <span className="font-semibold text-xs drop-shadow-sm" style={cardCustom ? {color: cardTextColor} : undefined}>{item.location}</span>
+                                </div>
+                              ) : <div />}
+                              {showVin && item.chassisNumber && item.chassisNumber.trim() !== '' && (
+                                <div className="flex items-center gap-2">
+                                  <span className="font-bold text-xs drop-shadow-sm" style={cardCustom ? {color: cardTextColor} : undefined}>VIN:</span>
+                                  <span className="font-medium font-latin text-xs drop-shadow-sm" style={cardCustom ? {color: cardTextColor} : undefined}>
+                                    {item.status === "مراجعة المشرف" ? "***" : item.chassisNumber}
+                                  </span>
+                                </div>
+                              )}
+                              <div></div>
                             </div>
-                            {item.chassisNumber && item.chassisNumber.trim() !== '' && (
-                              <div className="flex items-center gap-2">
-                                <span className="font-bold text-xs text-white drop-shadow-sm">VIN:</span>
-                                <span className="font-medium font-latin text-white dark:text-slate-100 text-xs drop-shadow-sm">
-                                  {item.status === "مراجعة المشرف" ? "***" : item.chassisNumber}
-                                </span>
-                              </div>
-                            )}
-                            <div></div> {/* Empty cell for alignment */}
-                          </div>
+                          )}
                           
 
                           
                           {/* Price and Mileage Row */}
-                          {(item.price || ((item.importType === "مستعمل" || item.importType === "مستعمل شخصي") && (item as any).mileage)) && (
-                            <div className="flex justify-between items-center py-2 border-t border-white/20 dark:border-slate-500/20 mt-3">
-                              {item.price && (
+                          {((showPrice && item.price) || (showMileage && (item.importType === "مستعمل" || item.importType === "مستعمل شخصي") && (item as any).mileage)) && (
+                            <div className="flex justify-between items-center py-2 border-t mt-3" style={{borderColor: cardCustom ? cardBorderColor : 'rgba(255,255,255,0.2)'}}>
+                              {showPrice && item.price && (
                                 <div className="flex items-center gap-1">
-                                  <span className="text-white/80 dark:text-slate-300 font-medium text-sm drop-shadow-sm">السعر:</span>
-                                  <span className="font-bold font-latin text-yellow-300 dark:text-yellow-300 text-sm drop-shadow-sm">{item.price}</span>
+                                  <span className="font-medium text-sm drop-shadow-sm" style={cardCustom ? {color: cardTextColor, opacity: 0.85} : undefined}>السعر:</span>
+                                  <span className="font-bold font-latin text-sm drop-shadow-sm" style={{color: cardPriceColor}}>{item.price}</span>
                                 </div>
                               )}
-                              {(item.importType === "مستعمل" || item.importType === "مستعمل شخصي") && (item as any).mileage && (
+                              {showMileage && (item.importType === "مستعمل" || item.importType === "مستعمل شخصي") && (item as any).mileage && (
                                 <div className="flex items-center gap-1">
-                                  <span className="text-white/80 dark:text-slate-300 font-medium text-sm drop-shadow-sm">ممشي:</span>
-                                  <span className="font-bold text-orange-300 dark:text-orange-300 text-sm drop-shadow-sm">{(item as any).mileage?.toLocaleString()} كم</span>
+                                  <span className="font-medium text-sm drop-shadow-sm" style={cardCustom ? {color: cardTextColor, opacity: 0.85} : undefined}>ممشي:</span>
+                                  <span className="font-bold text-sm drop-shadow-sm" style={{color: cardPriceColor}}>{(item as any).mileage?.toLocaleString()} كم</span>
                                 </div>
                               )}
                             </div>
@@ -1583,10 +1655,11 @@ export default function CardViewPage({ userRole, username, onLogout }: CardViewP
                           )}
 
                           {/* Action Buttons - First Row */}
-                          <div className="pt-3 mt-3 border-t border-slate-200">
+                          {(showShareBtn || showSellBtn || showQuoteBtn || showPriceCardBtn || showReserveBtn) && (
+                          <div className="pt-3 mt-3 border-t" style={{borderColor: cardCustom ? cardBorderColor : undefined}}>
                             <div className="flex justify-center gap-1 mb-2">
                               {/* Share button - Available for all users with share permission */}
-                              {canShareItem(userRole as UserRole, "cardView") && (
+                              {showShareBtn && canShareItem(userRole as UserRole, "cardView") && (
                                 <Button
                                   size="sm"
                                   variant="outline"
@@ -1605,7 +1678,7 @@ export default function CardViewPage({ userRole, username, onLogout }: CardViewP
                               )}
 
                               {/* Hide sell button for salesperson and bank_accountant roles */}
-                              {canEditItem(userRole as UserRole, "cardView") && userRole !== "salesperson" && userRole !== "bank_accountant" && (
+                              {showSellBtn && canEditItem(userRole as UserRole, "cardView") && userRole !== "salesperson" && userRole !== "bank_accountant" && (
                                 <Button
                                   size="sm"
                                   variant="outline"
@@ -1620,7 +1693,7 @@ export default function CardViewPage({ userRole, username, onLogout }: CardViewP
                               )}
 
                               {/* Show quote button for bank_accountant, hide for salesperson */}
-                              {canViewPage(userRole as UserRole, "quotationCreation") && userRole !== "salesperson" && (
+                              {showQuoteBtn && canViewPage(userRole as UserRole, "quotationCreation") && userRole !== "salesperson" && (
                                 <Button
                                   size="sm"
                                   variant="outline"
@@ -1634,7 +1707,7 @@ export default function CardViewPage({ userRole, username, onLogout }: CardViewP
                               )}
 
                               {/* Hide price card button for salesperson and bank_accountant roles */}
-                              {canViewPage(userRole as UserRole, "priceCards") && userRole !== "salesperson" && userRole !== "bank_accountant" && (
+                              {showPriceCardBtn && canViewPage(userRole as UserRole, "priceCards") && userRole !== "salesperson" && userRole !== "bank_accountant" && (
                                 <Button
                                   size="sm"
                                   variant="outline"
@@ -1651,7 +1724,7 @@ export default function CardViewPage({ userRole, username, onLogout }: CardViewP
                               )}
 
                               {/* Reservation buttons - Available for all users with reservation permission */}
-                              {canReserveItem(userRole as UserRole, "cardView") && (
+                              {showReserveBtn && canReserveItem(userRole as UserRole, "cardView") && (
                                 item.status === "محجوز" ? (
                                   <Button
                                     size="sm"
@@ -1680,6 +1753,7 @@ export default function CardViewPage({ userRole, username, onLogout }: CardViewP
                               )}
                             </div>
                           </div>
+                          )}
                         </div>
                       </CardContent>
                     </Card>

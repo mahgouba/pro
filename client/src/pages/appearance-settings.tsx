@@ -20,7 +20,8 @@ import {
   Trash2,
   Info,
   FileText,
-  Eye
+  Eye,
+  CreditCard
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { Textarea } from "@/components/ui/textarea";
@@ -192,7 +193,7 @@ export default function AppearanceSettings() {
       </div>
 
       <Tabs defaultValue="branding" className="w-full">
-        <TabsList className="grid w-full grid-cols-5 h-14 bg-slate-100/50 p-1 rounded-xl">
+        <TabsList className="grid w-full grid-cols-6 h-14 bg-slate-100/50 p-1 rounded-xl">
           <TabsTrigger value="branding" className="gap-2 text-sm font-bold data-[state=active]:bg-white data-[state=active]:shadow-sm">
             <ImageIcon className="h-4 w-4" />
             الهوية والشعار
@@ -204,6 +205,10 @@ export default function AppearanceSettings() {
           <TabsTrigger value="fonts" className="gap-2 text-sm font-bold data-[state=active]:bg-white data-[state=active]:shadow-sm">
             <Type className="h-4 w-4" />
             الخطوط والأيقونات
+          </TabsTrigger>
+          <TabsTrigger value="vehicleCard" className="gap-2 text-sm font-bold data-[state=active]:bg-white data-[state=active]:shadow-sm" data-testid="tab-vehicle-card">
+            <CreditCard className="h-4 w-4" />
+            بطاقة السيارة
           </TabsTrigger>
           <TabsTrigger value="printing" className="gap-2 text-sm font-bold data-[state=active]:bg-white data-[state=active]:shadow-sm">
             <Printer className="h-4 w-4" />
@@ -801,6 +806,184 @@ export default function AppearanceSettings() {
                       <p className="text-[10px] text-slate-400">تظهر في لسان المتصفح وبجانب اسم النظام.</p>
                     </div>
                   </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Vehicle Card Tab */}
+        <TabsContent value="vehicleCard" className="mt-6">
+          <Card className="border-slate-200 shadow-sm overflow-hidden">
+            <CardHeader className="bg-slate-50/50 border-b">
+              <CardTitle className="text-lg">إدارة بطاقة السيارة</CardTitle>
+              <CardDescription>تحكم في ألوان البطاقة، إظهار/إخفاء الأيقونات وأزرار الإجراءات في الصفحة الرئيسية</CardDescription>
+            </CardHeader>
+            <CardContent className="p-6 space-y-8">
+              {/* Custom Colors Toggle */}
+              <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-100">
+                <div className="space-y-1">
+                  <Label>استخدام ألوان مخصصة للبطاقة</Label>
+                  <p className="text-[10px] text-slate-400">عند التفعيل سيتم تطبيق الألوان أدناه بدل الألوان الافتراضية للبطاقة الزجاجية</p>
+                </div>
+                <Switch
+                  data-testid="switch-card-custom-colors"
+                  checked={formData.vehicleCardUseCustomColors || false}
+                  onCheckedChange={(checked) => handleChange("vehicleCardUseCustomColors", checked)}
+                />
+              </div>
+
+              {/* Colors */}
+              <div className="space-y-4">
+                <h3 className="text-sm font-bold text-slate-700">ألوان البطاقة</h3>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-xs">لون خلفية البطاقة</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        type="color"
+                        value={formData.vehicleCardBgColor || "#7B1E1E"}
+                        onChange={(e) => handleChange("vehicleCardBgColor", e.target.value)}
+                        className="w-14 h-10 p-1 cursor-pointer"
+                        data-testid="input-card-bg-color"
+                      />
+                      <Input
+                        value={formData.vehicleCardBgColor || "#7B1E1E"}
+                        onChange={(e) => handleChange("vehicleCardBgColor", e.target.value)}
+                        className="font-mono"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-xs">لون نص البطاقة</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        type="color"
+                        value={formData.vehicleCardTextColor || "#FFFFFF"}
+                        onChange={(e) => handleChange("vehicleCardTextColor", e.target.value)}
+                        className="w-14 h-10 p-1 cursor-pointer"
+                        data-testid="input-card-text-color"
+                      />
+                      <Input
+                        value={formData.vehicleCardTextColor || "#FFFFFF"}
+                        onChange={(e) => handleChange("vehicleCardTextColor", e.target.value)}
+                        className="font-mono"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-xs">لون السعر</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        type="color"
+                        value={formData.vehicleCardPriceColor || "#FCD34D"}
+                        onChange={(e) => handleChange("vehicleCardPriceColor", e.target.value)}
+                        className="w-14 h-10 p-1 cursor-pointer"
+                        data-testid="input-card-price-color"
+                      />
+                      <Input
+                        value={formData.vehicleCardPriceColor || "#FCD34D"}
+                        onChange={(e) => handleChange("vehicleCardPriceColor", e.target.value)}
+                        className="font-mono"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-xs">لون التمييز (الفئة ودرجة التجهيز)</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        type="color"
+                        value={formData.vehicleCardAccentColor || "#C49632"}
+                        onChange={(e) => handleChange("vehicleCardAccentColor", e.target.value)}
+                        className="w-14 h-10 p-1 cursor-pointer"
+                        data-testid="input-card-accent-color"
+                      />
+                      <Input
+                        value={formData.vehicleCardAccentColor || "#C49632"}
+                        onChange={(e) => handleChange("vehicleCardAccentColor", e.target.value)}
+                        className="font-mono"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-xs">لون الحدود الفاصلة</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        type="color"
+                        value={formData.vehicleCardBorderColor || "#FFFFFF"}
+                        onChange={(e) => handleChange("vehicleCardBorderColor", e.target.value)}
+                        className="w-14 h-10 p-1 cursor-pointer"
+                        data-testid="input-card-border-color"
+                      />
+                      <Input
+                        value={formData.vehicleCardBorderColor || "#FFFFFF"}
+                        onChange={(e) => handleChange("vehicleCardBorderColor", e.target.value)}
+                        className="font-mono"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-xs">انحناء الزوايا (px)</Label>
+                    <Input
+                      type="number"
+                      min={0}
+                      max={48}
+                      value={formData.vehicleCardBorderRadius ?? 16}
+                      onChange={(e) => handleChange("vehicleCardBorderRadius", parseInt(e.target.value) || 0)}
+                      data-testid="input-card-radius"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Field Visibility */}
+              <div className="space-y-4 pt-4 border-t">
+                <h3 className="text-sm font-bold text-slate-700">إظهار/إخفاء الأيقونات والحقول</h3>
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {[
+                    { key: "vehicleCardShowEngine", label: "سعة المحرك" },
+                    { key: "vehicleCardShowYear", label: "سنة الصنع" },
+                    { key: "vehicleCardShowExteriorColor", label: "اللون الخارجي" },
+                    { key: "vehicleCardShowInteriorColor", label: "اللون الداخلي" },
+                    { key: "vehicleCardShowImportType", label: "نوع الاستيراد" },
+                    { key: "vehicleCardShowOwnership", label: "نوع الملكية" },
+                    { key: "vehicleCardShowLocation", label: "الموقع" },
+                    { key: "vehicleCardShowVin", label: "رقم الهيكل (VIN)" },
+                    { key: "vehicleCardShowPrice", label: "السعر" },
+                    { key: "vehicleCardShowMileage", label: "الممشي" },
+                  ].map((f) => (
+                    <div key={f.key} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-100">
+                      <Label className="text-sm">{f.label}</Label>
+                      <Switch
+                        data-testid={`switch-${f.key}`}
+                        checked={formData[f.key] !== false}
+                        onCheckedChange={(checked) => handleChange(f.key, checked)}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Action Buttons Visibility */}
+              <div className="space-y-4 pt-4 border-t">
+                <h3 className="text-sm font-bold text-slate-700">إظهار/إخفاء أزرار الإجراءات</h3>
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {[
+                    { key: "vehicleCardShowShareBtn", label: "زر المشاركة" },
+                    { key: "vehicleCardShowSellBtn", label: "زر البيع" },
+                    { key: "vehicleCardShowQuoteBtn", label: "زر إنشاء عرض سعر" },
+                    { key: "vehicleCardShowPriceCardBtn", label: "زر بطاقة السعر" },
+                    { key: "vehicleCardShowReserveBtn", label: "زر الحجز / إلغاء الحجز" },
+                  ].map((f) => (
+                    <div key={f.key} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-100">
+                      <Label className="text-sm">{f.label}</Label>
+                      <Switch
+                        data-testid={`switch-${f.key}`}
+                        checked={formData[f.key] !== false}
+                        onCheckedChange={(checked) => handleChange(f.key, checked)}
+                      />
+                    </div>
+                  ))}
                 </div>
               </div>
             </CardContent>

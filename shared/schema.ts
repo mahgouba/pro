@@ -1115,6 +1115,34 @@ export const appearanceSettings = pgTable("appearance_settings", {
   watermarkEnabled: boolean("watermark_enabled").default(false),
   homeWatermarkEnabled: boolean("home_watermark_enabled").default(true),
   showBankDetails: boolean("show_bank_details").default(false),
+
+  // Vehicle Card Appearance
+  vehicleCardBgColor: varchar("vehicle_card_bg_color", { length: 7 }).default("#7B1E1E"),
+  vehicleCardTextColor: varchar("vehicle_card_text_color", { length: 7 }).default("#FFFFFF"),
+  vehicleCardPriceColor: varchar("vehicle_card_price_color", { length: 7 }).default("#FCD34D"),
+  vehicleCardAccentColor: varchar("vehicle_card_accent_color", { length: 7 }).default("#C49632"),
+  vehicleCardBorderColor: varchar("vehicle_card_border_color", { length: 7 }).default("#FFFFFF"),
+  vehicleCardBorderRadius: integer("vehicle_card_border_radius").default(16),
+  vehicleCardUseCustomColors: boolean("vehicle_card_use_custom_colors").default(false),
+
+  // Vehicle Card Field Visibility
+  vehicleCardShowEngine: boolean("vehicle_card_show_engine").default(true),
+  vehicleCardShowYear: boolean("vehicle_card_show_year").default(true),
+  vehicleCardShowExteriorColor: boolean("vehicle_card_show_exterior_color").default(true),
+  vehicleCardShowInteriorColor: boolean("vehicle_card_show_interior_color").default(true),
+  vehicleCardShowImportType: boolean("vehicle_card_show_import_type").default(true),
+  vehicleCardShowOwnership: boolean("vehicle_card_show_ownership").default(true),
+  vehicleCardShowLocation: boolean("vehicle_card_show_location").default(true),
+  vehicleCardShowVin: boolean("vehicle_card_show_vin").default(true),
+  vehicleCardShowPrice: boolean("vehicle_card_show_price").default(true),
+  vehicleCardShowMileage: boolean("vehicle_card_show_mileage").default(true),
+
+  // Vehicle Card Action Buttons Visibility
+  vehicleCardShowShareBtn: boolean("vehicle_card_show_share_btn").default(true),
+  vehicleCardShowSellBtn: boolean("vehicle_card_show_sell_btn").default(true),
+  vehicleCardShowQuoteBtn: boolean("vehicle_card_show_quote_btn").default(true),
+  vehicleCardShowPriceCardBtn: boolean("vehicle_card_show_price_card_btn").default(true),
+  vehicleCardShowReserveBtn: boolean("vehicle_card_show_reserve_btn").default(true),
   quotationBackgroundType: varchar("quotation_background_type", { length: 20 }).default("albarimi2"), // albarimi1, albarimi2, dynamic
   quotationPrimaryColor: varchar("quotation_primary_color", { length: 7 }).default("#1A365D"),
   quotationSecondaryColor: varchar("quotation_secondary_color", { length: 7 }).default("#2B4C8C"),
