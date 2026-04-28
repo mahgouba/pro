@@ -877,7 +877,7 @@ export default function CardViewPage({ userRole, username, onLogout }: CardViewP
     <div className={`min-h-screen relative overflow-hidden ${
       neumorphismMode 
         ? 'bg-gradient-to-br from-gray-200 via-gray-300 to-gray-400' 
-        : 'bg-gradient-to-br from-[#00627F] via-[#004861] to-[#00627F]'
+        : ''
     }`} dir="rtl">
       {/* Company Logo Background */}
       <div className="absolute inset-0 flex items-center justify-center opacity-5 pointer-events-none">
