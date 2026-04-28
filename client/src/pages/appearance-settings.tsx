@@ -820,6 +820,107 @@ export default function AppearanceSettings() {
               <CardDescription>تحكم في ألوان البطاقة، إظهار/إخفاء الأيقونات وأزرار الإجراءات في الصفحة الرئيسية</CardDescription>
             </CardHeader>
             <CardContent className="p-6 space-y-8">
+              {/* Live Preview */}
+              <div className="sticky top-0 z-20 -mx-6 -mt-6 px-6 pt-4 pb-4 mb-2 bg-gradient-to-b from-slate-100 to-slate-50 border-b border-slate-200">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-sm font-bold text-slate-700">معاينة مباشرة للبطاقة</h3>
+                  <span className="text-[10px] text-slate-400">تتحدث فوراً مع كل تغيير</span>
+                </div>
+                <div className="flex justify-center">
+                  <div
+                    className="w-full max-w-sm overflow-hidden border-0 relative shadow-lg"
+                    data-testid="preview-vehicle-card"
+                    style={
+                      formData.vehicleCardUseCustomColors
+                        ? {
+                            backgroundColor: formData.vehicleCardBgColor || "#7B1E1E",
+                            color: formData.vehicleCardTextColor || "#FFFFFF",
+                            borderRadius: `${formData.vehicleCardBorderRadius ?? 16}px`,
+                          }
+                        : {
+                            background: "linear-gradient(135deg, rgba(123,30,30,0.95), rgba(90,20,20,0.95))",
+                            color: "#FFFFFF",
+                            borderRadius: `${formData.vehicleCardBorderRadius ?? 16}px`,
+                            backdropFilter: "blur(10px)",
+                          }
+                    }
+                  >
+                    <div className="p-4 pb-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-sm" style={{ color: formData.vehicleCardAccentColor || "#C49632" }}>فئة كاملة</span>
+                          <span className="font-bold text-sm" style={{ color: formData.vehicleCardAccentColor || "#C49632" }}>تجهيز فاخر</span>
+                        </div>
+                        <span className="text-[10px] bg-green-500/30 text-white px-2 py-0.5 rounded-full">متوفر</span>
+                      </div>
+                    </div>
+                    <div className="px-4 pb-4 space-y-3 text-sm">
+                      {(formData.vehicleCardShowEngine !== false || formData.vehicleCardShowYear !== false || formData.vehicleCardShowExteriorColor !== false) && (
+                        <div className="grid grid-cols-3 gap-2 text-xs">
+                          <div>{formData.vehicleCardShowEngine !== false ? "🔧 3.5L" : ""}</div>
+                          <div>{formData.vehicleCardShowYear !== false ? "📅 2025" : ""}</div>
+                          <div>{formData.vehicleCardShowExteriorColor !== false ? "🎨 أبيض" : ""}</div>
+                        </div>
+                      )}
+                      {(formData.vehicleCardShowInteriorColor !== false || formData.vehicleCardShowImportType !== false || formData.vehicleCardShowOwnership !== false) && (
+                        <div className="grid grid-cols-3 gap-2 text-xs">
+                          <div>{formData.vehicleCardShowInteriorColor !== false ? "🪑 بيج" : ""}</div>
+                          <div>{formData.vehicleCardShowImportType !== false ? "🚢 شخصي" : ""}</div>
+                          <div>{formData.vehicleCardShowOwnership !== false ? "🏷️ مستعمل" : ""}</div>
+                        </div>
+                      )}
+                      {(formData.vehicleCardShowLocation !== false || formData.vehicleCardShowVin !== false) && (
+                        <div className="grid grid-cols-3 gap-2 text-xs">
+                          <div>{formData.vehicleCardShowLocation !== false ? "📍 المعرض" : ""}</div>
+                          <div className="col-span-2">{formData.vehicleCardShowVin !== false ? "VIN: WDB1234567890" : ""}</div>
+                        </div>
+                      )}
+                      {(formData.vehicleCardShowPrice !== false || formData.vehicleCardShowMileage !== false) && (
+                        <div
+                          className="flex justify-between items-center py-2 border-t mt-3"
+                          style={{ borderColor: formData.vehicleCardUseCustomColors ? (formData.vehicleCardBorderColor || "#FFFFFF") : "rgba(255,255,255,0.2)" }}
+                        >
+                          {formData.vehicleCardShowPrice !== false && (
+                            <div className="flex items-center gap-1">
+                              <span className="text-xs opacity-80">السعر:</span>
+                              <span className="font-bold text-sm" style={{ color: formData.vehicleCardPriceColor || "#FCD34D" }}>250,000 ر.س</span>
+                            </div>
+                          )}
+                          {formData.vehicleCardShowMileage !== false && (
+                            <div className="flex items-center gap-1">
+                              <span className="text-xs opacity-80">ممشي:</span>
+                              <span className="font-bold text-sm" style={{ color: formData.vehicleCardPriceColor || "#FCD34D" }}>15,000 كم</span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      {(formData.vehicleCardShowShareBtn !== false || formData.vehicleCardShowSellBtn !== false || formData.vehicleCardShowQuoteBtn !== false || formData.vehicleCardShowPriceCardBtn !== false || formData.vehicleCardShowReserveBtn !== false) && (
+                        <div
+                          className="pt-3 mt-3 border-t flex justify-center gap-1"
+                          style={{ borderColor: formData.vehicleCardUseCustomColors ? (formData.vehicleCardBorderColor || "#FFFFFF") : "rgba(255,255,255,0.2)" }}
+                        >
+                          {formData.vehicleCardShowShareBtn !== false && (
+                            <span className="px-2 h-7 inline-flex items-center justify-center rounded border border-yellow-300 bg-white/10 text-[11px]" style={{ color: "#BF9231" }}>↗</span>
+                          )}
+                          {formData.vehicleCardShowSellBtn !== false && (
+                            <span className="px-2 h-7 inline-flex items-center justify-center rounded border border-green-300 bg-white/10 text-[11px] text-green-300">🛒</span>
+                          )}
+                          {formData.vehicleCardShowQuoteBtn !== false && (
+                            <span className="px-2 h-7 inline-flex items-center justify-center rounded border border-purple-300 bg-white/10 text-[11px] text-purple-300">📄</span>
+                          )}
+                          {formData.vehicleCardShowPriceCardBtn !== false && (
+                            <span className="px-2 h-7 inline-flex items-center justify-center rounded border border-indigo-300 bg-white/10 text-[11px] text-indigo-300">🧾</span>
+                          )}
+                          {formData.vehicleCardShowReserveBtn !== false && (
+                            <span className="px-2 h-7 inline-flex items-center justify-center rounded border border-blue-300 bg-white/10 text-[11px] text-blue-300">📅</span>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               {/* Custom Colors Toggle */}
               <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-100">
                 <div className="space-y-1">
