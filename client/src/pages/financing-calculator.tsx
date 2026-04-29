@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -115,6 +115,95 @@ interface FormData {
   vehicleExteriorColor: string;
   vehicleInteriorColor: string;
   notes: string;
+}
+
+interface SavedCustomer {
+  customerName: string;
+  customerPhone: string;
+  customerSalary: string;
+}
+
+function CustomerSearchInput({
+  field,
+  value,
+  onChange,
+  onSelectCustomer,
+  savedCustomers,
+  placeholder,
+  testId,
+}: {
+  field: "name" | "phone";
+  value: string;
+  onChange: (value: string) => void;
+  onSelectCustomer: (customer: SavedCustomer) => void;
+  savedCustomers: SavedCustomer[];
+  placeholder: string;
+  testId: string;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const query = (value || "").trim().toLowerCase();
+  const matches = query.length >= 1
+    ? savedCustomers.filter((c) => {
+        const target = field === "name" ? c.customerName : c.customerPhone;
+        return target && target.toLowerCase().includes(query) && target.toLowerCase() !== query;
+      }).slice(0, 8)
+    : [];
+
+  return (
+    <div className="relative" ref={containerRef}>
+      <Input
+        value={value}
+        onChange={(e) => {
+          onChange(e.target.value);
+          setIsOpen(true);
+        }}
+        onFocus={() => setIsOpen(true)}
+        placeholder={placeholder}
+        className="bg-white/5 border-white/20 text-white"
+        data-testid={testId}
+        autoComplete="off"
+      />
+      {isOpen && matches.length > 0 && (
+        <div
+          className="absolute z-50 mt-1 w-full max-h-64 overflow-auto rounded-md border border-white/20 bg-slate-900/95 backdrop-blur-md shadow-xl"
+          data-testid={`dropdown-customer-${field}`}
+        >
+          {matches.map((c, idx) => (
+            <button
+              type="button"
+              key={`${c.customerName}-${c.customerPhone}-${idx}`}
+              onClick={() => {
+                onSelectCustomer(c);
+                setIsOpen(false);
+              }}
+              className="w-full text-right px-3 py-2 hover:bg-white/10 border-b border-white/5 last:border-b-0 transition-colors"
+              data-testid={`option-customer-${idx}`}
+            >
+              <div className="text-white text-sm font-medium">{c.customerName || "غير محدد"}</div>
+              <div className="text-white/50 text-xs flex justify-between gap-2">
+                <span>{c.customerPhone || "—"}</span>
+                {c.customerSalary && parseFloat(c.customerSalary) > 0 && (
+                  <span>راتب: {parseFloat(c.customerSalary).toLocaleString()} ر.س</span>
+                )}
+              </div>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default function FinancingCalculatorPage() {
@@ -313,6 +402,27 @@ export default function FinancingCalculatorPage() {
   const { data: savedCalculations = [] } = useQuery<any[]>({
     queryKey: ["/api/financing-calculations"],
   });
+
+  // Build a unique list of customers from saved calculations (most recent first)
+  const uniqueCustomers: SavedCustomer[] = (() => {
+    const seen = new Set<string>();
+    const list: SavedCustomer[] = [];
+    for (const calc of savedCalculations) {
+      const name = (calc?.customerName || "").trim();
+      const phone = (calc?.customerPhone || "").trim();
+      if (!name && !phone) continue;
+      if (name === "غير محدد" && !phone) continue;
+      const key = `${name.toLowerCase()}|${phone.toLowerCase()}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      list.push({
+        customerName: name,
+        customerPhone: phone,
+        customerSalary: calc?.customerSalary?.toString() || "",
+      });
+    }
+    return list;
+  })();
    useEffect(() => {
      if (selectedBank && (selectedBank as any).rates) {
        // In this system, selectedBank.rates is actually the rates array from FinancingRate
@@ -1138,22 +1248,40 @@ export default function FinancingCalculatorPage() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <Label>اسم العميل</Label>
-                  <Input
+                  <CustomerSearchInput
+                    field="name"
                     value={formData.customerName}
-                    onChange={(e) => handleInputChange("customerName", e.target.value)}
+                    onChange={(v) => handleInputChange("customerName", v)}
+                    onSelectCustomer={(c) => {
+                      setFormData((prev) => ({
+                        ...prev,
+                        customerName: c.customerName || "",
+                        customerPhone: c.customerPhone || "",
+                        customerSalary: c.customerSalary || "",
+                      }));
+                    }}
+                    savedCustomers={uniqueCustomers}
                     placeholder="الاسم الثلاثي"
-                    className="bg-white/5 border-white/20 text-white"
-                    data-testid="input-customer-name"
+                    testId="input-customer-name"
                   />
                 </div>
                 <div>
                   <Label>رقم الجوال</Label>
-                  <Input
+                  <CustomerSearchInput
+                    field="phone"
                     value={formData.customerPhone}
-                    onChange={(e) => handleInputChange("customerPhone", e.target.value)}
+                    onChange={(v) => handleInputChange("customerPhone", v)}
+                    onSelectCustomer={(c) => {
+                      setFormData((prev) => ({
+                        ...prev,
+                        customerName: c.customerName || "",
+                        customerPhone: c.customerPhone || "",
+                        customerSalary: c.customerSalary || "",
+                      }));
+                    }}
+                    savedCustomers={uniqueCustomers}
                     placeholder="05xxxxxxxx"
-                    className="bg-white/5 border-white/20 text-white"
-                    data-testid="input-customer-phone"
+                    testId="input-customer-phone"
                   />
                 </div>
                 <div>
