@@ -73,7 +73,13 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
   };
 
   return (
-    <div className="glass-background min-h-screen flex items-center justify-center p-4" dir="rtl">
+    <div
+      className="min-h-screen flex items-center justify-center p-4"
+      dir="rtl"
+      style={{
+        background: "var(--app-page-bg, var(--theme-gradient, linear-gradient(135deg, var(--dynamic-primary, #1f2937) 0%, var(--dynamic-secondary, #475569) 100%)))",
+      }}
+    >
       <Card className="w-full max-w-md glass-container border-0 relative z-10">
         <CardHeader className="text-center glass-header">
           <CardTitle className="text-2xl font-bold text-white">تسجيل الدخول</CardTitle>
