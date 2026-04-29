@@ -73,13 +73,13 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-black flex items-center justify-center p-4" dir="rtl">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">تسجيل الدخول</CardTitle>
-          <p className="text-muted-foreground">تسجيل الدخول إلى النظام</p>
+    <div className="glass-background min-h-screen flex items-center justify-center p-4" dir="rtl">
+      <Card className="w-full max-w-md glass-container border-0 relative z-10">
+        <CardHeader className="text-center glass-header">
+          <CardTitle className="text-2xl font-bold text-white">تسجيل الدخول</CardTitle>
+          <p className="text-white/70">تسجيل الدخول إلى النظام</p>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           <Form {...loginForm}>
             <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
               <FormField
@@ -87,9 +87,15 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
                 name="username"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>اسم المستخدم</FormLabel>
+                    <FormLabel className="text-white">اسم المستخدم</FormLabel>
                     <FormControl>
-                      <Input placeholder="أدخل اسم المستخدم" {...field} />
+                      <Input
+                        placeholder="أدخل اسم المستخدم"
+                        autoComplete="username"
+                        className="glass-input placeholder:text-white/50"
+                        data-testid="input-username"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -100,18 +106,26 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>كلمة المرور</FormLabel>
+                    <FormLabel className="text-white">كلمة المرور</FormLabel>
                     <FormControl>
-                      <Input type="password" placeholder="أدخل كلمة المرور" {...field} />
+                      <Input
+                        type="password"
+                        placeholder="أدخل كلمة المرور"
+                        autoComplete="current-password"
+                        className="glass-input placeholder:text-white/50"
+                        data-testid="input-password"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <Button 
-                type="submit" 
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-4 rounded-lg transition-colors duration-200" 
+              <Button
+                type="submit"
+                className="glass-button w-full font-medium py-2.5 px-4 rounded-lg"
                 disabled={isLoading}
+                data-testid="button-login"
               >
                 <LogIn className="ml-2 h-4 w-4" />
                 {isLoading ? "جاري تسجيل الدخول..." : "تسجيل الدخول"}
