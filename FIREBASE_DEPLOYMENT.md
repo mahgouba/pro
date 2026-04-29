@@ -32,18 +32,26 @@ This project is organized for deployment on **Firebase Hosting** (frontend) and 
 - All requests to `/api/**` are rewritten to the `api` function (see `firebase.json`).
 - All other paths fall back to `index.html` for client-side routing.
 
-## Required environment variables
+## Required secrets
 
-Set these in Firebase Functions configuration before deploying:
+The Cloud Function reads its configuration from **Google Secret Manager**
+(via `firebase-functions/params.defineSecret`). The `api` function declares
+`DATABASE_URL`, `NEON_DATABASE_URL`, and `SESSION_SECRET` and Firebase
+binds them as plain `process.env.*` values at runtime.
+
+Create the secrets once with:
 
 ```bash
 firebase functions:secrets:set DATABASE_URL
-# (if you use Neon serverless)
-firebase functions:secrets:set NEON_DATABASE_URL
+firebase functions:secrets:set NEON_DATABASE_URL   # optional alias
 firebase functions:secrets:set SESSION_SECRET
 ```
 
-Or use the deprecated `firebase functions:config:set` if your project still uses it.
+You can update a secret later with the same command (it creates a new version).
+List existing secrets with `firebase functions:secrets:access <NAME>`.
+
+> Locally (`npm run dev`) the same variables are read from `.env` via `dotenv`.
+> No Firebase configuration is needed for local development.
 
 ## One-time setup
 
