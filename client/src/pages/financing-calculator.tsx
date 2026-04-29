@@ -825,20 +825,6 @@ export default function FinancingCalculatorPage() {
         </div>
 
         <div class="section">
-          <div class="section-title">بيانات العميل</div>
-          <div class="section-content">
-            <div class="grid">
-              <div class="field" data-empty="${!formData.customerName}"><span class="label">اسم العميل:</span><span class="value">${formData.customerName || "غير محدد"}</span></div>
-              <div class="field" data-empty="${!formData.customerPhone}"><span class="label">رقم الجوال:</span><span class="value">${formData.customerPhone || "غير محدد"}</span></div>
-              <div class="field" data-empty="${!formData.customerAge}"><span class="label">العمر:</span><span class="value">${formData.customerAge || "غير محدد"} سنة</span></div>
-              <div class="field" data-empty="${!formData.customerJob}"><span class="label">الوظيفة:</span><span class="value">${formData.customerJob || "غير محدد"}</span></div>
-              <div class="field" data-empty="${!formData.customerSalary}"><span class="label">الراتب الشهري:</span><span class="value">${formData.customerSalary ? formatCurrency(parseFloat(formData.customerSalary)) : "غير محدد"}</span></div>
-              <div class="field" data-empty="${!formData.salaryTransferBank}"><span class="label">البنك المحول:</span><span class="value">${formData.salaryTransferBank || "غير محدد"}</span></div>
-            </div>
-          </div>
-        </div>
-
-        <div class="section">
           <div class="section-title">بيانات المركبة</div>
           <div class="section-content">
             <div class="grid">
@@ -1129,92 +1115,6 @@ export default function FinancingCalculatorPage() {
         </div>
 
         <div className="space-y-6">
-          {/* Customer Information Section */}
-          <Card className="glass-container">
-            <CardHeader className="pb-3 border-b border-white/10">
-              <CardTitle className="text-lg font-semibold text-white drop-shadow-lg flex items-center">
-                <Plus className="h-5 w-5 ml-2 text-blue-400" />
-                بيانات العميل
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div>
-                  <Label>اسم العميل</Label>
-                  <Input 
-                    value={formData.customerName} 
-                    onChange={(e) => handleInputChange("customerName", e.target.value)}
-                    placeholder="الاسم الثلاثي"
-                    className="bg-white/5 border-white/20 text-white"
-                  />
-                </div>
-                <div>
-                  <Label>رقم الجوال</Label>
-                  <Input 
-                    value={formData.customerPhone} 
-                    onChange={(e) => handleInputChange("customerPhone", e.target.value)}
-                    placeholder="05xxxxxxxx"
-                    className="bg-white/5 border-white/20 text-white"
-                  />
-                </div>
-                <div>
-                  <Label>العمر</Label>
-                  <Input 
-                    value={formData.customerAge} 
-                    onChange={(e) => handleInputChange("customerAge", e.target.value)}
-                    placeholder="مثال: 30"
-                    className="bg-white/5 border-white/20 text-white"
-                  />
-                </div>
-                <div>
-                  <Label>الوظيفة</Label>
-                  <Input 
-                    value={formData.customerJob} 
-                    onChange={(e) => handleInputChange("customerJob", e.target.value)}
-                    placeholder="مثال: موظف حكومي"
-                    className="bg-white/5 border-white/20 text-white"
-                  />
-                </div>
-                <div>
-                  <Label>الراتب (ريال)</Label>
-                  <Input 
-                    value={formData.customerSalary} 
-                    onChange={(e) => handleInputChange("customerSalary", e.target.value)}
-                    placeholder="0.00"
-                    className="bg-white/5 border-white/20 text-white"
-                  />
-                </div>
-                <div>
-                  <Label>البنك المحول عليه</Label>
-                  <Input 
-                    value={formData.salaryTransferBank} 
-                    onChange={(e) => handleInputChange("salaryTransferBank", e.target.value)}
-                    placeholder="اسم البنك"
-                    className="bg-white/5 border-white/20 text-white"
-                  />
-                </div>
-                <div>
-                  <Label>الالتزامات المالية (ريال)</Label>
-                  <Input 
-                    value={formData.financialCommitment} 
-                    onChange={(e) => handleInputChange("financialCommitment", e.target.value)}
-                    placeholder="0.00"
-                    className="bg-white/5 border-white/20 text-white"
-                  />
-                </div>
-                <div>
-                  <Label>نوع الالتزام</Label>
-                  <Input 
-                    value={formData.commitmentType} 
-                    onChange={(e) => handleInputChange("commitmentType", e.target.value)}
-                    placeholder="مثال: قرض شخصي"
-                    className="bg-white/5 border-white/20 text-white"
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
           {/* Vehicle Information Section */}
           <Card className="glass-container">
             <CardHeader className="pb-3 border-b border-white/10">
@@ -1704,24 +1604,6 @@ export default function FinancingCalculatorPage() {
               </CardHeader>
               <CardContent id="calculation-result" className="p-0">
                 <div className="p-6 space-y-8">
-                  {/* Customer Info Section */}
-                  <div className="space-y-4">
-                    <h3 className="text-blue-400 font-bold flex items-center gap-2 text-sm uppercase tracking-wider">
-                      <Plus className="h-4 w-4" />
-                      بيانات العميل
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg border border-white/5">
-                        <span className="text-white/50 text-xs">اسم العميل</span>
-                        <span className="text-white font-medium text-sm">{formData.customerName || "غير محدد"}</span>
-                      </div>
-                      <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg border border-white/5">
-                        <span className="text-white/50 text-xs">رقم الجوال</span>
-                        <span className="text-white font-medium text-sm">{formData.customerPhone || "غير محدد"}</span>
-                      </div>
-                    </div>
-                  </div>
-
                   {/* Vehicle Info */}
                   <div className="space-y-4">
                     <h3 className="text-blue-400 font-bold flex items-center gap-2 text-sm uppercase tracking-wider">
