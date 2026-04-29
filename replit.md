@@ -24,10 +24,19 @@ The system is built with a modern technology stack:
 - **Global theming**: The `/appearance-settings` page is the single source of truth for all colors, fonts, dark mode, RTL, and theme style. `client/src/components/theme-provider.tsx` reads `/api/appearance` and injects every color from the `appearance_settings` table as CSS custom properties on `:root` (`--dynamic-primary`, `--dynamic-secondary`, `--dynamic-accent`, `--dynamic-card-bg`, `--dynamic-border`, `--dynamic-text-primary`, etc., plus shadcn HSL channels and an `--app-page-bg` gradient). It auto-switches between light/dark palettes based on `darkModeEnabled`, toggles the `.dark` class, sets `dir`, applies the favicon, and updates the document title. `client/src/index.css` reads these variables for body background, glass containers, gold accents, custom-primary classes, checkbox/radio accent color, etc., so changes saved on the appearance page apply system-wide on the next render.
 - **Technical Implementations**: Includes robust API endpoints for CRUD operations across all modules, secure password hashing with bcrypt, and role-based filtering for data visibility.
 
+## Deployment
+
+The project is organized for deployment on **Firebase Hosting + Cloud Functions**. See `FIREBASE_DEPLOYMENT.md` for the full guide.
+
+- **Local development**: `server/index.ts` is the dev entry (Express + Vite on port 5000), used by `npm run dev`.
+- **Firebase Function entry**: `server/firebase-entry.ts` exports the `api` function.
+- **Functions package**: `functions/` is a self-contained Firebase Functions package with its own `package.json`. Its build script bundles `server/firebase-entry.ts` into `functions/lib/index.js` via esbuild.
+- **Hosting**: `firebase.json` serves `dist/public` (built by `npm run build`) and rewrites `/api/**` → `api` function.
+
 ## External Dependencies
 - **PostgreSQL**: Primary database for all system data.
 - **Neon**: An external PostgreSQL database service used for primary data storage and deployment.
-- **Vercel**: Deployment platform targeted for production environment.
+- **Firebase Hosting + Cloud Functions**: Deployment platform for the production environment.
 - **Passport.js**: Authentication middleware.
 - **TanStack Query**: Data fetching and state management library.
 - **Tailwind CSS**: Utility-first CSS framework.

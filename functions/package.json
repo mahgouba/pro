@@ -1,0 +1,20 @@
+{
+  "name": "rest-express-functions",
+  "version": "1.0.0",
+  "description": "Firebase Cloud Functions entry for the Express API",
+  "main": "lib/index.js",
+  "engines": {
+    "node": "20"
+  },
+  "scripts": {
+    "build": "esbuild ../server/firebase-entry.ts --platform=node --bundle --format=cjs --target=node20 --external:firebase-functions --external:firebase-admin --outfile=lib/index.js"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.8.0",
+    "firebase-functions": "^7.2.5"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.6"
+  },
+  "private": true
+}

@@ -2,14 +2,13 @@ import "dotenv/config";
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
-import { onRequest } from "firebase-functions/v2/https";
 
 const app = express();
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ extended: false, limit: '50mb' }));
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ extended: false, limit: "50mb" }));
 
 // Serve static files from public directory
-app.use(express.static('public'));
+app.use(express.static("public"));
 
 app.use((req, res, next) => {
   const start = Date.now();
@@ -41,58 +40,33 @@ app.use((req, res, next) => {
   next();
 });
 
-let serverInitialized = false;
-let serverPromise: Promise<any> | null = null;
+(async () => {
+  console.log("Starting server initialization...");
+  console.log("Registering routes...");
+  const server = await registerRoutes(app);
+  console.log("Routes registered, setting up Vite/static...");
 
-async function initializeServer() {
-  if (serverPromise) return serverPromise;
-  
-  serverPromise = (async () => {
-    console.log("Starting server initialization...");
-    console.log("Registering routes...");
-    const server = await registerRoutes(app);
-    console.log("Routes registered, setting up Vite/static...");
+  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+    const status = err.status || err.statusCode || 500;
+    const message = err.message || "Internal Server Error";
+    res.status(status).json({ message });
+    if (process.env.NODE_ENV !== "production") throw err;
+  });
 
-    app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-      const status = err.status || err.statusCode || 500;
-      const message = err.message || "Internal Server Error";
-      res.status(status).json({ message });
-      if (process.env.NODE_ENV !== "production") throw err;
-    });
+  if (process.env.NODE_ENV !== "production") {
+    await setupVite(app, server);
+  } else {
+    serveStatic(app);
+  }
 
-    if (process.env.NODE_ENV !== "production") {
-      await setupVite(app, server);
-    } else {
-      serveStatic(app);
-    }
-    
-    serverInitialized = true;
-    return server;
-  })();
-  
-  return serverPromise;
-}
-
-// Local development
-if (process.env.NODE_ENV !== "production" || !process.env.FUNCTION_SIGNATURE_TYPE) {
-  (async () => {
-    const server = await initializeServer();
-    const port = process.env.PORT || 5000;
-    server.listen({
+  const port = process.env.PORT || 5000;
+  server.listen(
+    {
       port: Number(port),
       host: "0.0.0.0",
-    }, () => {
+    },
+    () => {
       log(`serving on port ${port}`);
-    });
-  })();
-}
-
-// Firebase Cloud Function export
-export const api = onRequest({
-  memory: "1GiB",
-  timeoutSeconds: 60,
-  cors: true,
-}, async (req, res) => {
-  await initializeServer();
-  return app(req, res);
-});
+    }
+  );
+})();
