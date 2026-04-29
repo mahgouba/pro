@@ -193,28 +193,28 @@ export default function AppearanceSettings() {
       </div>
 
       <Tabs defaultValue="branding" className="w-full">
-        <TabsList className="grid w-full grid-cols-6 h-14 bg-slate-100/50 p-1 rounded-xl">
-          <TabsTrigger value="branding" className="gap-2 text-sm font-bold data-[state=active]:bg-white data-[state=active]:shadow-sm">
+        <TabsList className="grid w-full grid-cols-6 h-14 glass-container p-1 rounded-xl border-0">
+          <TabsTrigger value="branding" className="gap-2 text-sm font-bold text-white/80 data-[state=active]:bg-white/15 data-[state=active]:text-white data-[state=active]:shadow-sm">
             <ImageIcon className="h-4 w-4" />
             الهوية والشعار
           </TabsTrigger>
-          <TabsTrigger value="colors" className="gap-2 text-sm font-bold data-[state=active]:bg-white data-[state=active]:shadow-sm">
+          <TabsTrigger value="colors" className="gap-2 text-sm font-bold text-white/80 data-[state=active]:bg-white/15 data-[state=active]:text-white data-[state=active]:shadow-sm">
             <Palette className="h-4 w-4" />
             الألوان والسمات
           </TabsTrigger>
-          <TabsTrigger value="fonts" className="gap-2 text-sm font-bold data-[state=active]:bg-white data-[state=active]:shadow-sm">
+          <TabsTrigger value="fonts" className="gap-2 text-sm font-bold text-white/80 data-[state=active]:bg-white/15 data-[state=active]:text-white data-[state=active]:shadow-sm">
             <Type className="h-4 w-4" />
             الخطوط والأيقونات
           </TabsTrigger>
-          <TabsTrigger value="vehicleCard" className="gap-2 text-sm font-bold data-[state=active]:bg-white data-[state=active]:shadow-sm" data-testid="tab-vehicle-card">
+          <TabsTrigger value="vehicleCard" className="gap-2 text-sm font-bold text-white/80 data-[state=active]:bg-white/15 data-[state=active]:text-white data-[state=active]:shadow-sm" data-testid="tab-vehicle-card">
             <CreditCard className="h-4 w-4" />
             بطاقة السيارة
           </TabsTrigger>
-          <TabsTrigger value="printing" className="gap-2 text-sm font-bold data-[state=active]:bg-white data-[state=active]:shadow-sm">
+          <TabsTrigger value="printing" className="gap-2 text-sm font-bold text-white/80 data-[state=active]:bg-white/15 data-[state=active]:text-white data-[state=active]:shadow-sm">
             <Printer className="h-4 w-4" />
             المطبوعات (PDF)
           </TabsTrigger>
-          <TabsTrigger value="quotation" className="gap-2 text-sm font-bold data-[state=active]:bg-white data-[state=active]:shadow-sm">
+          <TabsTrigger value="quotation" className="gap-2 text-sm font-bold text-white/80 data-[state=active]:bg-white/15 data-[state=active]:text-white data-[state=active]:shadow-sm">
             <FileText className="h-4 w-4" />
             تصميم عرض السعر
           </TabsTrigger>

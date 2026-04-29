@@ -258,29 +258,29 @@ export default function UserManagement() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-black flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600 mx-auto"></div>
-          <p className="mt-4 text-slate-600 dark:text-slate-400">جاري تحميل المستخدمين...</p>
+      <div className="glass-background min-h-screen flex items-center justify-center">
+        <div className="text-center relative z-10">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white/80 mx-auto"></div>
+          <p className="mt-4 text-white/80">جاري تحميل المستخدمين...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-black" dir="rtl">
+    <div className="glass-background min-h-screen" dir="rtl">
       {/* Header */}
-      <header className="bg-white dark:bg-gray-900 shadow-sm border-b border-slate-200 dark:border-gray-700 sticky top-0 z-50">
+      <header className="glass-header sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-4 space-x-reverse">
               <Link href="/">
-                <Button variant="ghost" size="sm" className="text-slate-600 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-100">
+                <Button variant="ghost" size="sm" className="text-white/80 hover:text-white hover:bg-white/10">
                   <ArrowLeft size={18} className="ml-2" />
                   العودة للرئيسية
                 </Button>
               </Link>
-              <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">إدارة المستخدمين</h1>
+              <h1 className="text-xl font-bold text-white">إدارة المستخدمين</h1>
             </div>
             
             <div className="flex items-center space-x-2 space-x-reverse">
@@ -288,7 +288,7 @@ export default function UserManagement() {
               <Button 
                 variant="ghost" 
                 size="sm" 
-                className="p-2 text-slate-600 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-100" 
+                className="p-2 text-white/80 hover:text-white hover:bg-white/10" 
                 onClick={toggleDarkMode}
               >
                 {darkMode ? <Sun size={18} /> : <Moon size={18} />}
@@ -298,14 +298,14 @@ export default function UserManagement() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4 space-x-reverse">
-              <Users className="w-8 h-8 text-custom-primary" />
+              <Users className="w-8 h-8 text-white" />
               <div>
-                <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">المستخدمين</h2>
-                <p className="text-slate-600 dark:text-slate-400">إدارة حسابات المستخدمين في النظام</p>
+                <h2 className="text-2xl font-bold text-white">المستخدمين</h2>
+                <p className="text-white/70">إدارة حسابات المستخدمين في النظام</p>
               </div>
             </div>
 

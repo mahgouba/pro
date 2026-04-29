@@ -375,10 +375,10 @@ export default function QuotationEditPage({}: QuotationEditPageProps) {
 
   if (quotationLoading) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-black flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-slate-500">جاري تحميل عرض السعر...</p>
+      <div className="glass-background min-h-screen flex items-center justify-center">
+        <div className="text-center relative z-10">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white/80 mx-auto mb-4"></div>
+          <p className="text-white/80">جاري تحميل عرض السعر...</p>
         </div>
       </div>
     );
@@ -386,17 +386,17 @@ export default function QuotationEditPage({}: QuotationEditPageProps) {
 
   if (!quotation) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-black flex items-center justify-center">
-        <Card className="max-w-md w-full mx-4">
+      <div className="glass-background min-h-screen flex items-center justify-center">
+        <Card className="max-w-md w-full mx-4 glass-container border-0 relative z-10">
           <CardHeader>
-            <CardTitle className="text-center text-red-600">عرض السعر غير موجود</CardTitle>
+            <CardTitle className="text-center text-red-300">عرض السعر غير موجود</CardTitle>
           </CardHeader>
           <CardContent className="text-center">
-            <p className="text-slate-600 dark:text-slate-400 mb-4">
+            <p className="text-white/70 mb-4">
               لم يتم العثور على عرض السعر المطلوب
             </p>
             <Link href="/card-view">
-              <Button>
+              <Button className="glass-button">
                 <ArrowLeft size={16} className="ml-2" />
                 العودة للصفحة الرئيسية
               </Button>
@@ -408,19 +408,19 @@ export default function QuotationEditPage({}: QuotationEditPageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-black">
+    <div className="glass-background min-h-screen">
       {/* Header */}
-      <header className="dark:bg-slate-900 shadow-sm border-b border-slate-200 dark:border-slate-700 sticky top-0 z-50 no-print mt-[8px] mb-[8px] pt-[37px] pb-[37px] pl-[-9px] pr-[-9px] bg-[#ffffff]">
+      <header className="glass-header sticky top-0 z-50 no-print mt-[8px] mb-[8px] pt-[37px] pb-[37px]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-4 space-x-reverse">
               <Link href="/card-view">
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" className="glass-button border-white/20">
                   <ArrowLeft size={16} className="ml-2" />
                   العودة
                 </Button>
               </Link>
-              <h1 className="text-xl font-bold text-slate-800 dark:text-slate-200">
+              <h1 className="text-xl font-bold text-white">
                 تعديل عرض سعر - {quoteNumber}
               </h1>
             </div>
