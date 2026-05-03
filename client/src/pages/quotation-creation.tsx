@@ -2326,13 +2326,13 @@ export default function QuotationCreationPage({ vehicleData }: QuotationCreation
       {/* Header & Management Navbar */}
       <GlassBackground variant="header" className="glass-header sticky top-0 z-50 no-print">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="flex items-center space-x-4 space-x-reverse">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
+            <div className="flex items-center">
               <h1 className="text-xl font-bold text-white drop-shadow-lg">إنشاء عرض سعر</h1>
             </div>
             
             {/* Management Actions Navbar */}
-            <div className="flex items-center space-x-2 space-x-reverse flex-wrap gap-2">
+            <div className="flex items-center flex-wrap gap-2 w-full md:w-auto justify-start md:justify-end">
               {/* Saved Quotations */}
               <Link href="/quotation-management">
                 <Button
@@ -2408,44 +2408,44 @@ export default function QuotationCreationPage({ vehicleData }: QuotationCreation
               </Button>
 
               {/* Toggles */}
-              <div className="flex items-center gap-4 bg-white/5 p-1.5 rounded-lg border border-white/10">
+              <div className="flex items-center gap-3 bg-white/5 px-2 py-1.5 rounded-lg border border-white/10">
                 {/* Stamp Toggle */}
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5">
                   <div 
                     className={`w-9 h-5 rounded-full cursor-pointer relative transition-all duration-300 ${
-                      showStamp ? 'bg-red-500' : 'bg-red-300/50'
+                      showStamp ? 'bg-red-500' : 'bg-red-300/30 border border-red-300/30'
                     }`}
                     onClick={() => setShowStamp(!showStamp)}
                   >
-                    <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow-lg transition-all duration-300 ${showStamp ? 'right-0.5' : 'right-4.5'}`} />
+                    <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow-lg transition-all duration-300 ${showStamp ? 'left-[18px]' : 'left-0.5'}`} />
                   </div>
-                  <span className="text-xs text-red-300">الختم</span>
+                  <span className="text-xs text-red-300 whitespace-nowrap">الختم</span>
                 </div>
 
                 {/* Invoice Mode Toggle */}
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5">
                   <div 
                     className={`w-9 h-5 rounded-full cursor-pointer relative transition-all duration-300 ${
-                      isInvoiceMode ? 'bg-purple-600' : 'bg-purple-300/50'
+                      isInvoiceMode ? 'bg-purple-600' : 'bg-purple-300/30 border border-purple-300/30'
                     }`}
                     onClick={() => setIsInvoiceMode(!isInvoiceMode)}
                   >
-                    <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow-lg transition-all duration-300 ${isInvoiceMode ? 'right-0.5' : 'right-4.5'}`} />
+                    <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow-lg transition-all duration-300 ${isInvoiceMode ? 'left-[18px]' : 'left-0.5'}`} />
                   </div>
-                  <span className="text-xs text-purple-300">فاتورة</span>
+                  <span className="text-xs text-purple-300 whitespace-nowrap">فاتورة</span>
                 </div>
 
                 {/* Representative Toggle */}
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5">
                   <div 
                     className={`w-9 h-5 rounded-full cursor-pointer relative transition-all duration-300 ${
-                      showRepresentative ? 'bg-blue-600' : 'bg-blue-300/50'
+                      showRepresentative ? 'bg-blue-600' : 'bg-blue-300/30 border border-blue-300/30'
                     }`}
                     onClick={() => setShowRepresentative(!showRepresentative)}
                   >
-                    <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow-lg transition-all duration-300 ${showRepresentative ? 'right-0.5' : 'right-4.5'}`} />
+                    <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow-lg transition-all duration-300 ${showRepresentative ? 'left-[18px]' : 'left-0.5'}`} />
                   </div>
-                  <span className="text-xs text-blue-300">المندوب</span>
+                  <span className="text-xs text-blue-300 whitespace-nowrap">المندوب</span>
                 </div>
               </div>
 

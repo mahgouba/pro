@@ -1214,27 +1214,30 @@ export default function FinancingCalculatorPage() {
     <SystemGlassWrapper>
       <div className="container mx-auto p-4" dir="rtl">
         {/* Header */}
-        <div className="mb-6 flex justify-between items-center">
-          <div className="flex items-center gap-4">
-            <Calculator className="h-8 w-8 text-blue-400" />
-            <h1 className="text-2xl font-bold text-white drop-shadow-lg">حاسبة التمويل</h1>
+        <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+          <div className="flex items-center gap-3">
+            <Calculator className="h-7 w-7 text-blue-400 flex-shrink-0" />
+            <h1 className="text-xl sm:text-2xl font-bold text-white drop-shadow-lg">حاسبة التمويل</h1>
           </div>
-          <div className="flex gap-3">
+          <div className="flex gap-2 flex-wrap">
             <Link href="/financing-calculations-history">
-              <Button variant="outline" className="bg-white/10 hover:bg-white/20 text-white gap-2">
+              <Button variant="outline" size="sm" className="bg-white/10 hover:bg-white/20 text-white gap-2 border-white/20">
                 <History className="h-4 w-4" />
-                سجل الحسابات
+                <span className="hidden sm:inline">سجل الحسابات</span>
+                <span className="sm:hidden">السجل</span>
               </Button>
             </Link>
             <Link href="/financing-rates">
-              <Button className="bg-[#C79C45] hover:bg-[#B8862F] text-white gap-2">
+              <Button size="sm" className="bg-[#C79C45] hover:bg-[#B8862F] text-white gap-2">
                 <Settings className="h-4 w-4" />
-                إدارة البنوك والنسب
+                <span className="hidden sm:inline">إدارة البنوك والنسب</span>
+                <span className="sm:hidden">البنوك</span>
               </Button>
             </Link>
           </div>
         </div>
 
+        <div className="grid grid-cols-1 xl:grid-cols-[1fr_400px] gap-6 items-start">
         <div className="space-y-6">
           {/* Customer Information Section */}
           <Card className="glass-container">
@@ -1328,6 +1331,7 @@ export default function FinancingCalculatorPage() {
                     }}
                     placeholder="اختر الصانع"
                     searchPlaceholder="بحث عن الصانع..."
+                    className="bg-white/10 border-white/20 text-white"
                   />
                 </div>
 
@@ -1350,6 +1354,7 @@ export default function FinancingCalculatorPage() {
                     disabled={!formData.vehicleManufacturer}
                     placeholder="اختر الفئة"
                     searchPlaceholder="بحث عن الفئة..."
+                    className="bg-white/10 border-white/20 text-white"
                   />
                 </div>
 
@@ -1371,6 +1376,7 @@ export default function FinancingCalculatorPage() {
                     disabled={!formData.vehicleCategory}
                     placeholder="اختر درجة التجهيز"
                     searchPlaceholder="بحث عن درجة التجهيز..."
+                    className="bg-white/10 border-white/20 text-white"
                   />
                 </div>
 
@@ -1386,6 +1392,7 @@ export default function FinancingCalculatorPage() {
                     onValueChange={(value) => handleInputChange("vehicleYear", value)}
                     placeholder="اختر الموديل"
                     searchPlaceholder="بحث عن سنة..."
+                    className="bg-white/10 border-white/20 text-white"
                   />
                 </div>
 
@@ -1448,7 +1455,7 @@ export default function FinancingCalculatorPage() {
                     }}
                     placeholder="اختر البنك"
                     searchPlaceholder="بحث عن بنك..."
-                    className="mt-1.5"
+                    className="bg-white/10 border-white/20 text-white mt-1.5"
                   />
                 </div>
 
@@ -1960,6 +1967,8 @@ export default function FinancingCalculatorPage() {
             </Card>
           )}
         </div>
+
+        </div>{/* end grid wrapper */}
 
         {/* Share Dialog - PDF or Text → Customer / Employee / Bank Rep */}
         <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>

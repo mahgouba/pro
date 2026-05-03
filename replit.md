@@ -62,3 +62,11 @@ Connected to Neon (serverless PostgreSQL). Schema managed via Drizzle Kit. Run `
 - The `server/firebase-entry.ts` file is a legacy Firebase Functions entry point — not used in Replit.
 - Firebase on the client is analytics-only (no auth, no Firestore).
 - `server/routes/integration.ts` is a UI settings mock — no live external API calls.
+
+## Design Fixes (May 2026)
+- **Switch component** (`components/ui/switch.tsx`): Changed unchecked state from `bg-gray-300` to `bg-white/25` so it blends with the dark glassmorphism theme instead of appearing as a bright white box.
+- **Quotation toolbar toggles** (`pages/quotation-creation.tsx`): Fixed broken toggle thumb positioning — `right-4.5` is not a valid Tailwind class; replaced with `left-[18px]` (checked) / `left-0.5` (unchecked) so the thumb actually moves.
+- **Quotation toolbar responsiveness**: Improved mobile layout — toolbar wraps to full width on small screens with proper `flex-wrap`.
+- **Financing calculator Comboboxes** (`pages/financing-calculator.tsx`): Added `className="bg-white/10 border-white/20 text-white"` to all Combobox usages missing glass styling (manufacturer, category, trim level, year, bank selectors).
+- **Financing calculator header**: Made responsive with `flex-col sm:flex-row`, shorter button labels on mobile via `sm:hidden`/`hidden sm:inline`.
+- **Financing calculator layout**: Two-column grid on XL screens (`xl:grid-cols-[1fr_400px]`) so the results panel sits alongside the input forms.
