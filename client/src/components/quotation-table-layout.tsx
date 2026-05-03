@@ -277,12 +277,13 @@ export default function QuotationTableLayout({
                 </td>
                 {/* Value cell (left in RTL - white background) */}
                 <td
-                  className="px-4 py-3 align-middle bg-white text-gray-900"
+                  className="px-4 py-3 align-middle bg-white"
                   style={{
                     minHeight: row.isSpecs ? 72 : undefined,
+                    color: "#000000",
                   }}
                 >
-                  <div className={`text-center ${row.isMoney ? "flex justify-center" : ""}`}>
+                  <div className={`text-center ${row.isMoney ? "flex justify-center" : ""}`} style={{ color: "#000000" }}>
                     {row.value}
                   </div>
                 </td>
