@@ -276,7 +276,7 @@ export default function QuotationTableLayout({
                     color: "#000000",
                   }}
                 >
-                  <div className={`text-center ${row.isMoney ? "flex justify-center" : ""}`} style={{ color: "#000000" }}>
+                  <div className={`${row.isMoney ? "flex justify-center text-right" : ""}`} style={{ color: "#000000" }}>
                     {row.value}
                   </div>
                 </td>
