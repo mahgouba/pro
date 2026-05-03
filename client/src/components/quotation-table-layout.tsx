@@ -290,10 +290,9 @@ export default function QuotationTableLayout({
       <div className="mt-4 flex justify-end">
         <a
           href="#notes"
-          className="text-[13px] font-bold"
-          style={{ color: "#16a34a" }}
+          className="text-[13px] font-bold ml-[605px] mr-[605px] mt-[-18px] mb-[-18px] pl-[36px] pr-[36px] text-[#eb1010]"
         >
-          # ملاحظات:
+          الشروط والاحكام 
         </a>
       </div>
 
