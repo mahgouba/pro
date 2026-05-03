@@ -7,7 +7,7 @@
     "node": "20"
   },
   "scripts": {
-    "build": "esbuild ../server/firebase-entry.ts --platform=node --bundle --format=cjs --target=node20 --external:firebase-functions --external:firebase-admin --outfile=lib/index.js"
+    "build": "esbuild ../server/firebase-entry.ts --platform=node --bundle --format=cjs --target=node20 --external:firebase-functions --external:firebase-admin --alias:@shared=../shared --alias:@assets=../attached_assets --outfile=lib/index.js"
   },
   "dependencies": {
     "firebase-admin": "^13.8.0",

@@ -871,7 +871,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Ensure upload directory exists and configure multer for PDF uploads
-  const uploadsDir = path.resolve(import.meta.dirname, "public", "uploads", "quotations");
+  // Firebase Functions (K_SERVICE) has a read-only filesystem except /tmp
+  const uploadsDir = process.env.K_SERVICE
+    ? "/tmp/uploads/quotations"
+    : path.join(process.cwd(), "public", "uploads", "quotations");
   await fs.mkdir(uploadsDir, { recursive: true });
   const storage = multer.diskStorage({
     destination: (_req, _file, cb) => cb(null, uploadsDir),
