@@ -207,7 +207,7 @@ export default function QuotationTableLayout({
           )}
         </div>
 
-        <div className="flex items-center gap-6 text-[11px] font-bold pt-2">
+        <div className="flex items-center gap-6 text-[11px] font-bold pt-2 ml-[115px] mr-[115px]">
           <div className="flex items-center gap-2">
             <span style={{ color: accentColor, opacity: 0.8 }}>الرقم:</span>
             <span style={{ color: primaryColor }}>{formattedQuoteNumber}</span>
