@@ -624,7 +624,7 @@ export default function QuotationA4Preview({
             <div className="flex items-center justify-between border-b-2 pb-2" style={{ borderColor: `${accentColor}40`, marginTop: '8px', marginBottom: '8px' }}>
               <h1 className="text-[26px] font-black" style={{ color: bgType === "dynamic" ? '#ffffff' : '#c49633', paddingTop: '2px', paddingBottom: '2px' }}>عرض سعر</h1>
               
-              <div className="flex items-center gap-6 text-[12px] font-bold">
+              <div className="flex items-center gap-6 text-[12px] font-bold pl-[18px] pr-[18px] ml-[82px] mr-[82px]">
                 <div className="flex items-center gap-2">
                   <span style={{ color: bgType === "dynamic" ? '#ffffff' : accentColor, opacity: 0.8 }}>الرقم:</span>
                   <span style={{ color: bgType === "dynamic" ? '#ffffff' : primaryColor }}>{formattedQuoteNumber}</span>
