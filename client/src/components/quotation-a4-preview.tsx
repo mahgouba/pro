@@ -435,13 +435,6 @@ export default function QuotationA4Preview({
           )}
         </div>
 
-        <Button 
-          onClick={handlePrint}
-          className="text-white px-6 py-2 text-sm font-medium shadow-lg"
-          style={{ backgroundColor: secondaryColor }}
-        >
-          🖨️ طباعة الكوتيشن
-        </Button>
 
       </div>
 
