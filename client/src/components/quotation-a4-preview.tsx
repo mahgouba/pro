@@ -644,11 +644,13 @@ export default function QuotationA4Preview({
           {/* Customer Greeting Section */}
           <div className="mb-[6px] ml-[25px] mr-[25px] mt-0">
             <div className="flex items-center gap-2">
-              <span className="text-[15px] font-bold" style={{ color: secondaryColor }}>السادة /</span>
+              <span className="text-[15px] font-bold" style={{ color: secondaryColor }}>{customerTitle || "السادة"} /</span>
               <span className="text-[16px] font-black underline decoration-dotted underline-offset-4" style={{ color: accentColor }}>
                 {customerName || "عميلنا العزيز"}
               </span>
-              <span className="text-[15px] font-bold" style={{ color: secondaryColor, marginLeft: '176px', marginRight: '176px' }}>الموقرين</span>
+              <span className="text-[15px] font-bold" style={{ color: secondaryColor, marginLeft: '176px', marginRight: '176px' }}>
+                {customerTitle === "السيد" ? "الموقر" : customerTitle === "السيدة" ? "الموقرة" : "الموقرين"}
+              </span>
             </div>
             <div className="text-[13px] font-medium opacity-80 mt-0.5" style={{ color: primaryColor }}>
               تحية طيبة وبعد، يسعدنا تزويدكم بعرض السعر بناءً على طلبكم الكريم.
