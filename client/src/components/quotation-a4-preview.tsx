@@ -822,12 +822,6 @@ export default function QuotationA4Preview({
                             )}
                           </div>
                           <div className="flex flex-col gap-1">
-                            <div className="flex items-center gap-2 opacity-60">
-                              <div className="w-1 h-3 rounded-full" style={{ backgroundColor: accentColor }} />
-                              <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: secondaryColor }}>
-                                بيانات المركبة / Vehicle Details
-                              </span>
-                            </div>
                             <div className="flex items-center gap-3">
                               <span className="font-black text-xl print:text-black" style={{ color: secondaryColor }}>السيارة :</span>
                               <span className="text-2xl font-black print:text-black" style={{ color: primaryColor, letterSpacing: 'normal', fontFeatureSettings: '"liga" 1, "calt" 1' }}>
