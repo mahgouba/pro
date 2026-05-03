@@ -811,24 +811,20 @@ export default function QuotationA4Preview({
                 <div className="relative z-10" style={{ paddingLeft: '8px', paddingRight: '8px' }}>
                   <div className="flex flex-col gap-3">
                     {/* First Row: Comprehensive Vehicle Name - Redesigned for more prominence */}
-                    <div className="overflow-hidden rounded-lg border-2 shadow-sm bg-white/60" style={{ borderColor: `${accentColor}40` }}>
-                      <div className="p-4 flex items-center justify-between">
-                        <div className="flex items-center gap-5">
-                          <div className="flex items-center justify-center w-14 h-14 shrink-0">
-                            {manufacturerLogo ? (
-                              <img src={manufacturerLogo} alt={selectedVehicle.manufacturer} className="w-full h-full object-contain" />
-                            ) : (
-                              <Building className="w-7 h-7" style={{ color: secondaryColor }} />
-                            )}
-                          </div>
-                          <div className="flex flex-col gap-1">
-                            <div className="flex items-center gap-3">
-                              <span className="font-black text-xl print:text-black" style={{ color: secondaryColor }}>السيارة :</span>
-                              <span className="text-2xl font-black print:text-black" style={{ color: primaryColor, letterSpacing: 'normal', fontFeatureSettings: '"liga" 1, "calt" 1' }}>
-                                {selectedVehicle.manufacturer} {selectedVehicle.category} {selectedVehicle.trimLevel} {selectedVehicle.engineCapacity}
-                              </span>
-                            </div>
-                          </div>
+                    <div className="overflow-hidden rounded-lg border shadow-sm bg-white/60" style={{ borderColor: `${accentColor}40` }}>
+                      <div className="px-3 py-2 flex items-center gap-3">
+                        <div className="flex items-center justify-center w-9 h-9 shrink-0">
+                          {manufacturerLogo ? (
+                            <img src={manufacturerLogo} alt={selectedVehicle.manufacturer} className="w-full h-full object-contain" />
+                          ) : (
+                            <Building className="w-5 h-5" style={{ color: secondaryColor }} />
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[12px] font-black print:text-black" style={{ color: secondaryColor }}>السيارة :</span>
+                          <span className="text-[14px] font-black print:text-black" style={{ color: primaryColor }}>
+                            {selectedVehicle.manufacturer} {selectedVehicle.category} {selectedVehicle.trimLevel} {selectedVehicle.engineCapacity}
+                          </span>
                         </div>
                       </div>
                     </div>
