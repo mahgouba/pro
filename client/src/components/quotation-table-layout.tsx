@@ -69,7 +69,7 @@ export default function QuotationTableLayout({
     selectedVehicle?.manufacturer,
     selectedVehicle?.category,
     selectedVehicle?.trimLevel,
-    selectedVehicle?.engineCapacity,
+    selectedVehicle?.engineCapacity?.replace(/L$/i, ""),
   ]
     .filter(Boolean)
     .join(" ");
