@@ -1718,10 +1718,66 @@ export default function FinancingCalculatorPage() {
             </CardContent>
           </Card>
 
+          {/* ── Calculate Button ── */}
+          <Card className="glass-container border-blue-500/30">
+            <CardContent className="p-4 space-y-3">
+              <Button
+                onClick={formData.financingType === "two-payments" ? calculateTwoPayments : calculateFinancing}
+                className="w-full h-14 text-lg font-bold bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white shadow-lg shadow-blue-600/30 rounded-xl transition-all duration-200 active:scale-[0.98]"
+                data-testid="button-calculate"
+              >
+                <Calculator className="h-5 w-5 ml-2" />
+                احسب التمويل
+              </Button>
+              <Button
+                onClick={calculateTwoPayments}
+                variant="outline"
+                className="w-full h-11 text-sm bg-white/5 border-white/20 text-white hover:bg-white/10 hover:border-blue-400/40 rounded-xl transition-all duration-200"
+                data-testid="button-calculate-two-payments"
+              >
+                <TrendingUp className="h-4 w-4 ml-2" />
+                احسب خطة الدفعتين (50/50)
+              </Button>
+            </CardContent>
+          </Card>
+
         </div>
 
         {/* Results Column */}
         <div className="space-y-6">
+
+          {/* Placeholder before calculation */}
+          {!result && (
+            <Card className="glass-container border-white/10">
+              <CardContent className="flex flex-col items-center justify-center py-16 gap-5 text-center">
+                <div className="relative">
+                  <div className="absolute -inset-4 bg-blue-500/10 rounded-full blur-xl" />
+                  <div className="relative bg-white/5 border border-white/10 rounded-full p-5">
+                    <Calculator className="h-10 w-10 text-blue-400 opacity-70" />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <p className="text-white font-semibold text-lg">نتائج التمويل</p>
+                  <p className="text-white/40 text-sm leading-relaxed max-w-[220px]">
+                    أدخل بيانات التمويل ثم اضغط<br />
+                    <span className="text-blue-400 font-bold">"احسب التمويل"</span> لعرض النتائج
+                  </p>
+                </div>
+                <div className="flex flex-col gap-2 w-full max-w-[240px]">
+                  {[
+                    "القسط الشهري المتوقع",
+                    "إجمالي التكلفة النهائية",
+                    "إجمالي الأرباح والتأمين",
+                  ].map((label) => (
+                    <div key={label} className="flex justify-between items-center p-3 bg-white/3 rounded-lg border border-white/5 opacity-40">
+                      <span className="text-white/50 text-xs">{label}</span>
+                      <span className="text-white/30 text-xs font-mono">— — —</span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Results */}
           {result && (
