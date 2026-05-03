@@ -1727,18 +1727,7 @@ export default function FinancingCalculatorPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-4">
-              <div>
-                <Label htmlFor="notes">ملاحظات إضافية</Label>
-                <Input
-                  id="notes"
-                  value={formData.notes}
-                  onChange={(e) => handleInputChange("notes", e.target.value)}
-                  placeholder="ملاحظات إضافية..."
-                  className="bg-white/5 border-white/20 text-white"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Button onClick={calculateFinancing} className="w-full bg-blue-600 hover:bg-blue-700" size="lg">
                   <Calculator className="h-4 w-4 ml-2" />
                   حساب الأقساط الشهرية
