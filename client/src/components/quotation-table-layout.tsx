@@ -253,30 +253,19 @@ export default function QuotationTableLayout({
           style={{ direction: "rtl" }}
         >
           <colgroup>
-            <col style={{ width: "75%" }} />
             <col style={{ width: "25%" }} />
+            <col style={{ width: "75%" }} />
           </colgroup>
           <tbody>
             {rows.map((row, idx) => (
               <tr key={idx} style={{ borderBottom: "1px solid #d1d5db" }}>
-                {/* Value cell (left in RTL = appears on the left side) */}
-                <td
-                  className="px-4 py-3 align-middle bg-white text-gray-900"
-                  style={{
-                    borderLeft: "1px solid #d1d5db",
-                    minHeight: row.isSpecs ? 72 : undefined,
-                  }}
-                >
-                  <div className={`text-center ${row.isMoney ? "flex justify-center" : ""}`}>
-                    {row.value}
-                  </div>
-                </td>
-                {/* Label cell (right - dark teal background) */}
+                {/* Label cell (right in RTL - dark teal background) */}
                 <td
                   className="px-4 py-3 align-middle text-center"
                   style={{
                     backgroundColor: headerColor,
                     color: "#ffffff",
+                    borderLeft: "1px solid #d1d5db",
                   }}
                 >
                   <span
@@ -285,6 +274,17 @@ export default function QuotationTableLayout({
                   >
                     {row.label}
                   </span>
+                </td>
+                {/* Value cell (left in RTL - white background) */}
+                <td
+                  className="px-4 py-3 align-middle bg-white text-gray-900"
+                  style={{
+                    minHeight: row.isSpecs ? 72 : undefined,
+                  }}
+                >
+                  <div className={`text-center ${row.isMoney ? "flex justify-center" : ""}`}>
+                    {row.value}
+                  </div>
                 </td>
               </tr>
             ))}
@@ -297,7 +297,7 @@ export default function QuotationTableLayout({
         <a
           href="#notes"
           className="text-[13px] font-bold"
-          style={{ color: "#dc2626" }}
+          style={{ color: "#16a34a" }}
         >
           # ملاحظات:
         </a>
