@@ -1718,28 +1718,6 @@ export default function FinancingCalculatorPage() {
             </CardContent>
           </Card>
 
-          {/* Insurance Section */}
-          <Card className="glass-container">
-            <CardHeader className="pb-3 border-b border-white/10">
-              <CardTitle className="text-lg font-semibold text-white drop-shadow-lg flex items-center">
-                <Save className="h-5 w-5 ml-2 text-blue-400" />
-                قسم التأمين
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Button onClick={calculateFinancing} className="w-full bg-blue-600 hover:bg-blue-700" size="lg">
-                  <Calculator className="h-4 w-4 ml-2" />
-                  حساب الأقساط الشهرية
-                </Button>
-                
-                <Button onClick={calculateTwoPayments} className="w-full bg-[#C79C45] hover:bg-[#B8862F]" size="lg">
-                  <Check className="h-4 w-4 ml-2" />
-                  حساب خطة الدفعتين (50/50)
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
         </div>
 
         {/* Results Column */}
