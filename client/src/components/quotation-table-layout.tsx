@@ -256,10 +256,8 @@ export default function QuotationTableLayout({
               <tr key={idx} style={{ borderBottom: "1px solid #d1d5db" }}>
                 {/* Label cell (right in RTL - dark teal background) */}
                 <td
-                  className="px-4 py-3 align-middle text-center"
+                  className="px-4 py-3 align-middle bg-[#01637f] text-[#ffffff] text-right"
                   style={{
-                    backgroundColor: headerColor,
-                    color: "#ffffff",
                     borderLeft: "1px solid #d1d5db",
                   }}
                 >
