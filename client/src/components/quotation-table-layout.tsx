@@ -185,7 +185,7 @@ export default function QuotationTableLayout({
 
   return (
     <div
-      className="p-[25px] flex flex-col h-full relative z-10"
+      className="p-[25px] flex flex-col h-full relative z-10 ml-[10px] mr-[10px]"
       style={{ direction: "rtl", fontFamily }}
     >
       {/* Top header: company logo + quote info */}
