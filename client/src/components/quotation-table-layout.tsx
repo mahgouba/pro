@@ -200,11 +200,6 @@ export default function QuotationTableLayout({
           >
             {isInvoiceMode ? "فاتورة" : "عرض سعر"}
           </h1>
-          {appearance?.companyName && (
-            <span className="text-[12px] font-bold opacity-80 mt-1" style={{ color: secondaryColor }}>
-              {appearance.companyName}
-            </span>
-          )}
         </div>
 
         <div className="flex items-center gap-6 text-[11px] font-bold pt-2 ml-[115px] mr-[115px]">
