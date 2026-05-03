@@ -190,7 +190,7 @@ export default function QuotationTableLayout({
     >
       {/* Top header: company logo + quote info */}
       <div
-        className="flex items-start justify-between border-b-2 pb-3 mb-4 mt-[152px]"
+        className="flex items-start justify-between border-b-2 pb-3 mb-4 mt-[77px]"
         style={{ borderColor: `${accentColor}40` }}
       >
         <div className="flex flex-col">
