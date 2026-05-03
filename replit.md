@@ -1,48 +1,64 @@
-# Vehicle Inventory Management System
+# inventoryMaster-2 — Vehicle Inventory & Quotation Management System
 
 ## Overview
-This project is a full-stack vehicle inventory management system designed for vehicle dealerships. It provides comprehensive tools for managing vehicle inventory, tracking sales, handling user roles, and performing financial calculations. The system aims to streamline dealership operations, improve efficiency in inventory handling, and enhance sales processes.
+A comprehensive vehicle inventory and quotation management system targeting Arabic-speaking car dealerships. The UI is fully in Arabic (RTL).
 
-## User Preferences
-None specified yet.
+## Features
+- Vehicle inventory tracking (manufacturer, model, trim, chassis, colors)
+- Sales quotations and PDF invoice generation
+- Financing calculator with bank-specific interest rates
+- HR: employee attendance, work schedules, leave requests
+- CRM: customer interactions and reservations
+- Appearance/branding customization
 
-## System Architecture
-The system is built with a modern technology stack:
-- **Frontend**: Developed using React 18, TypeScript, Vite, Tailwind CSS for styling, and `shadcn/ui` for UI components. `TanStack Query` is used for server state management, and `Wouter` handles client-side routing.
-- **Backend**: Implemented with Express.js and TypeScript, designed to be scalable and maintainable.
-- **Database**: Utilizes PostgreSQL, integrated with Drizzle ORM for efficient and type-safe database interactions.
-- **Authentication**: Handled by Passport.js with a local strategy for secure user access.
-- **Core Features**:
-    - Detailed vehicle inventory management.
-    - Role-based access control for different user types (e.g., admin, accountant, salesperson).
-    - Sales and reservation tracking.
-    - Integration for financing calculations with bank information.
-    - Management of manufacturer and vehicle model hierarchies.
-    - Image and document handling capabilities.
-    - Employee attendance management, including editable records, leave requests, and reporting.
-- **Design Principles**: Prioritizes modern UI/UX with a focus on usability, responsiveness (including mobile optimization), and clear data presentation. This includes the use of responsive design for elements like attendance dialogs and mobile layout for badges, and consistent styling with gradient backgrounds and glass morphism where appropriate.
-- **Global theming**: The `/appearance-settings` page is the single source of truth for all colors, fonts, dark mode, RTL, and theme style. `client/src/components/theme-provider.tsx` reads `/api/appearance` and injects every color from the `appearance_settings` table as CSS custom properties on `:root` (`--dynamic-primary`, `--dynamic-secondary`, `--dynamic-accent`, `--dynamic-card-bg`, `--dynamic-border`, `--dynamic-text-primary`, etc., plus shadcn HSL channels and an `--app-page-bg` gradient). It auto-switches between light/dark palettes based on `darkModeEnabled`, toggles the `.dark` class, sets `dir`, applies the favicon, and updates the document title. `client/src/index.css` reads these variables for body background, glass containers, gold accents, custom-primary classes, checkbox/radio accent color, etc., so changes saved on the appearance page apply system-wide on the next render.
-- **Technical Implementations**: Includes robust API endpoints for CRUD operations across all modules, secure password hashing with bcrypt, and role-based filtering for data visibility.
+## Tech Stack
+- **Frontend**: React 18 + Vite, Tailwind CSS, Shadcn UI, TanStack Query, wouter, React Hook Form + Zod
+- **Backend**: Node.js + Express
+- **Database**: PostgreSQL via Neon (serverless), Drizzle ORM
+- **Auth**: Passport.js with local strategy + bcryptjs (username/password)
+- **PDF**: jspdf + html2canvas
+- **Other**: Firebase (client-side analytics only), multer (file uploads), xlsx (Excel import/export)
 
-## Deployment
+## Project Structure
+```
+client/          # React frontend (Vite)
+  src/
+    components/  # UI + domain components
+    hooks/       # Custom hooks
+    pages/       # App views
+    lib/         # Utilities (queryClient, firebase analytics)
+server/          # Express backend
+  routes.ts      # Main API routes (4400+ lines)
+  routes/
+    integration.ts  # Integration settings UI (mock)
+  db.ts          # Neon DB connection
+  storage.ts     # DB interaction layer
+  vite.ts        # Vite middleware setup
+  index.ts       # Entry point
+shared/
+  schema.ts      # Drizzle schema (source of truth)
+public/          # Static assets
+```
 
-The project is organized for deployment on **Firebase Hosting + Cloud Functions**. See `FIREBASE_DEPLOYMENT.md` for the full guide.
+## Running the App
+- **Dev**: `npm run dev` (runs `npx tsx server/index.ts` on port 5000)
+- **Build**: `npm run build`
+- **Start (prod)**: `npm start`
+- **DB push**: `npm run db:push`
 
-- **Local development**: `server/index.ts` is the dev entry (Express + Vite on port 5000), used by `npm run dev`.
-- **Firebase Function entry**: `server/firebase-entry.ts` exports the `api` function.
-- **Functions package**: `functions/` is a self-contained Firebase Functions package with its own `package.json`. Its build script bundles `server/firebase-entry.ts` into `functions/lib/index.js` via esbuild.
-- **Hosting**: `firebase.json` serves `dist/public` (built by `npm run build`) and rewrites `/api/**` → `api` function.
+## Environment Variables
+- `NEON_DATABASE_URL` — PostgreSQL connection string (set in .replit userenv)
+- `DATABASE_URL` — fallback alias for the DB URL
+- `SESSION_SECRET` — optional, for session signing
+- `OPENAI_API_KEY` — optional, for AI features
 
-## External Dependencies
-- **PostgreSQL**: Primary database for all system data.
-- **Neon**: An external PostgreSQL database service used for primary data storage and deployment.
-- **Firebase Hosting + Cloud Functions**: Deployment platform for the production environment.
-- **Passport.js**: Authentication middleware.
-- **TanStack Query**: Data fetching and state management library.
-- **Tailwind CSS**: Utility-first CSS framework.
-- **shadcn/ui**: Reusable UI components.
-- **Drizzle ORM**: TypeScript ORM for PostgreSQL.
-- **React**: Frontend library.
-- **Express.js**: Backend web framework.
-- **Vite**: Frontend build tool.
-- **Wouter**: Client-side router.
+## Authentication
+Uses Passport.js local strategy with bcrypt-hashed passwords stored in the `users` table. Sessions managed with express-session + memorystore.
+
+## Database
+Connected to Neon (serverless PostgreSQL). Schema managed via Drizzle Kit. Run `npm run db:push` to sync schema changes.
+
+## Notes
+- The `server/firebase-entry.ts` file is a legacy Firebase Functions entry point — not used in Replit.
+- Firebase on the client is analytics-only (no auth, no Firestore).
+- `server/routes/integration.ts` is a UI settings mock — no live external API calls.
