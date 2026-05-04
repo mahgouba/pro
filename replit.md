@@ -1,72 +1,70 @@
-# inventoryMaster-2 — Vehicle Inventory & Quotation Management System
+# InventoryMaster — Vehicle Inventory & Dealership Management System
 
 ## Overview
-A comprehensive vehicle inventory and quotation management system targeting Arabic-speaking car dealerships. The UI is fully in Arabic (RTL).
+A full-stack Arabic RTL dealership management system for vehicle inventory, quotations, invoicing, financing calculations, and HR. Built with React + Vite (frontend) and Express + Drizzle ORM (backend), running on a PostgreSQL database.
 
-## Features
-- Vehicle inventory tracking (manufacturer, model, trim, chassis, colors)
-- Sales quotations and PDF invoice generation
+## Architecture
+
+- **Frontend**: React 18 + Vite, Wouter routing, TanStack Query, shadcn/ui components, Tailwind CSS, RTL Arabic layout
+- **Backend**: Express.js + TypeScript (tsx), Drizzle ORM, passport-local authentication, session-based auth stored in localStorage
+- **Database**: Replit PostgreSQL (via `DATABASE_URL`)
+- **Shared**: `shared/schema.ts` — single source of truth for all Drizzle table definitions and Zod schemas
+
+## Key Features
+- Vehicle inventory management (manufacturers, categories, trim levels, colors, chassis, images)
+- Quotation creation and PDF generation
+- Invoice management
 - Financing calculator with bank-specific interest rates
-- HR: employee attendance, work schedules, leave requests
-- CRM: customer interactions and reservations
-- Appearance/branding customization
-
-## Tech Stack
-- **Frontend**: React 18 + Vite, Tailwind CSS, Shadcn UI, TanStack Query, wouter, React Hook Form + Zod
-- **Backend**: Node.js + Express
-- **Database**: PostgreSQL via Neon (serverless), Drizzle ORM
-- **Auth**: Passport.js with local strategy + bcryptjs (username/password)
-- **PDF**: jspdf + html2canvas
-- **Other**: Firebase (client-side analytics only), multer (file uploads), xlsx (Excel import/export)
-
-## Project Structure
-```
-client/          # React frontend (Vite)
-  src/
-    components/  # UI + domain components
-    hooks/       # Custom hooks
-    pages/       # App views
-    lib/         # Utilities (queryClient, firebase analytics)
-server/          # Express backend
-  routes.ts      # Main API routes (4400+ lines)
-  routes/
-    integration.ts  # Integration settings UI (mock)
-  db.ts          # Neon DB connection
-  storage.ts     # DB interaction layer
-  vite.ts        # Vite middleware setup
-  index.ts       # Entry point
-shared/
-  schema.ts      # Drizzle schema (source of truth)
-public/          # Static assets
-```
+- HR: attendance tracking, work schedules, leave requests
+- CRM: reservations, sold vehicle tracking
+- Appearance/branding customization (colors, logos, PDF templates)
+- Role-based access: admin, inventory_manager, sales_director, accountant, bank_accountant, salesperson
 
 ## Running the App
-- **Dev**: `npm run dev` (runs `npx tsx server/index.ts` on port 5000)
-- **Build**: `npm run build`
-- **Start (prod)**: `npm start`
-- **DB push**: `npm run db:push`
 
-## Environment Variables
-- `NEON_DATABASE_URL` — PostgreSQL connection string (set in .replit userenv)
-- `DATABASE_URL` — fallback alias for the DB URL
-- `SESSION_SECRET` — optional, for session signing
-- `OPENAI_API_KEY` — optional, for AI features
+```bash
+npm run dev       # Start development server (port 5000)
+npm run build     # Build for production
+npm run db:push   # Push schema changes to database
+```
 
-## Authentication
-Uses Passport.js local strategy with bcrypt-hashed passwords stored in the `users` table. Sessions managed with express-session + memorystore.
+## Default Credentials
+- Username: `admin`
+- Password: `admin123`
+- Role: `admin`
+
+## Project Structure
+
+```
+client/          — React frontend (Vite root)
+  src/
+    App.tsx      — Main router with role-based redirects
+    pages/       — Page components
+    components/  — UI components (dashboard, inventory, etc.)
+    lib/         — Utilities (queryClient, firebase analytics)
+server/          — Express backend
+  index.ts       — Server entry point (port 5000)
+  routes.ts      — All API routes (~4500 lines)
+  db.ts          — PostgreSQL connection via Drizzle
+  vite.ts        — Vite dev middleware
+shared/
+  schema.ts      — Drizzle schema + Zod validation schemas
+public/          — Static assets (logos, images, sounds)
+attached_assets/ — Additional images/templates
+```
 
 ## Database
-Connected to Neon (serverless PostgreSQL). Schema managed via Drizzle Kit. Run `npm run db:push` to sync schema changes.
+- Uses Replit's built-in PostgreSQL (`DATABASE_URL`)
+- Schema defined in `shared/schema.ts` with Drizzle ORM
+- Push schema changes: `npm run db:push`
 
-## Notes
-- The `server/firebase-entry.ts` file is a legacy Firebase Functions entry point — not used in Replit.
-- Firebase on the client is analytics-only (no auth, no Firestore).
-- `server/routes/integration.ts` is a UI settings mock — no live external API calls.
+## Authentication
+- Custom passport-local authentication (no external auth provider)
+- Sessions stored in `localStorage` under key `"auth"`
+- Login endpoint: `POST /api/auth/login`
+- Roles: admin, inventory_manager, sales_director, accountant, bank_accountant, salesperson, seller, user
 
-## Design Fixes (May 2026)
-- **Switch component** (`components/ui/switch.tsx`): Changed unchecked state from `bg-gray-300` to `bg-white/25` so it blends with the dark glassmorphism theme instead of appearing as a bright white box.
-- **Quotation toolbar toggles** (`pages/quotation-creation.tsx`): Fixed broken toggle thumb positioning — `right-4.5` is not a valid Tailwind class; replaced with `left-[18px]` (checked) / `left-0.5` (unchecked) so the thumb actually moves.
-- **Quotation toolbar responsiveness**: Improved mobile layout — toolbar wraps to full width on small screens with proper `flex-wrap`.
-- **Financing calculator Comboboxes** (`pages/financing-calculator.tsx`): Added `className="bg-white/10 border-white/20 text-white"` to all Combobox usages missing glass styling (manufacturer, category, trim level, year, bank selectors).
-- **Financing calculator header**: Made responsive with `flex-col sm:flex-row`, shorter button labels on mobile via `sm:hidden`/`hidden sm:inline`.
-- **Financing calculator layout**: Two-column grid on XL screens (`xl:grid-cols-[1fr_400px]`) so the results panel sits alongside the input forms.
+## Deployment
+- Build: `npm run build` (Vite + esbuild bundle)
+- Run: `node ./dist/index.cjs`
+- Deployment target: autoscale
