@@ -250,8 +250,8 @@ export default function QuotationTableLayout({
 
       {/* The main TABLE - 2 columns: white values on left, dark teal labels on right */}
       <div
-        className="border rounded-md overflow-hidden shadow-sm bg-white"
-        style={{ borderColor: "#d1d5db" }}
+        className="rounded-md overflow-hidden shadow-sm bg-white"
+        style={{ border: "1px solid #C79C45" }}
       >
         <table
           className="w-full border-collapse"
@@ -263,12 +263,12 @@ export default function QuotationTableLayout({
           </colgroup>
           <tbody>
             {rows.map((row, idx) => (
-              <tr key={idx} style={{ borderBottom: "1px solid #d1d5db" }}>
+              <tr key={idx} style={{ borderBottom: "1px solid #C79C45" }}>
                 {/* Label cell (right in RTL - dark teal background) */}
                 <td
                   className="px-4 py-3 align-middle bg-[#01637f] text-[#ffffff] text-right"
                   style={{
-                    borderLeft: "1px solid #d1d5db",
+                    borderRight: "4px solid #C79C45",
                   }}
                 >
                   <span
