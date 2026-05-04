@@ -124,6 +124,11 @@ export default function QuotationA4Preview({
   const previewRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
+  // Ref to prevent useEffect from overriding specs right after user saves
+  const justSavedSpecsRef = useRef(false);
+  // Track last vehicle id to detect actual vehicle changes
+  const lastVehicleIdRef = useRef<number | null>(null);
+
   // WhatsApp share state
   const [showWhatsAppDialog, setShowWhatsAppDialog] = useState(false);
   const [whatsAppPhone, setWhatsAppPhone] = useState("");
@@ -360,15 +365,33 @@ export default function QuotationA4Preview({
 
   // Handle detailed specs synchronization
   useEffect(() => {
-    if (selectedVehicle?.detailedSpecifications) {
-      setEditableSpecs(selectedVehicle.detailedSpecifications);
-    } else if (vehicleSpecs) {
-      // If we have separate specs object, format it as string
-      const specsString = Object.entries(vehicleSpecs)
-        .filter(([_, value]) => value)
-        .map(([key, value]) => `${key}: ${value}`)
-        .join('\n');
-      setEditableSpecs(specsString);
+    const vehicleId = selectedVehicle?.id ?? null;
+    const vehicleChanged = vehicleId !== lastVehicleIdRef.current;
+
+    if (vehicleChanged) {
+      // Actual vehicle change — reset tracking refs and re-initialize
+      lastVehicleIdRef.current = vehicleId;
+      justSavedSpecsRef.current = false;
+    }
+
+    // If user just saved, skip the override (vehicleSpecs refetch triggered this)
+    if (!vehicleChanged && justSavedSpecsRef.current) {
+      justSavedSpecsRef.current = false;
+      return;
+    }
+
+    // Only initialize if vehicle changed or first load
+    if (vehicleChanged) {
+      if (selectedVehicle?.detailedSpecifications) {
+        setEditableSpecs(selectedVehicle.detailedSpecifications);
+      } else if ((vehicleSpecs as any)?.specifications) {
+        setEditableSpecs((vehicleSpecs as any).specifications);
+      } else {
+        setEditableSpecs("");
+      }
+    } else if (!editableSpecs && (vehicleSpecs as any)?.specifications) {
+      // vehicleSpecs loaded async after vehicle was already selected — fill in only if empty
+      setEditableSpecs((vehicleSpecs as any).specifications);
     }
   }, [selectedVehicle, vehicleSpecs]);
 
@@ -1052,6 +1075,7 @@ export default function QuotationA4Preview({
                             onClick={() => {
                               setIsEditingSpecs(false);
                               if (onSaveSpecs) {
+                                justSavedSpecsRef.current = true;
                                 onSaveSpecs(editableSpecs);
                               }
                             }}
