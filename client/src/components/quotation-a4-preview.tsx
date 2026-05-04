@@ -332,82 +332,88 @@ export default function QuotationA4Preview({
   return (
     <div className="w-full max-w-4xl mx-auto p-6 print:p-0 print:m-0">
       {/* Controls - Background Toggle and Print Button */}
-      <div className="mb-4 flex justify-center items-center gap-4 print:hidden no-print" data-html2canvas-ignore="true">
-        <div className="flex items-center gap-3 border border-yellow-600 rounded-lg px-4 py-2 bg-white shadow-sm">
-          <span className="text-sm font-bold text-yellow-700">الخلفية:</span>
+      <div className="mb-4 flex justify-center items-center gap-3 print:hidden no-print flex-wrap" data-html2canvas-ignore="true">
+
+        {/* الخلفية */}
+        <div className="flex items-center gap-2 border-2 border-[#C79C45] rounded-xl px-3 py-1.5 bg-white shadow-md h-10">
+          <span className="text-xs font-bold text-[#01637f] whitespace-nowrap">الخلفية:</span>
           <Select value={currentBgType} onValueChange={setCurrentBgType}>
-            <SelectTrigger className="w-[180px] h-9 text-xs border-yellow-200" data-testid="select-background">
-              <SelectValue placeholder="اختر نوع الخلفية" />
+            <SelectTrigger className="w-[150px] h-7 text-xs border-none shadow-none focus:ring-0 text-[#01637f] font-medium" data-testid="select-background">
+              <SelectValue placeholder="اختر الخلفية" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="albarimi1">البريمي 1 (SVG)</SelectItem>
-              <SelectItem value="albarimi2">البريمي 2 (SVG)</SelectItem>
+              <SelectItem value="albarimi1">البريمي 1</SelectItem>
+              <SelectItem value="albarimi2">البريمي 2</SelectItem>
               <SelectItem value="dynamic">خلفية ديناميكية</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
-        <div className="flex items-center gap-3 border border-teal-600 rounded-lg px-4 py-2 bg-white shadow-sm">
-          <span className="text-sm font-bold text-teal-700">التخطيط:</span>
+        {/* التخطيط */}
+        <div className="flex items-center gap-2 border-2 border-[#C79C45] rounded-xl px-3 py-1.5 bg-white shadow-md h-10">
+          <span className="text-xs font-bold text-[#01637f] whitespace-nowrap">التخطيط:</span>
           <Select
             value={layoutStyle}
             onValueChange={(v) => setLayoutStyle(v as "standard" | "table")}
           >
             <SelectTrigger
-              className="w-[180px] h-9 text-xs border-teal-200"
+              className="w-[150px] h-7 text-xs border-none shadow-none focus:ring-0 text-[#01637f] font-medium"
               data-testid="select-layout-style"
             >
               <SelectValue placeholder="اختر التخطيط" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="standard">التخطيط الافتراضي</SelectItem>
-              <SelectItem value="table">جدول عمودي (تيل)</SelectItem>
+              <SelectItem value="standard">الافتراضي</SelectItem>
+              <SelectItem value="table">جدول عمودي</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
+        {/* زر تحرير النصوص */}
         <Button
           onClick={() => setIsTextEditMode((v) => !v)}
-          className={`px-6 py-2 text-sm font-medium shadow-lg gap-2 ${
+          className={`h-10 px-5 text-xs font-bold rounded-xl shadow-md gap-2 border-2 transition-all ${
             isTextEditMode
-              ? "bg-emerald-600 hover:bg-emerald-700 text-white"
-              : "bg-amber-500 hover:bg-amber-600 text-white"
+              ? "bg-[#01637f] hover:bg-[#014f67] text-white border-[#01637f]"
+              : "bg-white hover:bg-[#f0fafa] text-[#01637f] border-[#C79C45]"
           }`}
           data-testid="button-toggle-text-edit"
         >
           {isTextEditMode ? (
             <>
-              <Check size={16} />
+              <Check size={14} />
               إنهاء التحرير
             </>
           ) : (
             <>
-              <Edit3 size={16} />
+              <Edit3 size={14} />
               تحرير النصوص
             </>
           )}
         </Button>
 
+        {/* زر حفظ كقالب */}
         {isTextEditMode && (
           <Button
             onClick={handleSaveTemplate}
-            className="px-4 py-2 text-sm font-medium shadow-lg gap-2 bg-blue-600 hover:bg-blue-700 text-white"
+            className="h-10 px-5 text-xs font-bold rounded-xl shadow-md gap-2 border-2 bg-[#C79C45] hover:bg-[#b08a3a] text-white border-[#C79C45]"
             data-testid="button-save-template"
           >
-            <Save size={16} />
+            <Save size={14} />
             حفظ كقالب
           </Button>
         )}
 
-        <div className="flex items-center gap-2 border border-purple-500 rounded-lg px-3 py-1.5 bg-white shadow-sm">
-          <FileText size={16} className="text-purple-600" />
-          <span className="text-xs font-bold text-purple-700">القوالب:</span>
+        {/* القوالب */}
+        <div className="flex items-center gap-2 border-2 border-[#C79C45] rounded-xl px-3 py-1.5 bg-white shadow-md h-10">
+          <FileText size={14} className="text-[#C79C45]" />
+          <span className="text-xs font-bold text-[#01637f] whitespace-nowrap">القوالب:</span>
           <Select
             value={activeTemplateId || "__none__"}
             onValueChange={handleApplyTemplate}
           >
             <SelectTrigger
-              className="w-[170px] h-8 text-xs border-purple-200"
+              className="w-[140px] h-7 text-xs border-none shadow-none focus:ring-0 text-[#01637f] font-medium"
               data-testid="select-template"
             >
               <SelectValue placeholder="اختر قالباً" />
@@ -425,16 +431,15 @@ export default function QuotationA4Preview({
             <Button
               size="sm"
               variant="ghost"
-              className="h-7 w-7 p-0 text-red-600 hover:text-red-800 hover:bg-red-50"
+              className="h-6 w-6 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg"
               onClick={() => handleDeleteTemplate(activeTemplateId)}
               title="حذف القالب الحالي"
               data-testid="button-delete-template"
             >
-              <Trash2 size={14} />
+              <Trash2 size={13} />
             </Button>
           )}
         </div>
-
 
       </div>
 
