@@ -4,7 +4,8 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Phone, Mail, Globe, Building, Trash2, List, Eraser, PlusCircle, Type, Edit3, Check, Save, FileText, X } from "lucide-react";
+import { Phone, Mail, Globe, Building, Trash2, List, Eraser, PlusCircle, Type, Edit3, Check, Save, FileText, X, Printer, Download } from "lucide-react";
+import { captureElementToCanvas, canvasToA4Pdf } from "@/utils/pdf-capture";
 import { numberToArabic } from "@/utils/number-to-arabic";
 import type { Company, InventoryItem, Specification, AppearanceSettings } from "@shared/schema";
 import { getManufacturerLogo } from "@shared/manufacturer-logos";
@@ -216,6 +217,24 @@ export default function QuotationA4Preview({
   // Print function for the quotation preview
   const handlePrint = () => {
     window.print();
+  };
+
+  const [isExportingPDF, setIsExportingPDF] = useState(false);
+
+  const handleExportPDF = async () => {
+    const el = previewRef.current;
+    if (!el) return;
+    setIsExportingPDF(true);
+    try {
+      const canvas = await captureElementToCanvas(el);
+      const pdf = canvasToA4Pdf(canvas, el);
+      const fileName = `عرض-سعر-${quoteNumber || "quotation"}.pdf`;
+      pdf.save(fileName);
+    } catch (e) {
+      console.error("PDF export error", e);
+    } finally {
+      setIsExportingPDF(false);
+    }
   };
 
   useEffect(() => {
@@ -440,6 +459,27 @@ export default function QuotationA4Preview({
             </Button>
           )}
         </div>
+
+        {/* زر الطباعة */}
+        <Button
+          onClick={handlePrint}
+          className="h-10 px-5 text-xs font-bold rounded-xl shadow-md gap-2 border-2 bg-white hover:bg-[#f0fafa] text-[#01637f] border-[#C79C45] transition-all"
+          data-testid="button-print"
+        >
+          <Printer size={14} />
+          طباعة
+        </Button>
+
+        {/* زر تحميل PDF */}
+        <Button
+          onClick={handleExportPDF}
+          disabled={isExportingPDF}
+          className="h-10 px-5 text-xs font-bold rounded-xl shadow-md gap-2 border-2 bg-[#01637f] hover:bg-[#014f67] text-white border-[#01637f] transition-all disabled:opacity-60"
+          data-testid="button-export-pdf"
+        >
+          <Download size={14} />
+          {isExportingPDF ? "جارٍ التصدير..." : "تحميل PDF"}
+        </Button>
 
       </div>
 
