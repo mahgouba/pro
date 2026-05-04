@@ -4234,7 +4234,7 @@ export default function QuotationCreationPage({ vehicleData }: QuotationCreation
               <Button onClick={applySelectedTerms} className="bg-orange-600 hover:bg-orange-700 text-white font-bold px-10 py-6 rounded-xl shadow-lg shadow-orange-900/40 transition-all hover:scale-105 active:scale-95">
                 تطبيق على العرض الحالي
               </Button>
-              <Button variant="outline" onClick={() => setShowTermsDialog(false)} className="border-white/20 text-white hover:bg-white/10 px-6 py-6 rounded-xl">
+              <Button onClick={() => setShowTermsDialog(false)} className="bg-white/10 border border-white/20 text-white hover:bg-white/20 px-6 py-6 rounded-xl">
                 إغلاق
               </Button>
             </div>
