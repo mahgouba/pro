@@ -3,10 +3,13 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Phone, Mail, Globe, Building, Trash2, List, Eraser, PlusCircle, Type, Edit3, Check, Save, FileText, X, Printer, Download } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Phone, Mail, Globe, Building, Trash2, List, Eraser, PlusCircle, Type, Edit3, Check, Save, FileText, X, Printer, Download, MessageCircle } from "lucide-react";
 import { captureElementToCanvas, canvasToA4Pdf } from "@/utils/pdf-capture";
 import { numberToArabic } from "@/utils/number-to-arabic";
+import { useToast } from "@/hooks/use-toast";
 import type { Company, InventoryItem, Specification, AppearanceSettings } from "@shared/schema";
 import { getManufacturerLogo } from "@shared/manufacturer-logos";
 import { useQuery } from "@tanstack/react-query";
@@ -119,6 +122,11 @@ export default function QuotationA4Preview({
   const [editableSpecs, setEditableSpecs] = useState<string>("");
   const [isTextEditMode, setIsTextEditMode] = useState(false);
   const previewRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
+
+  // WhatsApp share state
+  const [showWhatsAppDialog, setShowWhatsAppDialog] = useState(false);
+  const [whatsAppPhone, setWhatsAppPhone] = useState("");
 
   // Saved templates (custom edited quote snapshots stored in localStorage)
   type QuoteTemplate = { id: string; name: string; html: string; savedAt: number };
@@ -234,6 +242,51 @@ export default function QuotationA4Preview({
       console.error("PDF export error", e);
     } finally {
       setIsExportingPDF(false);
+    }
+  };
+
+  const [isSharingWhatsApp, setIsSharingWhatsApp] = useState(false);
+
+  const handleOpenWhatsAppDialog = () => {
+    // Pre-fill with customer phone if available
+    const raw = customerPhone || "";
+    const cleaned = raw.replace(/\D/g, "").replace(/^00/, "").replace(/^966/, "");
+    setWhatsAppPhone(cleaned);
+    setShowWhatsAppDialog(true);
+  };
+
+  const handleSendWhatsApp = async () => {
+    const cleaned = whatsAppPhone.replace(/\D/g, "").replace(/^00/, "").replace(/^966/, "");
+    if (!cleaned) {
+      toast({ title: "رقم الهاتف مطلوب", variant: "destructive" });
+      return;
+    }
+    const fullPhone = `966${cleaned}`;
+    setIsSharingWhatsApp(true);
+    try {
+      // Generate and download the PDF first
+      const el = previewRef.current;
+      if (el) {
+        const canvas = await captureElementToCanvas(el);
+        const pdf = canvasToA4Pdf(canvas, el);
+        const fileName = `عرض-سعر-${quoteNumber || "quotation"}.pdf`;
+        pdf.save(fileName);
+      }
+      // Build the WhatsApp message
+      const vehicleName = selectedVehicle
+        ? `${selectedVehicle.manufacturer || ""} ${selectedVehicle.category || ""} ${selectedVehicle.year || ""}`.trim()
+        : "";
+      const msg = `السلام عليكم ${customerName ? `/ ${customerName}` : ""}،\n\nيسعدنا نشارككم عرض السعر${vehicleName ? ` للمركبة: ${vehicleName}` : ""}.\n\nرقم العرض: ${quoteNumber}\n\nيُرجى مراجعة ملف PDF المُرفق معه.\n\nشكراً لتواصلكم — فريق المبيعات`;
+      setTimeout(() => {
+        window.open(`https://wa.me/${fullPhone}?text=${encodeURIComponent(msg)}`, "_blank");
+        toast({ title: "تم إرسال الواتساب", description: "تم تحميل PDF وفتح محادثة الواتساب" });
+      }, 800);
+    } catch (e) {
+      console.error("WhatsApp share error", e);
+      toast({ title: "حدث خطأ", variant: "destructive" });
+    } finally {
+      setIsSharingWhatsApp(false);
+      setShowWhatsAppDialog(false);
     }
   };
 
@@ -479,6 +532,16 @@ export default function QuotationA4Preview({
         >
           <Download size={14} />
           {isExportingPDF ? "جارٍ التصدير..." : "تحميل PDF"}
+        </Button>
+
+        {/* زر مشاركة واتساب */}
+        <Button
+          onClick={handleOpenWhatsAppDialog}
+          className="h-10 px-5 text-xs font-bold rounded-xl shadow-md gap-2 border-2 bg-[#25D366] hover:bg-[#1ebe5d] text-white border-[#25D366] transition-all"
+          data-testid="button-whatsapp-share"
+        >
+          <MessageCircle size={14} />
+          واتساب
         </Button>
 
       </div>
@@ -1160,6 +1223,60 @@ export default function QuotationA4Preview({
         )}
       </div>
       )}
+    {/* WhatsApp Share Dialog */}
+    <Dialog open={showWhatsAppDialog} onOpenChange={setShowWhatsAppDialog}>
+      <DialogContent className="max-w-sm" style={{ direction: "rtl" }}>
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2 text-[#01637f]">
+            <MessageCircle size={18} className="text-[#25D366]" />
+            إرسال عرض السعر عبر واتساب
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="py-3 space-y-3">
+          <p className="text-sm text-gray-600">
+            سيتم تحميل ملف PDF أولاً، ثم فتح محادثة واتساب مع رسالة جاهزة.
+          </p>
+          <div>
+            <label className="text-xs font-bold text-[#01637f] mb-1 block">رقم الجوال (بدون مفتاح الدولة)</label>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-bold text-gray-500 bg-gray-100 px-3 py-2 rounded-lg border">+966</span>
+              <Input
+                value={whatsAppPhone}
+                onChange={(e) => setWhatsAppPhone(e.target.value.replace(/\D/g, ""))}
+                placeholder="5xxxxxxxx"
+                className="flex-1 text-left ltr border-[#C79C45] focus:ring-[#01637f]"
+                maxLength={9}
+                data-testid="input-whatsapp-phone"
+              />
+            </div>
+          </div>
+          {customerName && (
+            <p className="text-xs text-gray-500">العميل: <span className="font-bold text-[#01637f]">{customerName}</span></p>
+          )}
+        </div>
+
+        <DialogFooter className="flex gap-2 flex-row-reverse">
+          <Button
+            onClick={handleSendWhatsApp}
+            disabled={isSharingWhatsApp || !whatsAppPhone}
+            className="flex-1 bg-[#25D366] hover:bg-[#1ebe5d] text-white font-bold gap-2 rounded-xl"
+            data-testid="button-confirm-whatsapp"
+          >
+            <MessageCircle size={15} />
+            {isSharingWhatsApp ? "جارٍ الإرسال..." : "إرسال"}
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => setShowWhatsAppDialog(false)}
+            className="flex-1 rounded-xl border-gray-300"
+            data-testid="button-cancel-whatsapp"
+          >
+            إلغاء
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
     </div>
   );
 }
