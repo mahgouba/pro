@@ -573,6 +573,8 @@ export default function QuotationA4Preview({
             accentColor={accentColor}
             fontFamily={fontFamily}
             isInvoiceMode={isInvoiceMode}
+            includeLicensePlate={includeLicensePlate}
+            licensePlatePrice={totalLicense}
           />
         ) : (
         <div className="p-[25px] flex flex-col h-full relative z-10">

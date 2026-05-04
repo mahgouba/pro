@@ -20,6 +20,8 @@ interface QuotationTableLayoutProps {
   accentColor: string;
   fontFamily?: string;
   isInvoiceMode?: boolean;
+  includeLicensePlate?: boolean;
+  licensePlatePrice?: number;
 }
 
 const RiyalIcon: React.FC<{ size?: number; color?: string }> = ({
@@ -61,6 +63,8 @@ export default function QuotationTableLayout({
   accentColor,
   fontFamily = "Noto Sans Arabic",
   isInvoiceMode = false,
+  includeLicensePlate = false,
+  licensePlatePrice = 0,
 }: QuotationTableLayoutProps) {
   const headerColor = secondaryColor || "#01637f";
   const formattedQuoteNumber = quoteNumber.replace(/\D/g, "").padStart(5, "0");
@@ -169,6 +173,16 @@ export default function QuotationTableLayout({
       ),
       isMoney: true,
     },
+    ...(includeLicensePlate ? [{
+      label: "اللوحات",
+      value: (
+        <div className="flex items-center gap-2 justify-end">
+          <RiyalIcon size={14} color="#1a1a1a" />
+          <span className="font-bold text-[14px] tabular-nums">{formatMoney(licensePlatePrice)}</span>
+        </div>
+      ),
+      isMoney: true,
+    }] : []),
     {
       label: "القيمة الإجمالية",
       value: (
