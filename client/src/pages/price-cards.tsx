@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
-import { Download, Printer, Search, Filter, Plus, RefreshCw, Edit, Trash2, Eye, EyeOff, Save } from "lucide-react";
+import { Download, Printer, Search, Filter, Plus, RefreshCw, Edit, Trash2, Eye, EyeOff, Save, Upload, X } from "lucide-react";
 import { ManufacturerLogo } from "@/components/manufacturer-logo";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -77,6 +77,9 @@ export default function PriceCardsPage() {
   const [expandedCards, setExpandedCards] = useState<Set<number>>(new Set());
   const [editingCard, setEditingCard] = useState<PriceCard | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [cardBackgrounds, setCardBackgrounds] = useState<Record<number, string>>({});
+  const bgInputRef = useRef<HTMLInputElement>(null);
+  const currentBgCardId = useRef<number | null>(null);
   
   // حالات إخفاء البيانات - الوضع التلقائي: الفئة وسعة المحرك مخفية
   const [hiddenFields, setHiddenFields] = useState<{[cardId: number]: {
@@ -797,6 +800,25 @@ export default function PriceCardsPage() {
 
   return (
     <div className="container mx-auto p-6 space-y-6" dir="rtl">
+      {/* Hidden file input for background upload */}
+      <input
+        ref={bgInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          const cardId = currentBgCardId.current;
+          if (!file || cardId === null) return;
+          const reader = new FileReader();
+          reader.onload = (ev) => {
+            const dataUrl = ev.target?.result as string;
+            setCardBackgrounds(prev => ({ ...prev, [cardId]: dataUrl }));
+          };
+          reader.readAsDataURL(file);
+          e.target.value = "";
+        }}
+      />
       {/* Header */}
       <div className="text-center mb-8">
         <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
@@ -1089,6 +1111,41 @@ export default function PriceCardsPage() {
                             </div>
                             
                             <div className="flex gap-2 no-print">
+                  {/* زر رفع الخلفية */}
+                  <div className="flex gap-1 ml-4 border-l pl-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        currentBgCardId.current = card.id;
+                        bgInputRef.current?.click();
+                      }}
+                      title="رفع خلفية مخصصة"
+                      className="px-2 text-xs text-purple-600 border-purple-300 hover:bg-purple-50"
+                    >
+                      <Upload className="w-3 h-3 ml-1" />
+                      خلفية
+                    </Button>
+                    {cardBackgrounds[card.id] && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setCardBackgrounds(prev => {
+                            const next = { ...prev };
+                            delete next[card.id];
+                            return next;
+                          });
+                        }}
+                        title="إزالة الخلفية المخصصة"
+                        className="px-2 text-xs text-red-500 border-red-300 hover:bg-red-50"
+                      >
+                        <X className="w-3 h-3" />
+                      </Button>
+                    )}
+                  </div>
                   {/* عناصر التحكم في إخفاء البيانات */}
                   <div className="flex gap-1 ml-4 border-l pl-2">
                     <Button
@@ -1231,7 +1288,7 @@ export default function PriceCardsPage() {
                       overflow: 'hidden',
                       transform: 'scale(0.6)', // Scale down for display
                       transformOrigin: 'center center',
-                      backgroundImage: 'url(/price-card.jpg)',
+                      backgroundImage: `url(${cardBackgrounds[card.id] || '/price-card.jpg'})`,
                       backgroundSize: 'cover',
                       backgroundPosition: 'center',
                       backgroundRepeat: 'no-repeat'
