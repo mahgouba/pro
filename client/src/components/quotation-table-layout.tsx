@@ -152,9 +152,9 @@ export default function QuotationTableLayout({
     {
       label: "السعر النقدي",
       value: (
-        <div className="flex items-center gap-2 justify-end">
-          <RiyalIcon size={14} color="#C79C45" />
+        <div className="flex items-center gap-2 justify-start">
           <span className="font-bold text-[14px] tabular-nums">{formatMoney(basePrice)}</span>
+          <RiyalIcon size={14} color="#C79C45" />
         </div>
       ),
       isMoney: true,
@@ -162,9 +162,9 @@ export default function QuotationTableLayout({
     {
       label: `قيمة الضريبة VAT ${taxRate}%`,
       value: (
-        <div className="flex items-center gap-2 justify-end">
-          <RiyalIcon size={14} color="#C79C45" />
+        <div className="flex items-center gap-2 justify-start">
           <span className="font-bold text-[14px] tabular-nums">{formatMoney(taxAmount)}</span>
+          <RiyalIcon size={14} color="#C79C45" />
         </div>
       ),
       isMoney: true,
@@ -172,9 +172,9 @@ export default function QuotationTableLayout({
     ...(includeLicensePlate ? [{
       label: "اللوحات",
       value: (
-        <div className="flex items-center gap-2 justify-end">
-          <RiyalIcon size={14} color="#C79C45" />
+        <div className="flex items-center gap-2 justify-start">
           <span className="font-bold text-[14px] tabular-nums">{formatMoney(licensePlatePrice)}</span>
+          <RiyalIcon size={14} color="#C79C45" />
         </div>
       ),
       isMoney: true,
@@ -182,11 +182,9 @@ export default function QuotationTableLayout({
     {
       label: "القيمة الإجمالية",
       value: (
-        <div className="flex items-center gap-2 justify-end">
-          <RiyalIcon size={16} color="#C79C45" />
-          <span className="font-black text-[16px] tabular-nums">
-            {formatMoney(finalPrice)}
-          </span>
+        <div className="flex items-center gap-2 justify-start">
+          <span className="font-bold text-[14px] tabular-nums">{formatMoney(finalPrice)}</span>
+          <RiyalIcon size={14} color="#C79C45" />
         </div>
       ),
       isMoney: true,
@@ -286,7 +284,7 @@ export default function QuotationTableLayout({
                     color: "#000000",
                   }}
                 >
-                  <div className={`${row.isMoney ? "flex justify-center text-right" : ""}`} style={{ color: "#000000" }}>
+                  <div className={`${row.isMoney ? "flex justify-start" : ""}`} style={{ color: "#000000" }}>
                     {row.value}
                   </div>
                 </td>
