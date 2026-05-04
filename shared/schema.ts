@@ -470,6 +470,7 @@ export const priceCards = pgTable("price_cards", {
   features: text("features").array().default([]), // المميزات
   status: text("status").notNull().default("نشط"), // الحالة
   isActive: boolean("is_active").default(true).notNull(),
+  backgroundImage: text("background_image"), // صورة الخلفية المخصصة (Base64 أو URL)
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

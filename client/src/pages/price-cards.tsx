@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -52,6 +52,7 @@ interface PriceCard {
   status: string;
   importType?: string;
   isActive: boolean;
+  backgroundImage?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -80,6 +81,33 @@ export default function PriceCardsPage() {
   const [cardBackgrounds, setCardBackgrounds] = useState<Record<number, string>>({});
   const bgInputRef = useRef<HTMLInputElement>(null);
   const currentBgCardId = useRef<number | null>(null);
+
+  // تهيئة الخلفيات من قاعدة البيانات عند تحميل البيانات
+  const { data: priceCardsRaw = [] } = useQuery<PriceCard[]>({
+    queryKey: ["/api/price-cards"],
+  });
+
+  useEffect(() => {
+    const bgMap: Record<number, string> = {};
+    priceCardsRaw.forEach(card => {
+      if (card.backgroundImage) bgMap[card.id] = card.backgroundImage;
+    });
+    setCardBackgrounds(bgMap);
+  }, [priceCardsRaw]);
+
+  // mutation لحفظ الخلفية في قاعدة البيانات
+  const saveBackgroundMutation = useMutation({
+    mutationFn: async ({ cardId, backgroundImage }: { cardId: number; backgroundImage: string | null }) => {
+      const res = await apiRequest("PUT", `/api/price-cards/${cardId}`, { backgroundImage });
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/price-cards"] });
+    },
+    onError: () => {
+      toast({ title: "خطأ", description: "فشل في حفظ الخلفية", variant: "destructive" });
+    },
+  });
   
   // حالات إخفاء البيانات - الوضع التلقائي: الفئة وسعة المحرك مخفية
   const [hiddenFields, setHiddenFields] = useState<{[cardId: number]: {
@@ -137,10 +165,8 @@ export default function PriceCardsPage() {
     queryKey: ["/api/inventory"],
   });
 
-  // Fetch existing price cards
-  const { data: priceCards = [] } = useQuery<PriceCard[]>({
-    queryKey: ["/api/price-cards"],
-  });
+  // استخدام البيانات المحملة مسبقاً
+  const priceCards = priceCardsRaw;
 
   // Form for editing price cards
   const form = useForm<PriceCardFormData>({
@@ -814,6 +840,7 @@ export default function PriceCardsPage() {
           reader.onload = (ev) => {
             const dataUrl = ev.target?.result as string;
             setCardBackgrounds(prev => ({ ...prev, [cardId]: dataUrl }));
+            saveBackgroundMutation.mutate({ cardId, backgroundImage: dataUrl });
           };
           reader.readAsDataURL(file);
           e.target.value = "";
@@ -1138,6 +1165,7 @@ export default function PriceCardsPage() {
                             delete next[card.id];
                             return next;
                           });
+                          saveBackgroundMutation.mutate({ cardId: card.id, backgroundImage: null });
                         }}
                         title="إزالة الخلفية المخصصة"
                         className="px-2 text-xs text-red-500 border-red-300 hover:bg-red-50"
