@@ -26,22 +26,18 @@ interface QuotationTableLayoutProps {
 
 const RiyalIcon: React.FC<{ size?: number; color?: string }> = ({
   size = 14,
-  color = "#1a1a1a",
+  color = "#C79C45",
 }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke={color}
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
+    height={size * (1256.39 / 1124.14)}
+    viewBox="0 0 1124.14 1256.39"
+    fill={color}
     aria-hidden
   >
-    <path d="M6 4l3 16M14 4l3 16" />
-    <path d="M4 10h16M4 16h16" />
+    <path d="M699.62,1113.02h0c-20.06,44.48-33.32,92.75-38.4,143.37l424.51-90.24c20.06-44.47,33.31-92.75,38.4-143.37l-424.51,90.24Z"/>
+    <path d="M1085.73,895.8c20.06-44.47,33.32-92.75,38.4-143.37l-330.68,70.33v-135.2l292.27-62.11c20.06-44.47,33.32-92.75,38.4-143.37l-330.68,70.27V66.13c-50.67,28.45-95.67,66.32-132.25,110.99v403.35l-132.25,28.11V0c-50.67,28.44-95.67,66.32-132.25,110.99v525.69l-295.91,62.88c-20.06,44.47-33.33,92.75-38.42,143.37l334.33-71.05v170.26l-358.3,76.14c-20.06,44.47-33.32,92.75-38.4,143.37l375.04-79.7c30.53-6.35,56.77-24.4,73.83-49.24l68.78-101.97v-.02c7.14-10.55,11.3-23.27,11.3-36.97v-149.98l132.25-28.11v270.4l424.53-90.28Z"/>
   </svg>
 );
 
@@ -157,7 +153,7 @@ export default function QuotationTableLayout({
       label: "السعر النقدي",
       value: (
         <div className="flex items-center gap-2 justify-end">
-          <RiyalIcon size={14} color="#1a1a1a" />
+          <RiyalIcon size={14} color="#C79C45" />
           <span className="font-bold text-[14px] tabular-nums">{formatMoney(basePrice)}</span>
         </div>
       ),
@@ -167,7 +163,7 @@ export default function QuotationTableLayout({
       label: `قيمة الضريبة VAT ${taxRate}%`,
       value: (
         <div className="flex items-center gap-2 justify-end">
-          <RiyalIcon size={14} color="#1a1a1a" />
+          <RiyalIcon size={14} color="#C79C45" />
           <span className="font-bold text-[14px] tabular-nums">{formatMoney(taxAmount)}</span>
         </div>
       ),
@@ -177,7 +173,7 @@ export default function QuotationTableLayout({
       label: "اللوحات",
       value: (
         <div className="flex items-center gap-2 justify-end">
-          <RiyalIcon size={14} color="#1a1a1a" />
+          <RiyalIcon size={14} color="#C79C45" />
           <span className="font-bold text-[14px] tabular-nums">{formatMoney(licensePlatePrice)}</span>
         </div>
       ),
@@ -187,7 +183,7 @@ export default function QuotationTableLayout({
       label: "القيمة الإجمالية",
       value: (
         <div className="flex items-center gap-2 justify-end">
-          <RiyalIcon size={16} color="#1a1a1a" />
+          <RiyalIcon size={16} color="#C79C45" />
           <span className="font-black text-[16px] tabular-nums">
             {formatMoney(finalPrice)}
           </span>
