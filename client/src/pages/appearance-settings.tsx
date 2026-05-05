@@ -1295,6 +1295,20 @@ export default function AppearanceSettings() {
                 </div>
               </div>
 
+              {/* Footer */}
+              <div className="space-y-2 pt-4 border-t">
+                <Label>ذيل عرض السعر (Footer)</Label>
+                <textarea
+                  value={formData.quotationFooter ?? ""}
+                  onChange={(e) => handleChange("quotationFooter", e.target.value)}
+                  rows={2}
+                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring resize-none"
+                  placeholder="نص يظهر في أسفل عرض السعر، مثال: نشكركم على ثقتكم بنا..."
+                  dir="rtl"
+                />
+                <p className="text-xs text-muted-foreground">يظهر هذا النص في الذيل أسفل الشروط والأحكام والمندوب والختم.</p>
+              </div>
+
               <div className="grid md:grid-cols-3 gap-6 pt-4 border-t">
                 <div className="space-y-2">
                   <Label>اللون الأساسي (Primary)</Label>

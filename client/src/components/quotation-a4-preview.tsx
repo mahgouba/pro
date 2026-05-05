@@ -751,6 +751,11 @@ export default function QuotationA4Preview({
             isInvoiceMode={isInvoiceMode}
             includeLicensePlate={includeLicensePlate}
             licensePlatePrice={totalLicense}
+            termsConditions={termsConditions}
+            representativeName={representativeName}
+            representativePhone={representativePhone}
+            showRepresentative={showRepresentative}
+            companyStamp={localStamp || companyStamp}
           />
         ) : (
         <div className="p-[25px] flex flex-col h-full relative z-10">

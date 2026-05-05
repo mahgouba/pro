@@ -22,6 +22,11 @@ interface QuotationTableLayoutProps {
   isInvoiceMode?: boolean;
   includeLicensePlate?: boolean;
   licensePlatePrice?: number;
+  termsConditions?: Array<{ id: number; term_text: string; display_order: number }>;
+  representativeName?: string;
+  representativePhone?: string;
+  showRepresentative?: boolean;
+  companyStamp?: string | null;
 }
 
 const RiyalIcon: React.FC<{ size?: number; color?: string }> = ({
@@ -61,6 +66,11 @@ export default function QuotationTableLayout({
   isInvoiceMode = false,
   includeLicensePlate = false,
   licensePlatePrice = 0,
+  termsConditions = [],
+  representativeName = "",
+  representativePhone = "",
+  showRepresentative = true,
+  companyStamp = null,
 }: QuotationTableLayoutProps) {
   const headerColor = secondaryColor || "#01637f";
   const formattedQuoteNumber = quoteNumber.replace(/\D/g, "").padStart(5, "0");
@@ -299,23 +309,72 @@ export default function QuotationTableLayout({
         </table>
       </div>
 
-      {/* Notes link at the bottom */}
-      <div className="mt-4 flex justify-end">
-        <a
-          href="#notes"
-          className="text-[13px] font-bold ml-[605px] mr-[605px] mt-[-18px] mb-[-18px] pl-[36px] pr-[36px] text-[#eb1010]"
-        >
-          الشروط والاحكام 
-        </a>
-      </div>
-
       {/* Notes content (if provided) */}
       {notes && notes.trim().length > 0 && (
         <div
-          className="mt-2 p-3 rounded-md border bg-white text-[11px] leading-[1.7] whitespace-pre-wrap"
+          className="mt-3 p-3 rounded-md border bg-white text-[11px] leading-[1.7] whitespace-pre-wrap"
           style={{ borderColor: "#fecaca", color: "#374151" }}
         >
           {notes}
+        </div>
+      )}
+
+      {/* Terms & Conditions */}
+      {!isInvoiceMode && termsConditions && termsConditions.length > 0 && (
+        <div className="mt-3 bg-white/40 border border-slate-200 p-2.5 rounded-lg shadow-sm">
+          <div className="pb-1 mb-1.5 border-b border-slate-200">
+            <span className="text-[10px] font-bold tracking-wide" style={{ color: secondaryColor }}>
+              الشروط والأحكام / Terms &amp; Conditions
+            </span>
+          </div>
+          <div className="text-[10px] space-y-0.5">
+            {termsConditions.map((term, index) => (
+              <div key={term.id} className="flex items-start gap-2">
+                <span className="font-bold min-w-[0.85rem] shrink-0" style={{ color: accentColor }}>{index + 1}.</span>
+                <span className="leading-relaxed" style={{ color: primaryColor }}>{term.term_text}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Representative + Stamp row */}
+      {!isInvoiceMode && (showRepresentative && representativeName || companyStamp) && (
+        <div className="mt-3 flex justify-between items-end gap-3">
+          {showRepresentative && representativeName ? (
+            <div className="bg-white/95 border border-[#E2E8F0] p-2.5 rounded-lg shadow-sm w-48 shrink-0">
+              <div className="text-center mb-1.5 pb-1 border-b border-[#E2E8F0]">
+                <span className="font-bold text-[11px]" style={{ color: secondaryColor }}>المندوب</span>
+              </div>
+              <div className="space-y-0.5 text-[10px]">
+                <div className="flex justify-between gap-2">
+                  <span className="font-semibold" style={{ color: secondaryColor }}>الاسم:</span>
+                  <span className="font-medium text-right" style={{ color: primaryColor }}>{representativeName}</span>
+                </div>
+                <div className="flex justify-between gap-2">
+                  <span className="font-semibold" style={{ color: secondaryColor }}>الجوال:</span>
+                  <span className="font-bold" style={{ color: accentColor }}>{representativePhone || "—"}</span>
+                </div>
+              </div>
+            </div>
+          ) : <div />}
+          {companyStamp && (
+            <img
+              src={companyStamp}
+              alt="ختم الشركة"
+              className="w-36 h-24 object-contain"
+            />
+          )}
+        </div>
+      )}
+
+      {/* Footer */}
+      {appearance?.quotationFooter && (
+        <div
+          className="mt-3 pt-2 border-t text-center text-[10px] leading-relaxed"
+          style={{ borderColor: accentColor + "55", color: primaryColor, opacity: 0.75 }}
+        >
+          {appearance.quotationFooter}
         </div>
       )}
 
