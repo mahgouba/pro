@@ -1269,18 +1269,30 @@ export default function AppearanceSettings() {
                 </div>
               </div>
 
-              {/* Greeting Text */}
-              <div className="space-y-2 pt-4 border-t">
-                <Label>النص الترحيبي في عرض السعر</Label>
-                <textarea
-                  value={formData.quotationGreeting ?? "تحية طيبة وبعد، يسعدنا تزويدكم بعرض السعر بناءً على طلبكم الكريم."}
-                  onChange={(e) => handleChange("quotationGreeting", e.target.value)}
-                  rows={2}
-                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring resize-none"
-                  placeholder="أدخل النص الترحيبي الذي يظهر تحت اسم العميل..."
-                  dir="rtl"
-                />
-                <p className="text-xs text-muted-foreground">يظهر هذا النص تحت سطر السادة / اسم العميل في عرض السعر.</p>
+              {/* Greeting & Closing */}
+              <div className="grid md:grid-cols-2 gap-6 pt-4 border-t">
+                <div className="space-y-2">
+                  <Label>النص الترحيبي في عرض السعر</Label>
+                  <textarea
+                    value={formData.quotationGreeting ?? "تحية طيبة وبعد، يسعدنا تزويدكم بعرض السعر بناءً على طلبكم الكريم."}
+                    onChange={(e) => handleChange("quotationGreeting", e.target.value)}
+                    rows={2}
+                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring resize-none"
+                    placeholder="أدخل النص الترحيبي الذي يظهر تحت اسم العميل..."
+                    dir="rtl"
+                  />
+                  <p className="text-xs text-muted-foreground">يظهر تحت سطر السادة / اسم العميل.</p>
+                </div>
+                <div className="space-y-2">
+                  <Label>لقب الختام (يسار السطر)</Label>
+                  <Input
+                    value={formData.quotationClosingSalutation ?? ""}
+                    onChange={(e) => handleChange("quotationClosingSalutation", e.target.value)}
+                    placeholder="مثال: الموقرين  (تلقائي حسب اللقب)"
+                    dir="rtl"
+                  />
+                  <p className="text-xs text-muted-foreground">اتركه فارغاً للتحديد التلقائي (الموقر / الموقرة / الموقرين) حسب لقب العميل.</p>
+                </div>
               </div>
 
               <div className="grid md:grid-cols-3 gap-6 pt-4 border-t">

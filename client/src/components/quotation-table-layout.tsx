@@ -241,7 +241,8 @@ export default function QuotationTableLayout({
           {customerName || "عميلنا العزيز"}
         </span>
         <span className="text-[14px] font-bold mr-auto" style={{ color: secondaryColor }}>
-          {customerTitle === "السيد" ? "الموقر" : customerTitle === "السيدة" ? "الموقرة" : "الموقرين"}
+          {appearance?.quotationClosingSalutation ||
+            (customerTitle === "السيد" ? "الموقر" : customerTitle === "السيدة" ? "الموقرة" : "الموقرين")}
         </span>
       </div>
       {(appearance?.quotationGreeting || "تحية طيبة وبعد، يسعدنا تزويدكم بعرض السعر بناءً على طلبكم الكريم.") && (

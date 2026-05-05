@@ -1150,6 +1150,7 @@ export const appearanceSettings = pgTable("appearance_settings", {
   quotationAccentColor: varchar("quotation_accent_color", { length: 7 }).default("#C49632"),
   quotationFontFamily: varchar("quotation_font_family", { length: 100 }).default("Noto Sans Arabic"),
   quotationGreeting: text("quotation_greeting").default("تحية طيبة وبعد، يسعدنا تزويدكم بعرض السعر بناءً على طلبكم الكريم."),
+  quotationClosingSalutation: varchar("quotation_closing_salutation", { length: 50 }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow()
 });

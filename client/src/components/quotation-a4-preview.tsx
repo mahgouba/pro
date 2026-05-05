@@ -820,7 +820,8 @@ export default function QuotationA4Preview({
                 {customerName || "عميلنا العزيز"}
               </span>
               <span className="text-[15px] font-bold" style={{ color: secondaryColor, marginLeft: '176px', marginRight: '176px' }}>
-                {customerTitle === "السيد" ? "الموقر" : customerTitle === "السيدة" ? "الموقرة" : "الموقرين"}
+                {appearance?.quotationClosingSalutation ||
+                  (customerTitle === "السيد" ? "الموقر" : customerTitle === "السيدة" ? "الموقرة" : "الموقرين")}
               </span>
             </div>
             {(appearance?.quotationGreeting || "تحية طيبة وبعد، يسعدنا تزويدكم بعرض السعر بناءً على طلبكم الكريم.") && (
