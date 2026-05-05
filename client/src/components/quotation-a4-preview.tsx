@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Phone, Mail, Globe, Building, Trash2, List, Eraser, PlusCircle, Type, Edit3, Check, Save, FileText, X, Printer, Download, MessageCircle } from "lucide-react";
+import { Phone, Mail, Globe, Building, Trash2, List, Eraser, PlusCircle, Type, Edit3, Check, Save, FileText, X, Printer, Download, MessageCircle, Upload } from "lucide-react";
 import { captureElementToCanvas, canvasToA4Pdf } from "@/utils/pdf-capture";
 import { numberToArabic } from "@/utils/number-to-arabic";
 import { useToast } from "@/hooks/use-toast";
@@ -199,6 +199,21 @@ export default function QuotationA4Preview({
   });
 
   const [currentBgType, setCurrentBgType] = useState<string>("albarimi2");
+  const [customBgImage, setCustomBgImage] = useState<string | null>(null);
+  const customBgInputRef = useRef<HTMLInputElement>(null);
+
+  const handleCustomBgUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const dataUrl = ev.target?.result as string;
+      setCustomBgImage(dataUrl);
+      setCurrentBgType("custom");
+    };
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  };
 
   // Layout style toggle: "standard" = original A4 layout, "table" = vertical 2-column table layout
   const [layoutStyle, setLayoutStyle] = useState<"standard" | "table">(() => {
@@ -432,7 +447,7 @@ export default function QuotationA4Preview({
         {/* الخلفية */}
         <div className="flex items-center gap-2 border-2 border-[#C79C45] rounded-xl px-3 py-1.5 bg-white shadow-md h-10">
           <span className="text-xs font-bold text-[#01637f] whitespace-nowrap">الخلفية:</span>
-          <Select value={currentBgType} onValueChange={setCurrentBgType}>
+          <Select value={currentBgType} onValueChange={(v) => { setCurrentBgType(v); }}>
             <SelectTrigger className="w-[150px] h-7 text-xs border-none shadow-none focus:ring-0 text-[#01637f] font-medium" data-testid="select-background">
               <SelectValue placeholder="اختر الخلفية" />
             </SelectTrigger>
@@ -440,8 +455,38 @@ export default function QuotationA4Preview({
               <SelectItem value="albarimi1">البريمي 1</SelectItem>
               <SelectItem value="albarimi2">البريمي 2</SelectItem>
               <SelectItem value="dynamic">خلفية ديناميكية</SelectItem>
+              {customBgImage && <SelectItem value="custom">خلفية مخصصة</SelectItem>}
             </SelectContent>
           </Select>
+          {/* زر رفع خلفية مخصصة */}
+          <input
+            ref={customBgInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleCustomBgUpload}
+          />
+          <button
+            type="button"
+            onClick={() => customBgInputRef.current?.click()}
+            title="رفع خلفية مخصصة"
+            className="flex items-center gap-1 px-2 py-1 text-xs font-bold text-purple-700 bg-purple-50 border border-purple-300 rounded-lg hover:bg-purple-100 transition-colors"
+            data-testid="button-upload-custom-bg"
+          >
+            <Upload size={12} />
+            رفع
+          </button>
+          {customBgImage && currentBgType === "custom" && (
+            <button
+              type="button"
+              onClick={() => { setCustomBgImage(null); setCurrentBgType("albarimi2"); }}
+              title="إزالة الخلفية المخصصة"
+              className="flex items-center gap-1 px-2 py-1 text-xs font-bold text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors"
+              data-testid="button-remove-custom-bg"
+            >
+              <X size={12} />
+            </button>
+          )}
         </div>
 
         {/* التخطيط */}
@@ -638,7 +683,7 @@ export default function QuotationA4Preview({
           width: '210mm',
           height: '297mm',
           backgroundColor: 'white',
-          backgroundImage: bgType === "dynamic" ? 'none' : `url(${bgType === "albarimi2" ? backgroundImages.albarimi2 : backgroundImages.albarimi1})`,
+          backgroundImage: bgType === "dynamic" ? 'none' : bgType === "custom" && customBgImage ? `url(${customBgImage})` : `url(${bgType === "albarimi2" ? backgroundImages.albarimi2 : backgroundImages.albarimi1})`,
           backgroundSize: '100% 100%',
           backgroundRepeat: 'no-repeat',
           position: 'relative',
