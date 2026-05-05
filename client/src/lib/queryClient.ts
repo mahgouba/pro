@@ -1,7 +1,8 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
+import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
+import { persistQueryClient } from "@tanstack/react-query-persist-client";
 
 async function throwIfResNotOk(res: Response) {
-  // Check if response is HTML when we expect JSON (common in misconfigured hosting)
   const contentType = res.headers.get("content-type");
   if (contentType && contentType.includes("text/html")) {
     throw new Error("عذراً، الخادم (Backend) غير متصل حالياً. تأكد من رفع الـ Cloud Functions أو استخدام استضافة تدعم Node.js مثل Railway.");
@@ -53,11 +54,25 @@ export const queryClient = new QueryClient({
       queryFn: getQueryFn({ on401: "throw" }),
       refetchInterval: false,
       refetchOnWindowFocus: false,
-      staleTime: 5 * 60 * 1000, // 5 minutes instead of Infinity
+      staleTime: 10 * 60 * 1000,
+      gcTime: 24 * 60 * 60 * 1000,
       retry: false,
     },
     mutations: {
       retry: false,
     },
   },
+});
+
+const localStoragePersister = createSyncStoragePersister({
+  storage: window.localStorage,
+  key: "DEALERSHIP_QUERY_CACHE",
+  throttleTime: 1000,
+});
+
+persistQueryClient({
+  queryClient,
+  persister: localStoragePersister,
+  maxAge: 24 * 60 * 60 * 1000,
+  buster: "v1",
 });
