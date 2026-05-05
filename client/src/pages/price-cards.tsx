@@ -93,6 +93,11 @@ export default function PriceCardsPage() {
       if (card.backgroundImage) bgMap[card.id] = card.backgroundImage;
     });
     setCardBackgrounds(bgMap);
+    // فتح جميع المجموعات تلقائياً عند أول تحميل للبيانات
+    if (priceCardsRaw.length > 0) {
+      const allManufacturers = new Set(priceCardsRaw.map(c => c.manufacturer));
+      setExpandedManufacturers(allManufacturers);
+    }
   }, [priceCardsRaw]);
 
   // mutation لحفظ الخلفية في قاعدة البيانات
