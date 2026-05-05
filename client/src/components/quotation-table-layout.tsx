@@ -198,8 +198,7 @@ export default function QuotationTableLayout({
     >
       {/* Top header: company logo + quote info */}
       <div
-        className="flex items-start justify-between border-b-2 pb-3 mb-4 mt-[77px]"
-        style={{ borderColor: `${accentColor}40` }}
+        className="flex items-start justify-between pb-3 mb-4 mt-[77px]"
       >
         <div className="flex flex-col">
           <h1
@@ -231,7 +230,7 @@ export default function QuotationTableLayout({
       </div>
 
       {/* Customer greeting */}
-      <div className="mb-4 flex items-center gap-2">
+      <div className="mb-1 flex items-center gap-2">
         <span className="text-[14px] font-bold" style={{ color: secondaryColor }}>
           {customerTitle} /
         </span>
@@ -242,8 +241,11 @@ export default function QuotationTableLayout({
           {customerName || "عميلنا العزيز"}
         </span>
         <span className="text-[14px] font-bold mr-auto" style={{ color: secondaryColor }}>
-          الموقرين
+          {customerTitle === "السيد" ? "الموقر" : customerTitle === "السيدة" ? "الموقرة" : "الموقرين"}
         </span>
+      </div>
+      <div className="mb-3 text-[13px] font-medium" style={{ color: primaryColor, opacity: 0.85 }}>
+        تحية طيبة وبعد، يسعدنا تزويدكم بعرض السعر بناءً على طلبكم الكريم.
       </div>
 
       {/* The main TABLE - 2 columns: white values on left, dark teal labels on right */}

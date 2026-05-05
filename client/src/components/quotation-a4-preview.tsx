@@ -792,7 +792,7 @@ export default function QuotationA4Preview({
           {/* Header Info - Pushed down to avoid overlap with background header */}
           <div className="ml-[25px] mr-[25px] mb-[15px]" style={{ marginTop: bgType === "dynamic" ? '85px' : '75px' }}>
             {/* New Row Layout: Quotation Title, Number, Date, and Valid Until in one row */}
-            <div className="flex items-center justify-between border-b-2 pb-2" style={{ borderColor: `${accentColor}40`, marginTop: '8px', marginBottom: '8px' }}>
+            <div className="flex items-center justify-between pb-2" style={{ marginTop: '8px', marginBottom: '8px' }}>
               <h1 className="text-[26px] font-black" style={{ color: bgType === "dynamic" ? '#ffffff' : '#c49633', paddingTop: '2px', paddingBottom: '2px' }}>عرض سعر</h1>
               
               <div className="flex items-center gap-6 text-[12px] font-bold pl-[18px] pr-[18px] ml-[82px] mr-[82px]">
