@@ -244,9 +244,11 @@ export default function QuotationTableLayout({
           {customerTitle === "السيد" ? "الموقر" : customerTitle === "السيدة" ? "الموقرة" : "الموقرين"}
         </span>
       </div>
-      <div className="mb-3 text-[13px] font-medium" style={{ color: primaryColor, opacity: 0.85 }}>
-        تحية طيبة وبعد، يسعدنا تزويدكم بعرض السعر بناءً على طلبكم الكريم.
-      </div>
+      {(appearance?.quotationGreeting || "تحية طيبة وبعد، يسعدنا تزويدكم بعرض السعر بناءً على طلبكم الكريم.") && (
+        <div className="mb-3 text-[13px] font-medium" style={{ color: primaryColor, opacity: 0.85 }}>
+          {appearance?.quotationGreeting || "تحية طيبة وبعد، يسعدنا تزويدكم بعرض السعر بناءً على طلبكم الكريم."}
+        </div>
+      )}
 
       {/* The main TABLE - 2 columns: white values on left, dark teal labels on right */}
       <div

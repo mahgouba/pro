@@ -823,9 +823,11 @@ export default function QuotationA4Preview({
                 {customerTitle === "السيد" ? "الموقر" : customerTitle === "السيدة" ? "الموقرة" : "الموقرين"}
               </span>
             </div>
-            <div className="text-[13px] font-medium opacity-80 mt-0.5" style={{ color: primaryColor }}>
-              تحية طيبة وبعد، يسعدنا تزويدكم بعرض السعر بناءً على طلبكم الكريم.
-            </div>
+            {(appearance?.quotationGreeting || "تحية طيبة وبعد، يسعدنا تزويدكم بعرض السعر بناءً على طلبكم الكريم.") && (
+              <div className="text-[13px] font-medium opacity-80 mt-0.5" style={{ color: primaryColor }}>
+                {appearance?.quotationGreeting || "تحية طيبة وبعد، يسعدنا تزويدكم بعرض السعر بناءً على طلبكم الكريم."}
+              </div>
+            )}
           </div>
 
           {/* Vehicle Information Section */}
