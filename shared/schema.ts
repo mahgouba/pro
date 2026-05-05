@@ -1152,6 +1152,7 @@ export const appearanceSettings = pgTable("appearance_settings", {
   quotationGreeting: text("quotation_greeting").default("تحية طيبة وبعد، يسعدنا تزويدكم بعرض السعر بناءً على طلبكم الكريم."),
   quotationClosingSalutation: varchar("quotation_closing_salutation", { length: 50 }),
   quotationFooter: text("quotation_footer"),
+  quotationValidityDays: integer("quotation_validity_days").default(3),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow()
 });

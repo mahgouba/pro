@@ -1233,7 +1233,7 @@ export default function AppearanceSettings() {
               <CardDescription>التحكم في خلفية عرض السعر، الألوان، والخطوط</CardDescription>
             </CardHeader>
             <CardContent className="p-6 space-y-6">
-              <div className="grid md:grid-cols-2 gap-6">
+              <div className="grid md:grid-cols-3 gap-6">
                 <div className="space-y-2">
                   <Label>نوع الخلفية</Label>
                   <Select 
@@ -1249,6 +1249,22 @@ export default function AppearanceSettings() {
                       <SelectItem value="dynamic">خلفية ديناميكية (قابلة للتخصيص)</SelectItem>
                     </SelectContent>
                   </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>مدة صلاحية العرض الافتراضية (أيام)</Label>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="number"
+                      min={1}
+                      max={365}
+                      value={formData.quotationValidityDays ?? 3}
+                      onChange={(e) => handleChange("quotationValidityDays", parseInt(e.target.value) || 3)}
+                      className="w-full text-center text-lg font-bold"
+                      dir="ltr"
+                    />
+                    <span className="text-sm text-muted-foreground whitespace-nowrap">يوم</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">القيمة الافتراضية عند إنشاء عرض سعر جديد.</p>
                 </div>
                 <div className="space-y-2">
                   <Label>نوع الخط في عرض السعر</Label>

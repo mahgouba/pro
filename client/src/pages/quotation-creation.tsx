@@ -422,6 +422,18 @@ export default function QuotationCreationPage({ vehicleData }: QuotationCreation
     vehiclePrice
   ]);
 
+  // Fetch appearance for default validity days
+  const { data: appearanceData } = useQuery<any>({
+    queryKey: ["/api/appearance"],
+  });
+
+  // Sync validityDays default from appearance settings once loaded
+  useEffect(() => {
+    if (appearanceData?.quotationValidityDays && !editingQuotation) {
+      setValidityDays(appearanceData.quotationValidityDays);
+    }
+  }, [appearanceData, editingQuotation]);
+
   // Fetch users from API for sales representatives
   // Load users
   const { data: users = [] } = useQuery<User[]>({
@@ -2522,6 +2534,22 @@ export default function QuotationCreationPage({ vehicleData }: QuotationCreation
                         ))}
                       </SelectContent>
                     </Select>
+                  </div>
+                  <div>
+                    <Label className="text-white/90">مدة صلاحية العرض (أيام)</Label>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="number"
+                        min={1}
+                        max={365}
+                        value={validityDays}
+                        onChange={(e) => setValidityDays(Math.max(1, parseInt(e.target.value) || 1))}
+                        className="glass-input bg-white/10 border-white/20 text-white text-center font-bold"
+                        dir="ltr"
+                        data-testid="input-validity-days"
+                      />
+                      <span className="text-white/70 text-sm whitespace-nowrap">يوم</span>
+                    </div>
                   </div>
                 </div>
               )}
