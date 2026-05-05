@@ -378,6 +378,32 @@ export default function QuotationTableLayout({
         </div>
       )}
 
+      {/* Validity Notice */}
+      {!isInvoiceMode && (
+        <div
+          className="mt-3 py-2 px-4 rounded-md text-center text-[11px] font-bold"
+          style={{
+            backgroundColor: accentColor + "18",
+            border: `1px solid ${accentColor}55`,
+            color: primaryColor,
+          }}
+        >
+          <span style={{ color: accentColor }}>⚠ </span>
+          هذا العرض ساري حتى تاريخ{" "}
+          <span
+            className="font-black text-[12px] mx-1"
+            style={{ color: accentColor }}
+          >
+            {validUntil.toLocaleDateString("ar-SA", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })}
+          </span>
+          — بعد هذا التاريخ يُعدّ العرض لاغياً ويخضع للمراجعة.
+        </div>
+      )}
+
       {/* Manufacturer logo (subtle, bottom-left) */}
       {manufacturerLogo && (
         <div className="absolute bottom-[40px] left-[40px] opacity-60">

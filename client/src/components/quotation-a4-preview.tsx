@@ -1278,6 +1278,32 @@ export default function QuotationA4Preview({
               </div>
             )}
 
+            {/* Validity Notice */}
+            {!isInvoiceMode && (
+              <div
+                className="mt-3 py-2 px-4 rounded-md text-center text-[10px] font-bold"
+                style={{
+                  backgroundColor: appearance?.quotationAccentColor ? appearance.quotationAccentColor + "18" : "#C4963218",
+                  border: `1px solid ${appearance?.quotationAccentColor ? appearance.quotationAccentColor + "55" : "#C4963255"}`,
+                  color: appearance?.quotationPrimaryColor || "#1A365D",
+                }}
+              >
+                <span style={{ color: appearance?.quotationAccentColor || "#C49632" }}>⚠ </span>
+                هذا العرض ساري حتى تاريخ{" "}
+                <span
+                  className="font-black text-[11px] mx-1"
+                  style={{ color: appearance?.quotationAccentColor || "#C49632" }}
+                >
+                  {validUntil.toLocaleDateString("ar-SA", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
+                </span>
+                — بعد هذا التاريخ يُعدّ العرض لاغياً ويخضع للمراجعة.
+              </div>
+            )}
+
             {/* Appearance Footer Extra Sections - Moved to absolute position at the bottom of the page */}
             {appearance && (appearance.printFooterLeft || appearance.printFooterCenter || appearance.printFooterRight || appearance.printFooter) && (
               <div className="absolute bottom-0 left-0 right-0 z-20 flex flex-col" style={{ width: '210mm' }}>
